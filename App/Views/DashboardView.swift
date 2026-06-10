@@ -41,15 +41,26 @@ struct DashboardView: View {
                         }
                     }
 
+                    let reported = Set(displays.map(\.kind))
+                    let unreported = MetricKind.allCases.filter { !reported.contains($0) }
                     GroupBox {
                         VStack(spacing: 15) {
                             ForEach(displays.dropFirst(2)) { metric in
                                 MetricBarRow(metric: metric)
                             }
-                            if displays.count <= 2 {
-                                Text("Model-specific and extra-usage metrics appear here when your plan reports them.")
-                                    .font(.caption)
-                                    .foregroundStyle(.tertiary)
+                            ForEach(unreported) { kind in
+                                HStack(alignment: .firstTextBaseline) {
+                                    Text(kind.title)
+                                        .font(.system(size: 12.5, weight: .semibold))
+                                        .foregroundStyle(.secondary)
+                                    Spacer()
+                                    Text("—")
+                                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                                        .foregroundStyle(.tertiary)
+                                    Text("not reported for your account yet")
+                                        .font(.system(size: 10.5))
+                                        .foregroundStyle(.tertiary)
+                                }
                             }
                         }
                         .padding(8)

@@ -37,6 +37,11 @@ private extension MetricKind {
 struct DisplaySettingsView: View {
     @State private var visible = Set(AppGroupStore.visibleMetrics)
 
+    private var unreported: Set<MetricKind> {
+        guard let snapshot = AppGroupStore.cachedSnapshot else { return [] }
+        return Set(MetricKind.allCases.filter { snapshot.window(for: $0) == nil })
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("SHOW THESE METRICS IN WIDGETS & MENU BAR")
@@ -58,6 +63,15 @@ struct DisplaySettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
+                    if unreported.contains(kind) {
+                        Text("no data yet")
+                            .font(.system(size: 10.5, weight: .semibold))
+                            .foregroundStyle(.orange)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 2)
+                            .background(Capsule().fill(.orange.opacity(0.14)))
+                            .help("Anthropic isn't reporting this metric for your account right now. It appears automatically once reported.")
+                    }
                     Text(kind.settingsBadge)
                         .font(.system(size: 10.5, weight: .semibold))
                         .foregroundStyle(.secondary)

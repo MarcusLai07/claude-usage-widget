@@ -4,8 +4,18 @@ struct MenuBarView: View {
     @EnvironmentObject private var refresher: UsageRefresher
     @Environment(\.openSettings) private var openSettings
     @Environment(\.openWindow) private var openWindow
+    // The popover view persists between opens, so re-render when settings
+    // (visible metrics, thresholds) change in the window or Settings pane.
+    @State private var settingsTick = 0
 
     var body: some View {
+        content
+            .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
+                settingsTick &+= 1
+            }
+    }
+
+    private var content: some View {
         VStack(spacing: 0) {
             if !refresher.isSignedIn {
                 signedOutPrompt

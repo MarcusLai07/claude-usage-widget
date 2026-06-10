@@ -9,6 +9,9 @@ final class UsageRefresher: ObservableObject {
     @Published var isSignedIn: Bool = TokenStore.load() != nil
     @Published var isRefreshing = false
 
+    /// True when the last fetch failed and we're showing cached data.
+    var isStale: Bool { lastError != nil && snapshot != nil }
+
     static let refreshInterval: TimeInterval = 5 * 60
 
     private var timer: Timer?

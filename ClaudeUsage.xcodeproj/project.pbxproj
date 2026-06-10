@@ -8,18 +8,22 @@
 
 /* Begin PBXBuildFile section */
 		05948C9BB01967542C474609 /* UsageRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123B2B85D5C14AE1B91BC8AD /* UsageRefresher.swift */; };
+		0BA6B58DADC210030BCE555B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C72995DE871F034CA68B79 /* Theme.swift */; };
 		12C19C6654CF6BD889493C91 /* ClaudeCodeImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1ADC922D989DC1AD17BFFA /* ClaudeCodeImport.swift */; };
 		14231B4F27B8A4C91A39F952 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E86351762BC954A07DAE5F /* Models.swift */; };
 		1A15FD5CE4936789D6EFAAA0 /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAF96C3ED2923D7B0C7D288 /* AppGroupStore.swift */; };
 		2DE007E5C1369CE0205CDA0A /* UsageAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AD55D9098A9467D7664BE4C /* UsageAPI.swift */; };
 		32EDEF82B724E10707C4978C /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E523773952E01523EA9066 /* TokenStore.swift */; };
 		46217628552499310B0F81C3 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E86351762BC954A07DAE5F /* Models.swift */; };
+		5D05FDE354FE5466BC887C98 /* MetricPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */; };
 		6689E4C7F8D857ED5425E9A0 /* ClaudeUsageApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1520DE729C71CBF445CFC145 /* ClaudeUsageApp.swift */; };
 		6BACE2E6E91928CD3CA54CA5 /* ClaudeCodeImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1ADC922D989DC1AD17BFFA /* ClaudeCodeImport.swift */; };
 		826A5FD75868AF1505FDC23C /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC477B6568DC675B2F9AAD16 /* SignInView.swift */; };
 		A88AFAD0716175DA7FD0C3E9 /* OAuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */; };
+		B12793EF77E5E3D46808CB5F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C72995DE871F034CA68B79 /* Theme.swift */; };
 		B23E6003B3841B8957E1E6BE /* ClaudeUsageWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB4851F82804202E410BB46 /* ClaudeUsageWidget.swift */; };
 		B8B9DDBD3BF4F11EDCB9C868 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97788F0DEBD8BFA7EFE8DED /* SettingsView.swift */; };
+		D71B6A3D9AA01DA669BF1927 /* MetricPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */; };
 		DB57F6E2ED03D314E9A20222 /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E523773952E01523EA9066 /* TokenStore.swift */; };
 		E12A5E1AD7DE18B0FB736C57 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212915E642A4295BB319865 /* MenuBarView.swift */; };
 		E590066085D27EA41A0AB299 /* OAuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */; };
@@ -64,6 +68,7 @@
 		2B1ADC922D989DC1AD17BFFA /* ClaudeCodeImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCodeImport.swift; sourceTree = "<group>"; };
 		2D8530E203C99CDB7CAA371F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		32E86351762BC954A07DAE5F /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		34C72995DE871F034CA68B79 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		3DDB3669F215EFC0C1958C20 /* ClaudeUsage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudeUsage.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B73EA8A4AB5738107893EB5 /* ClaudeUsageWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ClaudeUsageWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AD55D9098A9467D7664BE4C /* UsageAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageAPI.swift; sourceTree = "<group>"; };
@@ -71,6 +76,7 @@
 		C97788F0DEBD8BFA7EFE8DED /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D2D075FEF47C5CBC62414384 /* ClaudeUsage.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ClaudeUsage.entitlements; sourceTree = "<group>"; };
 		ECAF96C3ED2923D7B0C7D288 /* AppGroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStore.swift; sourceTree = "<group>"; };
+		EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricPresentation.swift; sourceTree = "<group>"; };
 		F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthClient.swift; sourceTree = "<group>"; };
 		FC477B6568DC675B2F9AAD16 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -104,8 +110,10 @@
 			children = (
 				ECAF96C3ED2923D7B0C7D288 /* AppGroupStore.swift */,
 				2B1ADC922D989DC1AD17BFFA /* ClaudeCodeImport.swift */,
+				EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */,
 				32E86351762BC954A07DAE5F /* Models.swift */,
 				F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */,
+				34C72995DE871F034CA68B79 /* Theme.swift */,
 				19E523773952E01523EA9066 /* TokenStore.swift */,
 				9AD55D9098A9467D7664BE4C /* UsageAPI.swift */,
 			);
@@ -228,11 +236,13 @@
 				6BACE2E6E91928CD3CA54CA5 /* ClaudeCodeImport.swift in Sources */,
 				6689E4C7F8D857ED5425E9A0 /* ClaudeUsageApp.swift in Sources */,
 				E12A5E1AD7DE18B0FB736C57 /* MenuBarView.swift in Sources */,
+				5D05FDE354FE5466BC887C98 /* MetricPresentation.swift in Sources */,
 				46217628552499310B0F81C3 /* Models.swift in Sources */,
 				FD22448E9AF1EE91A9DF9282 /* NotificationManager.swift in Sources */,
 				E590066085D27EA41A0AB299 /* OAuthClient.swift in Sources */,
 				B8B9DDBD3BF4F11EDCB9C868 /* SettingsView.swift in Sources */,
 				826A5FD75868AF1505FDC23C /* SignInView.swift in Sources */,
+				B12793EF77E5E3D46808CB5F /* Theme.swift in Sources */,
 				32EDEF82B724E10707C4978C /* TokenStore.swift in Sources */,
 				2DE007E5C1369CE0205CDA0A /* UsageAPI.swift in Sources */,
 				05948C9BB01967542C474609 /* UsageRefresher.swift in Sources */,
@@ -246,8 +256,10 @@
 				E9DBAF52706354EF65939B67 /* AppGroupStore.swift in Sources */,
 				12C19C6654CF6BD889493C91 /* ClaudeCodeImport.swift in Sources */,
 				B23E6003B3841B8957E1E6BE /* ClaudeUsageWidget.swift in Sources */,
+				D71B6A3D9AA01DA669BF1927 /* MetricPresentation.swift in Sources */,
 				14231B4F27B8A4C91A39F952 /* Models.swift in Sources */,
 				A88AFAD0716175DA7FD0C3E9 /* OAuthClient.swift in Sources */,
+				0BA6B58DADC210030BCE555B /* Theme.swift in Sources */,
 				DB57F6E2ED03D314E9A20222 /* TokenStore.swift in Sources */,
 				EB5A7C19B9233C037E2D89FF /* UsageAPI.swift in Sources */,
 			);

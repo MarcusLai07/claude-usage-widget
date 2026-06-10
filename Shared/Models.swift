@@ -13,8 +13,8 @@ enum MetricKind: String, CaseIterable, Codable, Identifiable {
         switch self {
         case .session: return "Session"
         case .weekly: return "Weekly"
-        case .weeklyOpus: return "Opus · 7d"
-        case .weeklySonnet: return "Sonnet · 7d"
+        case .weeklyOpus: return "Opus · 7-day"
+        case .weeklySonnet: return "Sonnet · 7-day"
         case .extraUsage: return "Extra usage"
         }
     }

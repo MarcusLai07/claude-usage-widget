@@ -1,0 +1,59 @@
+name: ClaudeUsage
+options:
+  bundleIdPrefix: com.marcuslai
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    CODE_SIGN_STYLE: Automatic
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: 0.1.0
+targets:
+  ClaudeUsage:
+    type: application
+    platform: macOS
+    sources: [App, Shared]
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Claude Usage
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.developer-tools
+    entitlements:
+      path: App/ClaudeUsage.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.application-groups:
+          - group.com.marcuslai.ClaudeUsage
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.marcuslai.ClaudeUsage.shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.marcuslai.ClaudeUsage
+    dependencies:
+      - target: ClaudeUsageWidget
+  ClaudeUsageWidget:
+    type: app-extension
+    platform: macOS
+    sources: [Widget, Shared]
+    info:
+      path: Widget/Info.plist
+      properties:
+        CFBundleDisplayName: Claude Usage
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Widget/ClaudeUsageWidget.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.application-groups:
+          - group.com.marcuslai.ClaudeUsage
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.marcuslai.ClaudeUsage.shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.marcuslai.ClaudeUsage.Widget

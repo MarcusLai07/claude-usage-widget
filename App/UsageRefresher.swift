@@ -29,17 +29,20 @@ final class UsageRefresher: ObservableObject {
         guard isSignedIn else { return }
         isRefreshing = true
         defer { isRefreshing = false }
+        let started = Date()
         do {
             let snapshot = try await UsageAPI.fetchUsage()
             self.snapshot = snapshot
             self.lastError = nil
             AppGroupStore.cachedSnapshot = snapshot
+            PerfLog.record(source: "app", started: started, error: nil)
             WidgetCenter.shared.reloadAllTimelines()
             NotificationManager.evaluate(snapshot)
         } catch UsageAPIError.notSignedIn {
             isSignedIn = false
         } catch {
             lastError = error.localizedDescription
+            PerfLog.record(source: "app", started: started, error: error.localizedDescription)
         }
     }
 

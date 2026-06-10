@@ -84,6 +84,27 @@ Then in Xcode:
   app isn't running. WidgetKit refresh is best-effort — expect up to ~15
   minutes of lag on the desktop widget.
 
+## Performance telemetry (local only)
+
+Every usage fetch appends one JSON line — duration, process CPU time,
+resident memory, success/error — to:
+
+```
+~/Library/Group Containers/group.com.marcuslai.ClaudeUsage/perf-log.jsonl
+```
+
+This never leaves your machine; it exists so polling cost can be measured
+instead of guessed, and so widget-side fetch failures are diagnosable.
+Inspect it with `jq`, e.g. average fetch duration per source:
+
+```sh
+jq -s 'group_by(.source)[] | {source: .[0].source, n: length, avgMs: (map(.durationMs) | add / length)}' \
+  ~/Library/Group\ Containers/group.com.marcuslai.ClaudeUsage/perf-log.jsonl
+```
+
+The file rotates at ~2 MB. Polling costs no Claude tokens — the usage
+endpoint is account metadata and never invokes a model.
+
 ## Roadmap
 
 - [ ] Per-widget configuration (AppIntents) instead of global metric toggles

@@ -80,20 +80,19 @@ struct UsageRing: View {
     }
 }
 
-/// Pill shown top-right when data is stale, with auto-updating age.
-struct StaleBadge: View {
+/// Minimal top-corner age indicator: "4:28" counting up since the last fetch.
+/// Goes orange with an alert icon when showing stale (cached) data.
+struct AgeBadge: View {
     let since: Date
+    var stale: Bool = false
 
     var body: some View {
         HStack(spacing: 3) {
-            Image(systemName: "clock.badge.exclamationmark")
-                .font(.system(size: 9, weight: .semibold))
-            Text(since, style: .relative)
+            Image(systemName: stale ? "clock.badge.exclamationmark" : "clock")
+                .font(.system(size: 8, weight: .semibold))
+            Text(since, style: .timer)
         }
-        .font(.system(size: 10, weight: .semibold))
-        .foregroundStyle(.secondary)
-        .padding(.horizontal, 7)
-        .padding(.vertical, 2)
-        .background(Capsule().fill(.quaternary))
+        .font(.system(size: 9.5, weight: .medium).monospacedDigit())
+        .foregroundStyle(stale ? AnyShapeStyle(.orange) : AnyShapeStyle(.tertiary))
     }
 }

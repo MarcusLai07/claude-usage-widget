@@ -34,14 +34,17 @@ struct UsageProvider: TimelineProvider {
             var snapshot: UsageSnapshot?
             var signedIn = true
             var stale = false
+            let started = Date()
             do {
                 snapshot = try await UsageAPI.fetchUsage()
                 AppGroupStore.cachedSnapshot = snapshot
+                PerfLog.record(source: "widget", started: started, error: nil)
             } catch UsageAPIError.notSignedIn {
                 signedIn = false
             } catch {
                 snapshot = AppGroupStore.cachedSnapshot
                 stale = true
+                PerfLog.record(source: "widget", started: started, error: error.localizedDescription)
             }
             let entry = UsageEntry(date: Date(), snapshot: snapshot,
                                    visibleMetrics: AppGroupStore.visibleMetrics,
@@ -87,6 +90,7 @@ struct SignedOutWidgetView: View {
 struct WidgetHeader: View {
     let entry: UsageEntry
     var markSize: CGFloat = 15
+    var showAge = true
 
     var body: some View {
         HStack {
@@ -96,12 +100,8 @@ struct WidgetHeader: View {
                     .font(.system(size: 12.5, weight: .semibold))
             }
             Spacer()
-            if entry.isStale, let fetchedAt = entry.snapshot?.fetchedAt {
-                StaleBadge(since: fetchedAt)
-            } else if let fetchedAt = entry.snapshot?.fetchedAt {
-                (Text("Updated ") + Text(fetchedAt, style: .relative) + Text(" ago"))
-                    .font(.system(size: 10.5))
-                    .foregroundStyle(.tertiary)
+            if showAge, let fetchedAt = entry.snapshot?.fetchedAt {
+                AgeBadge(since: fetchedAt, stale: entry.isStale)
             }
         }
     }
@@ -158,10 +158,8 @@ struct BarsWidgetView: View {
                     .kerning(1)
                     .foregroundStyle(.secondary)
                 Spacer()
-                if entry.isStale, let fetchedAt = entry.snapshot?.fetchedAt {
-                    StaleBadge(since: fetchedAt)
-                } else {
-                    SunburstMark(size: 14)
+                if let fetchedAt = entry.snapshot?.fetchedAt {
+                    AgeBadge(since: fetchedAt, stale: entry.isStale)
                 }
             }
             (Text("\(Int(hero.percent))")
@@ -208,7 +206,7 @@ struct BarsWidgetView: View {
 
     private var large: some View {
         VStack(alignment: .leading, spacing: 0) {
-            WidgetHeader(entry: entry, markSize: 16)
+            WidgetHeader(entry: entry, markSize: 16, showAge: false)
             VStack(alignment: .leading, spacing: 14) {
                 ForEach(entry.displays.prefix(5)) { metric in
                     MetricBarRow(metric: metric)
@@ -252,8 +250,8 @@ struct RingsWidgetView: View {
             HStack {
                 SunburstMark(size: 14)
                 Spacer()
-                if entry.isStale, let fetchedAt = entry.snapshot?.fetchedAt {
-                    StaleBadge(since: fetchedAt)
+                if let fetchedAt = entry.snapshot?.fetchedAt {
+                    AgeBadge(since: fetchedAt, stale: entry.isStale)
                 }
             }
             Spacer(minLength: 2)
@@ -285,25 +283,26 @@ struct RingsWidgetView: View {
     private var medium: some View {
         VStack(spacing: 0) {
             WidgetHeader(entry: entry)
-            Spacer(minLength: 4)
-            HStack(alignment: .top) {
+            Spacer(minLength: 5)
+            HStack(alignment: .top, spacing: 0) {
                 ForEach(entry.displays.prefix(3)) { metric in
-                    Spacer(minLength: 0)
-                    VStack(spacing: 6) {
-                        UsageRing(percent: metric.percent, size: 72, stroke: 8)
+                    VStack(spacing: 5) {
+                        UsageRing(percent: metric.percent, size: 62, stroke: 7)
                             .opacity(entry.isStale ? 0.75 : 1)
-                        VStack(spacing: 0) {
-                            Text(metric.name)
-                                .font(.system(size: 11.5, weight: .semibold))
-                            if let resetsAt = metric.resetsAt {
-                                ResetCaption(date: resetsAt, percent: metric.percent, font: .system(size: 10))
-                            }
+                        Text(metric.name)
+                            .font(.system(size: 11.5, weight: .semibold))
+                        if let resetsAt = metric.resetsAt {
+                            ResetCaption(date: resetsAt, percent: metric.percent, font: .system(size: 9.5))
+                        } else if let caption = metric.caption {
+                            Text(caption)
+                                .font(.system(size: 9.5))
+                                .foregroundStyle(.tertiary)
                         }
                     }
-                    Spacer(minLength: 0)
+                    .frame(maxWidth: .infinity)
                 }
             }
-            Spacer(minLength: 4)
+            Spacer(minLength: 3)
         }
     }
 
@@ -311,7 +310,7 @@ struct RingsWidgetView: View {
         let metrics = entry.displays
         let hero = metrics[0]
         return VStack(alignment: .leading, spacing: 0) {
-            WidgetHeader(entry: entry, markSize: 16)
+            WidgetHeader(entry: entry, markSize: 16, showAge: false)
             HStack(spacing: 14) {
                 UsageRing(percent: hero.percent, size: 96, stroke: 10)
                     .opacity(entry.isStale ? 0.75 : 1)

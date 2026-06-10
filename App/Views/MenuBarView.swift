@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @EnvironmentObject private var refresher: UsageRefresher
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(spacing: 0) {
@@ -109,7 +110,12 @@ struct MenuBarView: View {
 
     private var footer: some View {
         VStack(spacing: 1) {
-            SettingsLink {
+            Button {
+                // Accessory apps open the Settings window unfocused (or not at
+                // all via SettingsLink) unless the app is activated first.
+                NSApp.activate(ignoringOtherApps: true)
+                openSettings()
+            } label: {
                 MenuRow(icon: "gearshape", title: "Settings…", shortcut: "⌘,")
             }
             .buttonStyle(.plain)

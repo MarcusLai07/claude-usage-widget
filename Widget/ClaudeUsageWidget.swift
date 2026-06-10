@@ -148,6 +148,7 @@ struct BarsWidgetView: View {
                 }
             }
         }
+        .widgetURL(URL(string: "claudeusage://open"))
         .containerBackground(.fill.tertiary, for: .widget)
     }
 
@@ -243,6 +244,7 @@ struct RingsWidgetView: View {
                 }
             }
         }
+        .widgetURL(URL(string: "claudeusage://open"))
         .containerBackground(.fill.tertiary, for: .widget)
     }
 

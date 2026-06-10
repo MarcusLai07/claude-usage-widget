@@ -1,5 +1,7 @@
 # Xcode
 build/
+build.noindex/
+build-iconset/
 DerivedData/
 *.xcuserstate
 xcuserdata/

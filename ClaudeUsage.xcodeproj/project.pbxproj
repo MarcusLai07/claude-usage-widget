@@ -15,9 +15,11 @@
 		2DE007E5C1369CE0205CDA0A /* UsageAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AD55D9098A9467D7664BE4C /* UsageAPI.swift */; };
 		32EDEF82B724E10707C4978C /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E523773952E01523EA9066 /* TokenStore.swift */; };
 		46217628552499310B0F81C3 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E86351762BC954A07DAE5F /* Models.swift */; };
+		511217524E03B26B8379C3F3 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9598317CDA9AAF24482ABB2C /* AppIcon.icns */; };
 		5D05FDE354FE5466BC887C98 /* MetricPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */; };
 		6689E4C7F8D857ED5425E9A0 /* ClaudeUsageApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1520DE729C71CBF445CFC145 /* ClaudeUsageApp.swift */; };
 		6BACE2E6E91928CD3CA54CA5 /* ClaudeCodeImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1ADC922D989DC1AD17BFFA /* ClaudeCodeImport.swift */; };
+		70B93F3F377B52BDEB2F5911 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9598317CDA9AAF24482ABB2C /* AppIcon.icns */; };
 		826A5FD75868AF1505FDC23C /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC477B6568DC675B2F9AAD16 /* SignInView.swift */; };
 		A88AFAD0716175DA7FD0C3E9 /* OAuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */; };
 		B12793EF77E5E3D46808CB5F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C72995DE871F034CA68B79 /* Theme.swift */; };
@@ -71,6 +73,7 @@
 		34C72995DE871F034CA68B79 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		3DDB3669F215EFC0C1958C20 /* ClaudeUsage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudeUsage.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B73EA8A4AB5738107893EB5 /* ClaudeUsageWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ClaudeUsageWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		9598317CDA9AAF24482ABB2C /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9AD55D9098A9467D7664BE4C /* UsageAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageAPI.swift; sourceTree = "<group>"; };
 		C83428CAB7277078A2677D14 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C97788F0DEBD8BFA7EFE8DED /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -90,9 +93,18 @@
 				C83428CAB7277078A2677D14 /* Info.plist */,
 				1C38BCAEF55783EA8A2A2576 /* NotificationManager.swift */,
 				123B2B85D5C14AE1B91BC8AD /* UsageRefresher.swift */,
+				169069D3B7FF10EE470209CE /* Resources */,
 				2E667A1C32D8E1BCDE07F90E /* Views */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		169069D3B7FF10EE470209CE /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				9598317CDA9AAF24482ABB2C /* AppIcon.icns */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		2E667A1C32D8E1BCDE07F90E /* Views */ = {
@@ -157,6 +169,7 @@
 			buildConfigurationList = AD8EEEAD16896B61140BC6A6 /* Build configuration list for PBXNativeTarget "ClaudeUsageWidget" */;
 			buildPhases = (
 				194120D870612C23743A5311 /* Sources */,
+				CC5A79E475581C7EACA870E2 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -174,6 +187,7 @@
 			buildConfigurationList = 78FFC4369CA5357E81B68B17 /* Build configuration list for PBXNativeTarget "ClaudeUsage" */;
 			buildPhases = (
 				0879BCB003A66A2E5A5E923C /* Sources */,
+				93F8577ADA890DBFF21FF55F /* Resources */,
 				C61D794878352EA7E321BF49 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
@@ -226,6 +240,25 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		93F8577ADA890DBFF21FF55F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				511217524E03B26B8379C3F3 /* AppIcon.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC5A79E475581C7EACA870E2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				70B93F3F377B52BDEB2F5911 /* AppIcon.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0879BCB003A66A2E5A5E923C /* Sources */ = {

@@ -20,6 +20,7 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: Claude Usage
+        CFBundleIconFile: AppIcon
         LSUIElement: true
         LSApplicationCategoryType: public.app-category.developer-tools
     entitlements:
@@ -39,11 +40,15 @@ targets:
   ClaudeUsageWidget:
     type: app-extension
     platform: macOS
-    sources: [Widget, Shared]
+    sources:
+      - Widget
+      - Shared
+      - path: App/Resources/AppIcon.icns
     info:
       path: Widget/Info.plist
       properties:
         CFBundleDisplayName: Claude Usage
+        CFBundleIconFile: AppIcon
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:

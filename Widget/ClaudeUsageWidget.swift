@@ -36,7 +36,10 @@ struct UsageProvider: TimelineProvider {
             var stale = false
             let started = Date()
             do {
-                snapshot = try await UsageAPI.fetchUsage()
+                // Long freshness window: the app refreshes every 5 minutes and
+                // reloads widget timelines after each fetch, so the widget only
+                // goes to the network itself if the app hasn't run in a while.
+                snapshot = try await UsageFetcher.shared.fetch(maxAge: 10 * 60)
                 AppGroupStore.cachedSnapshot = snapshot
                 PerfLog.record(source: "widget", started: started, error: nil)
             } catch UsageAPIError.notSignedIn {

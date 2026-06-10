@@ -8,6 +8,7 @@ enum UsageAPIError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notSignedIn: return "Not signed in"
+        case .http(429): return "Rate limited — will retry on the next cycle"
         case .http(let code): return "Request failed (HTTP \(code))"
         case .decoding: return "Unexpected response from server"
         }

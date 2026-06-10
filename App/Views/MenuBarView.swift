@@ -41,7 +41,7 @@ struct MenuBarView: View {
                 ProgressView().controlSize(.small)
             } else {
                 Button {
-                    Task { await refresher.refresh() }
+                    Task { await refresher.refresh(force: true) }
                 } label: {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 13, weight: .medium))
@@ -69,7 +69,7 @@ struct MenuBarView: View {
             }
             Spacer()
             Button("Retry") {
-                Task { await refresher.refresh() }
+                Task { await refresher.refresh(force: true) }
             }
             .buttonStyle(.plain)
             .font(.system(size: 11.5, weight: .semibold))

@@ -16,12 +16,14 @@
 		32EDEF82B724E10707C4978C /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E523773952E01523EA9066 /* TokenStore.swift */; };
 		46217628552499310B0F81C3 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E86351762BC954A07DAE5F /* Models.swift */; };
 		511217524E03B26B8379C3F3 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9598317CDA9AAF24482ABB2C /* AppIcon.icns */; };
+		5C2B48F8759A109B564C0F37 /* UsageFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8900757A61756CC87E954D /* UsageFetcher.swift */; };
 		5D05FDE354FE5466BC887C98 /* MetricPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */; };
 		6689E4C7F8D857ED5425E9A0 /* ClaudeUsageApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1520DE729C71CBF445CFC145 /* ClaudeUsageApp.swift */; };
 		6BACE2E6E91928CD3CA54CA5 /* ClaudeCodeImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1ADC922D989DC1AD17BFFA /* ClaudeCodeImport.swift */; };
 		70B93F3F377B52BDEB2F5911 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9598317CDA9AAF24482ABB2C /* AppIcon.icns */; };
 		826A5FD75868AF1505FDC23C /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC477B6568DC675B2F9AAD16 /* SignInView.swift */; };
 		8DCD650C64FE5A905A434D26 /* PerfLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FCE82BA732A47459B4C094 /* PerfLog.swift */; };
+		9774411F816C9C9C3FB7A6ED /* UsageFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8900757A61756CC87E954D /* UsageFetcher.swift */; };
 		A88AFAD0716175DA7FD0C3E9 /* OAuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */; };
 		B12793EF77E5E3D46808CB5F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C72995DE871F034CA68B79 /* Theme.swift */; };
 		B23E6003B3841B8957E1E6BE /* ClaudeUsageWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB4851F82804202E410BB46 /* ClaudeUsageWidget.swift */; };
@@ -75,6 +77,7 @@
 		34C72995DE871F034CA68B79 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		3DDB3669F215EFC0C1958C20 /* ClaudeUsage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudeUsage.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51FCE82BA732A47459B4C094 /* PerfLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfLog.swift; sourceTree = "<group>"; };
+		5B8900757A61756CC87E954D /* UsageFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageFetcher.swift; sourceTree = "<group>"; };
 		7B73EA8A4AB5738107893EB5 /* ClaudeUsageWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ClaudeUsageWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9598317CDA9AAF24482ABB2C /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9AD55D9098A9467D7664BE4C /* UsageAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageAPI.swift; sourceTree = "<group>"; };
@@ -132,6 +135,7 @@
 				34C72995DE871F034CA68B79 /* Theme.swift */,
 				19E523773952E01523EA9066 /* TokenStore.swift */,
 				9AD55D9098A9467D7664BE4C /* UsageAPI.swift */,
+				5B8900757A61756CC87E954D /* UsageFetcher.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -283,6 +287,7 @@
 				B12793EF77E5E3D46808CB5F /* Theme.swift in Sources */,
 				32EDEF82B724E10707C4978C /* TokenStore.swift in Sources */,
 				2DE007E5C1369CE0205CDA0A /* UsageAPI.swift in Sources */,
+				9774411F816C9C9C3FB7A6ED /* UsageFetcher.swift in Sources */,
 				05948C9BB01967542C474609 /* UsageRefresher.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -301,6 +306,7 @@
 				0BA6B58DADC210030BCE555B /* Theme.swift in Sources */,
 				DB57F6E2ED03D314E9A20222 /* TokenStore.swift in Sources */,
 				EB5A7C19B9233C037E2D89FF /* UsageAPI.swift in Sources */,
+				5C2B48F8759A109B564C0F37 /* UsageFetcher.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

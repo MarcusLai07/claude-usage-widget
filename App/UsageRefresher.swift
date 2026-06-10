@@ -25,13 +25,16 @@ final class UsageRefresher: ObservableObject {
         Task { await refresh() }
     }
 
-    func refresh() async {
+    /// `force` is for user-initiated refreshes: it shrinks the freshness
+    /// window but still coalesces rapid clicks instead of hitting the
+    /// endpoint per click (it rate-limits at HTTP 429 under bursts).
+    func refresh(force: Bool = false) async {
         guard isSignedIn else { return }
         isRefreshing = true
         defer { isRefreshing = false }
         let started = Date()
         do {
-            let snapshot = try await UsageAPI.fetchUsage()
+            let snapshot = try await UsageFetcher.shared.fetch(maxAge: force ? 5 : 60)
             self.snapshot = snapshot
             self.lastError = nil
             AppGroupStore.cachedSnapshot = snapshot

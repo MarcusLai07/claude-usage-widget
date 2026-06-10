@@ -3,11 +3,12 @@ import SwiftUI
 struct MenuBarView: View {
     @EnvironmentObject private var refresher: UsageRefresher
     @Environment(\.openSettings) private var openSettings
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(spacing: 0) {
             if !refresher.isSignedIn {
-                SignInView()
+                signedOutPrompt
             } else {
                 header
                 if refresher.isStale {
@@ -27,6 +28,34 @@ struct MenuBarView: View {
             }
         }
         .frame(width: 320)
+    }
+
+    private var signedOutPrompt: some View {
+        VStack(spacing: 13) {
+            SunburstMark(size: 28)
+                .padding(.top, 8)
+            Text("Claude Usage")
+                .font(.system(size: 15, weight: .semibold))
+            Text("Sign in to see your session and weekly limits.")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            Button {
+                NSApp.activate(ignoringOtherApps: true)
+                openWindow(id: "main")
+            } label: {
+                Text("Open Claude Usage to Sign In")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 9)
+                    .background(Color.clay, in: RoundedRectangle(cornerRadius: 9))
+            }
+            .buttonStyle(.plain)
+            Button("Quit") { NSApp.terminate(nil) }
+                .controlSize(.small)
+        }
+        .padding(.init(top: 14, leading: 18, bottom: 14, trailing: 18))
     }
 
     private var header: some View {
@@ -110,6 +139,15 @@ struct MenuBarView: View {
 
     private var footer: some View {
         VStack(spacing: 1) {
+            Button {
+                NSApp.activate(ignoringOtherApps: true)
+                openWindow(id: "main")
+            } label: {
+                MenuRow(icon: "macwindow", title: "Open Claude Usage…", shortcut: "⌘O")
+            }
+            .buttonStyle(.plain)
+            .keyboardShortcut("o")
+
             Button {
                 // Accessory apps open the Settings window unfocused (or not at
                 // all via SettingsLink) unless the app is activated first.

@@ -11,8 +11,14 @@ desktop or in Notification Center.
 
 ## Features
 
-- **Desktop / Notification Center widget** in small, medium, and large sizes
+- **Desktop / Notification Center widgets** in two styles (bars and radial
+  rings), each in small, medium, and large sizes
 - **Menu bar app** with live usage, manual refresh, and reset countdowns
+- **Analytics window** — utilization history charts (sampled every 5 minutes),
+  plus per-model token breakdowns parsed from Claude Code's local transcripts
+  (`~/.claude`, read-only, granted once via open panel). Token analytics cover
+  Claude Code on this Mac only; the percentage limits from Anthropic remain
+  the source of truth.
 - **Sign in with Claude** — OAuth 2.0 + PKCE in your browser, or one-click
   import of existing Claude Code credentials from the keychain
 - **Choose what to show** — session, weekly, Opus 7-day, Sonnet 7-day, extra usage
@@ -22,7 +28,7 @@ desktop or in Notification Center.
 
 ## Requirements
 
-- macOS 14 (Sonoma) or later
+- macOS 15 (Sequoia) or later
 - Xcode 16+ to build
 - A Claude Pro / Max / Team subscription
 

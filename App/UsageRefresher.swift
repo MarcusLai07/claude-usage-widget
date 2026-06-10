@@ -38,6 +38,7 @@ final class UsageRefresher: ObservableObject {
             self.snapshot = snapshot
             self.lastError = nil
             AppGroupStore.cachedSnapshot = snapshot
+            UsageHistory.append(snapshot)
             PerfLog.record(source: "app", started: started, error: nil)
             WidgetCenter.shared.reloadAllTimelines()
             NotificationManager.evaluate(snapshot)

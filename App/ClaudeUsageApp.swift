@@ -14,6 +14,13 @@ struct ClaudeUsageApp: App {
         }
         .menuBarExtraStyle(.window)
 
+        Window("Claude Usage", id: "main") {
+            MainWindowView()
+                .environmentObject(refresher)
+        }
+        .defaultSize(width: 900, height: 640)
+        .defaultLaunchBehavior(.suppressed)
+
         Settings {
             SettingsView()
                 .environmentObject(refresher)

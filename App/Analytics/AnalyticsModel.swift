@@ -39,6 +39,16 @@ final class AnalyticsModel: ObservableObject {
 
     // MARK: Aggregations
 
+    /// Stable model → chart color assignment, in 30-day share order.
+    var modelColors: [String: Color] {
+        let ordered = modelShares(since: Date().addingTimeInterval(-30 * 86400)).map(\.model)
+        var map: [String: Color] = [:]
+        for (index, model) in ordered.enumerated() {
+            map[model] = modelPalette[index % modelPalette.count]
+        }
+        return map
+    }
+
     struct ModelShare: Identifiable {
         let model: String
         let billable: Int

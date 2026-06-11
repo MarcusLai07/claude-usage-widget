@@ -1,16 +1,18 @@
 import SwiftUI
 import WidgetKit
 
+/// Standalone Settings scene (⌘,) — same cards as the window's Settings page.
 struct SettingsView: View {
     var body: some View {
-        TabView {
-            DisplaySettingsView()
-                .tabItem { Label("Display", systemImage: "rectangle.on.rectangle") }
-            NotificationSettingsView()
-                .tabItem { Label("Notifications", systemImage: "bell") }
+        ScrollView {
+            VStack(spacing: 16) {
+                DisplaySettingsView()
+                NotificationSettingsView()
+            }
+            .padding(20)
         }
-        .frame(width: 560)
-        .padding()
+        .frame(width: 560, height: 620)
+        .background(Color.windowContent)
     }
 }
 
@@ -44,14 +46,11 @@ struct DisplaySettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("SHOW THESE METRICS IN WIDGETS & MENU BAR")
-                .font(.system(size: 11, weight: .semibold))
-                .kerning(0.4)
-                .foregroundStyle(.tertiary)
-                .padding(.bottom, 10)
+            CardTitle("Visible metrics")
+                .padding(.bottom, 4)
 
             ForEach(MetricKind.allCases) { kind in
-                HStack(alignment: .top, spacing: 11) {
+                HStack(alignment: .center, spacing: 12) {
                     Toggle("", isOn: binding(for: kind))
                         .toggleStyle(.checkbox)
                         .labelsHidden()
@@ -64,38 +63,30 @@ struct DisplaySettingsView: View {
                     }
                     Spacer()
                     if unreported.contains(kind) {
-                        Text("no data yet")
-                            .font(.system(size: 10.5, weight: .semibold))
-                            .foregroundStyle(.orange)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
-                            .background(Capsule().fill(.orange.opacity(0.14)))
+                        badge("no data yet", color: .orange)
                             .help("Anthropic isn't reporting this metric for your account right now. It appears automatically once reported.")
                     }
-                    Text(kind.settingsBadge)
-                        .font(.system(size: 10.5, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(Capsule().fill(.quaternary))
+                    badge(kind.settingsBadge, color: nil)
                 }
-                .padding(.vertical, 9)
+                .padding(.vertical, 11)
                 if kind != MetricKind.allCases.last {
                     Divider()
                 }
             }
 
-            HStack(alignment: .top, spacing: 8) {
-                Image(systemName: "info.circle")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.tertiary)
-                Text("The small widget always shows your first two enabled metrics.")
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.top, 14)
+            hint("Widgets show your first two enabled metrics. The small widget always leads with these.")
         }
-        .padding(.init(top: 18, leading: 22, bottom: 22, trailing: 22))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .designCard()
+    }
+
+    private func badge(_ text: String, color: Color?) -> some View {
+        Text(text)
+            .font(.system(size: 10.5, weight: .semibold))
+            .foregroundStyle(color.map(AnyShapeStyle.init) ?? AnyShapeStyle(.secondary))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(color?.opacity(0.14).asAnyShapeStyle ?? AnyShapeStyle(.quaternary)))
     }
 
     private func binding(for kind: MetricKind) -> Binding<Bool> {
@@ -110,6 +101,10 @@ struct DisplaySettingsView: View {
     }
 }
 
+private extension Color {
+    var asAnyShapeStyle: AnyShapeStyle { AnyShapeStyle(self) }
+}
+
 struct NotificationSettingsView: View {
     @State private var enabled = AppGroupStore.notificationsEnabled
     @State private var notifyOnLimit = AppGroupStore.notifyOnLimitReached
@@ -118,11 +113,8 @@ struct NotificationSettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("NOTIFICATIONS")
-                .font(.system(size: 11, weight: .semibold))
-                .kerning(0.4)
-                .foregroundStyle(.tertiary)
-                .padding(.bottom, 6)
+            CardTitle("Notifications")
+                .padding(.bottom, 4)
 
             toggleRow(title: "Enable notifications",
                       subtitle: "Master switch for all usage alerts",
@@ -134,12 +126,7 @@ struct NotificationSettingsView: View {
                       isOn: $notifyOnLimit)
                 .onChange(of: notifyOnLimit) { _, value in AppGroupStore.notifyOnLimitReached = value }
                 .disabled(!enabled)
-
-            Text("ALERT THRESHOLDS")
-                .font(.system(size: 11, weight: .semibold))
-                .kerning(0.4)
-                .foregroundStyle(.tertiary)
-                .padding(.init(top: 22, leading: 0, bottom: 6, trailing: 0))
+            Divider()
 
             Group {
                 thresholdRow(title: "Session warning", value: $sessionThreshold)
@@ -151,17 +138,10 @@ struct NotificationSettingsView: View {
             .disabled(!enabled)
             .opacity(enabled ? 1 : 0.4)
 
-            HStack(alignment: .top, spacing: 8) {
-                Image(systemName: "info.circle")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.tertiary)
-                Text("Thresholds fire once per rolling window so you're not alerted repeatedly.")
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.top, 14)
+            hint("Each threshold fires once per rolling window so you're not alerted repeatedly.")
         }
-        .padding(.init(top: 18, leading: 22, bottom: 22, trailing: 22))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .designCard()
     }
 
     private func toggleRow(title: String, subtitle: String, isOn: Binding<Bool>) -> some View {
@@ -178,11 +158,11 @@ struct NotificationSettingsView: View {
                 .toggleStyle(.switch)
                 .labelsHidden()
         }
-        .padding(.vertical, 11)
+        .padding(.vertical, 12)
     }
 
     private func thresholdRow(title: String, value: Binding<Double>) -> some View {
-        VStack(alignment: .leading, spacing: 9) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
                 Text(title)
                     .font(.system(size: 13, weight: .medium))
@@ -200,6 +180,18 @@ struct NotificationSettingsView: View {
             .font(.system(size: 10))
             .foregroundStyle(.tertiary)
         }
-        .padding(.vertical, 13)
+        .padding(.vertical, 14)
     }
+}
+
+func hint(_ text: String) -> some View {
+    HStack(alignment: .top, spacing: 8) {
+        Image(systemName: "info.circle")
+            .font(.system(size: 12))
+            .foregroundStyle(.tertiary)
+        Text(text)
+            .font(.system(size: 11.5))
+            .foregroundStyle(.secondary)
+    }
+    .padding(.top, 13)
 }

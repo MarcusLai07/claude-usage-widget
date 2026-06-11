@@ -34,6 +34,7 @@
 		B12793EF77E5E3D46808CB5F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C72995DE871F034CA68B79 /* Theme.swift */; };
 		B23E6003B3841B8957E1E6BE /* ClaudeUsageWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB4851F82804202E410BB46 /* ClaudeUsageWidget.swift */; };
 		B8B9DDBD3BF4F11EDCB9C868 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97788F0DEBD8BFA7EFE8DED /* SettingsView.swift */; };
+		C05943C43151A16944896E54 /* DesignComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75401BE469C1FB046A8DFC12 /* DesignComponents.swift */; };
 		D71B6A3D9AA01DA669BF1927 /* MetricPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */; };
 		DB26A044F07B3028F16FF5AA /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0F2160FA1C50EE7EF8B5C96 /* AnalyticsView.swift */; };
 		DB57F6E2ED03D314E9A20222 /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E523773952E01523EA9066 /* TokenStore.swift */; };
@@ -90,6 +91,7 @@
 		51FCE82BA732A47459B4C094 /* PerfLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfLog.swift; sourceTree = "<group>"; };
 		5B8900757A61756CC87E954D /* UsageFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageFetcher.swift; sourceTree = "<group>"; };
 		700F93DC5B26167BC3B0982F /* TranscriptStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptStats.swift; sourceTree = "<group>"; };
+		75401BE469C1FB046A8DFC12 /* DesignComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignComponents.swift; sourceTree = "<group>"; };
 		7B73EA8A4AB5738107893EB5 /* ClaudeUsageWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ClaudeUsageWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9598317CDA9AAF24482ABB2C /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9AD55D9098A9467D7664BE4C /* UsageAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageAPI.swift; sourceTree = "<group>"; };
@@ -136,6 +138,7 @@
 				4F29F4A8C11562A4C0AD07B2 /* AccountView.swift */,
 				E0F2160FA1C50EE7EF8B5C96 /* AnalyticsView.swift */,
 				41F3922816D4D8D422D256B7 /* DashboardView.swift */,
+				75401BE469C1FB046A8DFC12 /* DesignComponents.swift */,
 				B97C3A43D85709AA956F3522 /* MainWindowView.swift */,
 				0212915E642A4295BB319865 /* MenuBarView.swift */,
 				C97788F0DEBD8BFA7EFE8DED /* SettingsView.swift */,
@@ -313,6 +316,7 @@
 				39B94C1E0A7691AB2A9512A2 /* ClaudeFolderAccess.swift in Sources */,
 				6689E4C7F8D857ED5425E9A0 /* ClaudeUsageApp.swift in Sources */,
 				23BAF7A08F359FB0274B0FCF /* DashboardView.swift in Sources */,
+				C05943C43151A16944896E54 /* DesignComponents.swift in Sources */,
 				2976816337441DE1BEB37941 /* MainWindowView.swift in Sources */,
 				E12A5E1AD7DE18B0FB736C57 /* MenuBarView.swift in Sources */,
 				5D05FDE354FE5466BC887C98 /* MetricPresentation.swift in Sources */,
@@ -412,7 +416,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = P7DV5ZUK9A;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -432,7 +436,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 0.3.0;
+				MARKETING_VERSION = 0.4.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -479,7 +483,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = P7DV5ZUK9A;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -493,7 +497,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 0.3.0;
+				MARKETING_VERSION = 0.4.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

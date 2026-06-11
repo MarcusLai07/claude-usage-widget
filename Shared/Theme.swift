@@ -16,6 +16,7 @@ func usageColor(_ percent: Double) -> Color {
 /// The 12-ray sunburst app mark used across widget, popover, and sign-in.
 struct SunburstMark: View {
     var size: CGFloat = 15
+    var color: Color = .clay
 
     var body: some View {
         Canvas { context, canvasSize in
@@ -28,7 +29,7 @@ struct SunburstMark: View {
                                       y: center.y + sin(angle) * unit * 3.2))
                 path.addLine(to: CGPoint(x: center.x + cos(angle) * unit * 9,
                                          y: center.y + sin(angle) * unit * 9))
-                context.stroke(path, with: .color(.clay),
+                context.stroke(path, with: .color(color),
                                style: StrokeStyle(lineWidth: unit * 2.1, lineCap: .round))
             }
         }

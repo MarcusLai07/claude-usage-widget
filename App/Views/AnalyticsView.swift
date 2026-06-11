@@ -118,6 +118,9 @@ struct AnalyticsView: View {
                     }
                 }
                 .chartYScale(domain: 0...100)
+                // Pin the x-axis to the selected range so 7d/30d honestly show
+                // the unrecorded span instead of auto-fitting to the data.
+                .chartXScale(domain: since...Date())
                 .chartYAxis { AxisMarks(position: .leading, values: [0, 25, 50, 75, 100]) }
                 .chartLegend(.hidden)
                 .frame(height: 170)

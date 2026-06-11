@@ -32,11 +32,13 @@ final class AnalyticsModel: ObservableObject {
             return
         }
         hasClaudeAccess = true
+        let scanStarted = Date()
         tokenSamples = await Task.detached(priority: .userInitiated) {
             let scoped = folder.startAccessingSecurityScopedResource()
             defer { if scoped { folder.stopAccessingSecurityScopedResource() } }
             return TranscriptStats.collectSamples(claudeFolder: folder, since: since)
         }.value
+        PerfLog.record(source: "scan", started: scanStarted, error: nil)
         let ordered = modelShares(since: since).map(\.model)
         modelColors = Dictionary(uniqueKeysWithValues: ordered.enumerated().map {
             ($0.element, modelPalette[$0.offset % modelPalette.count])

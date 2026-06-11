@@ -90,6 +90,10 @@ struct SignedOutWidgetView: View {
     }
 }
 
+/// The whole widget opens the app via widgetURL; the logo is additionally an
+/// explicit tap target for the same deep link.
+let openWindowURL = URL(string: "claudeusage://open")!
+
 struct WidgetHeader: View {
     let entry: UsageEntry
     var markSize: CGFloat = 15
@@ -97,10 +101,12 @@ struct WidgetHeader: View {
 
     var body: some View {
         HStack {
-            HStack(spacing: 6) {
-                SunburstMark(size: markSize)
-                Text("Claude Usage")
-                    .font(.system(size: 12.5, weight: .semibold))
+            Link(destination: openWindowURL) {
+                HStack(spacing: 6) {
+                    SunburstMark(size: markSize)
+                    Text("Claude Usage")
+                        .font(.system(size: 12.5, weight: .semibold))
+                }
             }
             Spacer()
             if showAge, let fetchedAt = entry.snapshot?.fetchedAt {
@@ -148,7 +154,7 @@ struct BarsWidgetView: View {
                 }
             }
         }
-        .widgetURL(URL(string: "claudeusage://open"))
+        .widgetURL(openWindowURL)
         .containerBackground(.fill.tertiary, for: .widget)
     }
 
@@ -244,7 +250,7 @@ struct RingsWidgetView: View {
                 }
             }
         }
-        .widgetURL(URL(string: "claudeusage://open"))
+        .widgetURL(openWindowURL)
         .containerBackground(.fill.tertiary, for: .widget)
     }
 
@@ -253,7 +259,9 @@ struct RingsWidgetView: View {
         let hero = metrics[0]
         return VStack(spacing: 0) {
             HStack {
-                SunburstMark(size: 14)
+                Link(destination: openWindowURL) {
+                    SunburstMark(size: 14)
+                }
                 Spacer()
                 if let fetchedAt = entry.snapshot?.fetchedAt {
                     AgeBadge(since: fetchedAt, stale: entry.isStale)

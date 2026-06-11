@@ -1,14 +1,23 @@
 import SwiftUI
 
+/// Routes the popover (and deep links) to a specific section of the main
+/// window — the window binds its sidebar selection to this.
+@MainActor
+final class WindowRouter: ObservableObject {
+    @Published var section: MainSection = .dashboard
+}
+
 @main
 struct ClaudeUsageApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var refresher = UsageRefresher()
+    @StateObject private var router = WindowRouter()
 
     var body: some Scene {
         MenuBarExtra {
             MenuBarView()
                 .environmentObject(refresher)
+                .environmentObject(router)
         } label: {
             MenuBarLabel()
         }
@@ -17,17 +26,13 @@ struct ClaudeUsageApp: App {
         Window("Claude Usage", id: "main") {
             MainWindowView()
                 .environmentObject(refresher)
+                .environmentObject(router)
         }
         .defaultSize(width: 900, height: 640)
         .defaultLaunchBehavior(.suppressed)
         // Tapping a widget opens claudeusage://open. The only external events
         // this app receives are its own URL scheme, so match everything.
         .handlesExternalEvents(matching: ["*"])
-
-        Settings {
-            SettingsView()
-                .environmentObject(refresher)
-        }
     }
 }
 

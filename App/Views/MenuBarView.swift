@@ -2,7 +2,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @EnvironmentObject private var refresher: UsageRefresher
-    @Environment(\.openSettings) private var openSettings
+    @EnvironmentObject private var router: WindowRouter
     @Environment(\.openWindow) private var openWindow
     // The popover view persists between opens, so re-render when settings
     // (visible metrics, thresholds) change in the window or Settings pane.
@@ -51,8 +51,7 @@ struct MenuBarView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button {
-                NSApp.activate(ignoringOtherApps: true)
-                openWindow(id: "main")
+                openMain(.dashboard)
             } label: {
                 Text("Open Claude Usage to Sign In")
                     .font(.system(size: 13, weight: .semibold))
@@ -93,30 +92,17 @@ struct MenuBarView: View {
         .padding(.init(top: 13, leading: 14, bottom: 11, trailing: 14))
     }
 
+    /// Opens the main window at a specific section (shared stale banner and
+    /// settings/dashboard rows all route through here).
+    private func openMain(_ section: MainSection) {
+        router.section = section
+        NSApp.activate(ignoringOtherApps: true)
+        openWindow(id: "main")
+    }
+
     private var staleBanner: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 12))
-                .foregroundStyle(.orange)
-            if let fetchedAt = refresher.snapshot?.fetchedAt {
-                (Text("Couldn't refresh — showing data from ")
-                 + Text(fetchedAt, style: .relative) + Text(" ago."))
-                    .font(.system(size: 11))
-            } else {
-                Text("Couldn't refresh.")
-                    .font(.system(size: 11))
-            }
-            Spacer()
-            Button("Retry") {
-                Task { await refresher.refresh(force: true) }
-            }
-            .buttonStyle(.plain)
-            .font(.system(size: 11.5, weight: .semibold))
-            .foregroundStyle(Color.clay)
-        }
-        .padding(.init(top: 8, leading: 10, bottom: 8, trailing: 10))
-        .background(.orange.opacity(0.16), in: RoundedRectangle(cornerRadius: 9))
-        .padding(.init(top: 0, leading: 14, bottom: 6, trailing: 14))
+        StaleBanner()
+            .padding(.init(top: 0, leading: 14, bottom: 6, trailing: 14))
     }
 
     private func metricList(_ snapshot: UsageSnapshot) -> some View {
@@ -150,8 +136,7 @@ struct MenuBarView: View {
     private var footer: some View {
         VStack(spacing: 1) {
             Button {
-                NSApp.activate(ignoringOtherApps: true)
-                openWindow(id: "main")
+                openMain(.dashboard)
             } label: {
                 MenuRow(icon: "macwindow", title: "Open Claude Usage…", shortcut: "⌘O")
             }
@@ -159,10 +144,7 @@ struct MenuBarView: View {
             .keyboardShortcut("o")
 
             Button {
-                // Accessory apps open the Settings window unfocused (or not at
-                // all via SettingsLink) unless the app is activated first.
-                NSApp.activate(ignoringOtherApps: true)
-                openSettings()
+                openMain(.settings)
             } label: {
                 MenuRow(icon: "gearshape", title: "Settings…", shortcut: "⌘,")
             }

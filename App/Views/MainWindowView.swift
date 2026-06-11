@@ -26,8 +26,10 @@ enum MainSection: String, CaseIterable, Identifiable {
 
 struct MainWindowView: View {
     @EnvironmentObject private var refresher: UsageRefresher
+    @EnvironmentObject private var router: WindowRouter
     @StateObject private var analytics = AnalyticsModel()
-    @State private var section: MainSection = .dashboard
+
+    private var section: MainSection { router.section }
 
     var body: some View {
         Group {
@@ -94,7 +96,7 @@ struct MainWindowView: View {
     private func navRow(_ item: MainSection) -> some View {
         let selected = section == item
         return Button {
-            section = item
+            router.section = item
         } label: {
             HStack(spacing: 10) {
                 Image(systemName: item.icon)

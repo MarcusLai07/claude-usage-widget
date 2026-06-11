@@ -8,6 +8,9 @@ final class AnalyticsModel: ObservableObject {
     @Published var hasClaudeAccess = ClaudeFolderAccess.resolve() != nil
     @Published var isLoading = false
     @Published var lastLoaded: Date?
+    /// Stable model → chart color assignment, recomputed once per reload
+    /// (views read this several times per render).
+    @Published var modelColors: [String: Color] = [:]
 
     func grantAccess() {
         if ClaudeFolderAccess.requestAccess() != nil {
@@ -34,20 +37,14 @@ final class AnalyticsModel: ObservableObject {
             defer { if scoped { folder.stopAccessingSecurityScopedResource() } }
             return TranscriptStats.collectSamples(claudeFolder: folder, since: since)
         }.value
+        let ordered = modelShares(since: since).map(\.model)
+        modelColors = Dictionary(uniqueKeysWithValues: ordered.enumerated().map {
+            ($0.element, modelPalette[$0.offset % modelPalette.count])
+        })
         lastLoaded = Date()
     }
 
     // MARK: Aggregations
-
-    /// Stable model → chart color assignment, in 30-day share order.
-    var modelColors: [String: Color] {
-        let ordered = modelShares(since: Date().addingTimeInterval(-30 * 86400)).map(\.model)
-        var map: [String: Color] = [:]
-        for (index, model) in ordered.enumerated() {
-            map[model] = modelPalette[index % modelPalette.count]
-        }
-        return map
-    }
 
     struct ModelShare: Identifiable {
         let model: String

@@ -1,21 +1,6 @@
 import SwiftUI
 import WidgetKit
 
-/// Standalone Settings scene (⌘,) — same cards as the window's Settings page.
-struct SettingsView: View {
-    var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                DisplaySettingsView()
-                NotificationSettingsView()
-            }
-            .padding(20)
-        }
-        .frame(width: 560, height: 620)
-        .background(Color.windowContent)
-    }
-}
-
 private extension MetricKind {
     var settingsSubtitle: String {
         switch self {
@@ -74,7 +59,7 @@ struct DisplaySettingsView: View {
                 }
             }
 
-            hint("Widgets show your first two enabled metrics. The small widget always leads with these.")
+            HintRow("Widgets show your first two enabled metrics. The small widget always leads with these.")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .designCard()
@@ -138,7 +123,7 @@ struct NotificationSettingsView: View {
             .disabled(!enabled)
             .opacity(enabled ? 1 : 0.4)
 
-            hint("Each threshold fires once per rolling window so you're not alerted repeatedly.")
+            HintRow("Each threshold fires once per rolling window so you're not alerted repeatedly.")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .designCard()
@@ -182,16 +167,4 @@ struct NotificationSettingsView: View {
         }
         .padding(.vertical, 14)
     }
-}
-
-func hint(_ text: String) -> some View {
-    HStack(alignment: .top, spacing: 8) {
-        Image(systemName: "info.circle")
-            .font(.system(size: 12))
-            .foregroundStyle(.tertiary)
-        Text(text)
-            .font(.system(size: 11.5))
-            .foregroundStyle(.secondary)
-    }
-    .padding(.top, 13)
 }

@@ -193,6 +193,26 @@ struct EmptyStateView: View {
     }
 }
 
+// MARK: - Hint footnote (settings/account cards)
+
+struct HintRow: View {
+    let text: String
+
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "info.circle")
+                .font(.system(size: 12))
+                .foregroundStyle(.tertiary)
+            Text(text)
+                .font(.system(size: 11.5))
+                .foregroundStyle(.secondary)
+        }
+        .padding(.top, 13)
+    }
+}
+
 // MARK: - Chart legend swatch
 
 struct LegendSwatch: View {

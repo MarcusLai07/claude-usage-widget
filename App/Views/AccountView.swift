@@ -110,7 +110,7 @@ struct AccountView: View {
             .padding(12)
             .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10))
             .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.cardStroke, lineWidth: 0.5))
-            hint("Used to count tokens by model in Analytics. Files are read locally and never uploaded.")
+            HintRow("Used to count tokens by model in Analytics. Files are read locally and never uploaded.")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .designCard()

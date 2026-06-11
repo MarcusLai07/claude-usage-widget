@@ -1,5 +1,9 @@
-// Generates App/Resources/AppIcon.icns — the clay sunburst mark inside a
-// radial progress ring on a dark gradient squircle.
+// Generates the app icon — the clay sunburst mark inside a radial progress
+// ring on a dark gradient squircle — as both:
+//   • App/Resources/Assets.xcassets/AppIcon.appiconset (modern macOS reads
+//     CFBundleIconName from the compiled asset catalog; the widget gallery
+//     and Finder require this)
+//   • App/Resources/AppIcon.icns (legacy CFBundleIconFile fallback)
 //
 // Usage:  swift Scripts/GenerateIcon.swift
 // Requires: Xcode (iconutil). Re-run after tweaking, then rebuild.
@@ -21,8 +25,6 @@ func draw(in ctx: CGContext, size s: CGFloat) {
     ctx.addPath(plate)
     ctx.clip()
 
-    // Background gradient (top-left violet → bottom-right deep teal, like the
-    // wireframe's dark board).
     let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(),
                               colors: [bgTop.cgColor, bgBottom.cgColor] as CFArray,
                               locations: [0, 1])!
@@ -79,25 +81,48 @@ func renderPNG(pixels: Int) -> Data {
 
 let scriptDir = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
 let repoRoot = scriptDir.deletingLastPathComponent()
+let resources = repoRoot.appendingPathComponent("App/Resources")
+let appiconset = resources.appendingPathComponent("Assets.xcassets/AppIcon.appiconset")
 let iconset = repoRoot.appendingPathComponent("build-iconset/AppIcon.iconset")
-let output = repoRoot.appendingPathComponent("App/Resources/AppIcon.icns")
+let icns = resources.appendingPathComponent("AppIcon.icns")
 
 try? FileManager.default.removeItem(at: iconset.deletingLastPathComponent())
 try FileManager.default.createDirectory(at: iconset, withIntermediateDirectories: true)
-try FileManager.default.createDirectory(at: output.deletingLastPathComponent(),
-                                        withIntermediateDirectories: true)
+try FileManager.default.createDirectory(at: appiconset, withIntermediateDirectories: true)
 
+var assetImages: [[String: String]] = []
 for points in [16, 32, 128, 256, 512] {
-    try renderPNG(pixels: points).write(to: iconset.appendingPathComponent("icon_\(points)x\(points).png"))
-    try renderPNG(pixels: points * 2).write(to: iconset.appendingPathComponent("icon_\(points)x\(points)@2x.png"))
+    for scale in [1, 2] {
+        let suffix = scale == 2 ? "@2x" : ""
+        let name = "icon_\(points)x\(points)\(suffix).png"
+        let png = renderPNG(pixels: points * scale)
+        try png.write(to: iconset.appendingPathComponent(name))
+        try png.write(to: appiconset.appendingPathComponent(name))
+        assetImages.append(["filename": name, "idiom": "mac",
+                            "scale": "\(scale)x", "size": "\(points)x\(points)"])
+    }
 }
+
+let contents: [String: Any] = [
+    "images": assetImages,
+    "info": ["author": "xcode", "version": 1],
+]
+let contentsData = try JSONSerialization.data(withJSONObject: contents, options: [.prettyPrinted, .sortedKeys])
+try contentsData.write(to: appiconset.appendingPathComponent("Contents.json"))
+
+// Top-level catalog Contents.json so Xcode treats the folder as a catalog.
+let catalogContents = try JSONSerialization.data(
+    withJSONObject: ["info": ["author": "xcode", "version": 1]], options: [.prettyPrinted])
+try catalogContents.write(to: resources.appendingPathComponent("Assets.xcassets/Contents.json"))
 
 let iconutil = Process()
 iconutil.executableURL = URL(fileURLWithPath: "/usr/bin/iconutil")
-iconutil.arguments = ["-c", "icns", iconset.path, "-o", output.path]
+iconutil.arguments = ["-c", "icns", iconset.path, "-o", icns.path]
 try iconutil.run()
 iconutil.waitUntilExit()
 try? FileManager.default.removeItem(at: iconset.deletingLastPathComponent())
 
-print(iconutil.terminationStatus == 0 ? "Wrote \(output.path)" : "iconutil failed")
+print(iconutil.terminationStatus == 0
+      ? "Wrote \(appiconset.path) and \(icns.path)"
+      : "iconutil failed")
 exit(iconutil.terminationStatus)

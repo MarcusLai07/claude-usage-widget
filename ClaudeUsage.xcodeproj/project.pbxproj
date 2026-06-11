@@ -21,6 +21,7 @@
 		39B94C1E0A7691AB2A9512A2 /* ClaudeFolderAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC7B0BA1FAD7D9D38A65CF5 /* ClaudeFolderAccess.swift */; };
 		46217628552499310B0F81C3 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E86351762BC954A07DAE5F /* Models.swift */; };
 		511217524E03B26B8379C3F3 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9598317CDA9AAF24482ABB2C /* AppIcon.icns */; };
+		5B2B2EAE018FE359B2D31EBD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F687E4F0FAD67B196BD0ED2D /* Assets.xcassets */; };
 		5C2B48F8759A109B564C0F37 /* UsageFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8900757A61756CC87E954D /* UsageFetcher.swift */; };
 		5D05FDE354FE5466BC887C98 /* MetricPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */; };
 		6689E4C7F8D857ED5425E9A0 /* ClaudeUsageApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1520DE729C71CBF445CFC145 /* ClaudeUsageApp.swift */; };
@@ -36,6 +37,7 @@
 		B8B9DDBD3BF4F11EDCB9C868 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97788F0DEBD8BFA7EFE8DED /* SettingsView.swift */; };
 		C05943C43151A16944896E54 /* DesignComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75401BE469C1FB046A8DFC12 /* DesignComponents.swift */; };
 		D71B6A3D9AA01DA669BF1927 /* MetricPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */; };
+		DAE954B7EEF187EEFFDCA7E2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F687E4F0FAD67B196BD0ED2D /* Assets.xcassets */; };
 		DB26A044F07B3028F16FF5AA /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0F2160FA1C50EE7EF8B5C96 /* AnalyticsView.swift */; };
 		DB57F6E2ED03D314E9A20222 /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E523773952E01523EA9066 /* TokenStore.swift */; };
 		E12A5E1AD7DE18B0FB736C57 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212915E642A4295BB319865 /* MenuBarView.swift */; };
@@ -104,6 +106,7 @@
 		ECAF96C3ED2923D7B0C7D288 /* AppGroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStore.swift; sourceTree = "<group>"; };
 		EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricPresentation.swift; sourceTree = "<group>"; };
 		F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthClient.swift; sourceTree = "<group>"; };
+		F687E4F0FAD67B196BD0ED2D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FBBEDF3C81AFB6BBD9F95751 /* UsageHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageHistory.swift; sourceTree = "<group>"; };
 		FC477B6568DC675B2F9AAD16 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -128,6 +131,7 @@
 			isa = PBXGroup;
 			children = (
 				9598317CDA9AAF24482ABB2C /* AppIcon.icns */,
+				F687E4F0FAD67B196BD0ED2D /* Assets.xcassets */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -290,6 +294,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				511217524E03B26B8379C3F3 /* AppIcon.icns in Resources */,
+				DAE954B7EEF187EEFFDCA7E2 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,6 +303,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				70B93F3F377B52BDEB2F5911 /* AppIcon.icns in Resources */,
+				5B2B2EAE018FE359B2D31EBD /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,6 +374,7 @@
 		2475906CBB63576C704B8288 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Widget/ClaudeUsageWidget.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -416,7 +423,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = P7DV5ZUK9A;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -436,7 +443,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 0.4.2;
+				MARKETING_VERSION = 0.4.3;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -483,7 +490,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = P7DV5ZUK9A;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -497,7 +504,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 0.4.2;
+				MARKETING_VERSION = 0.4.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -543,6 +550,7 @@
 		D8C8BCF37DCA30F6D288ED4B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Widget/ClaudeUsageWidget.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Widget/Info.plist;

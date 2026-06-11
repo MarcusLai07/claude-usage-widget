@@ -2,6 +2,7 @@
 build/
 build.noindex/
 build-iconset/
+dist/
 DerivedData/
 *.xcuserstate
 xcuserdata/

@@ -1,0 +1,177 @@
+{
+  "App/Analytics/AnalyticsModel.swift": {
+    "mtime": 1781157199.170878,
+    "ast_hash": "46b77951cba3c5d4971bd5c50025cef3",
+    "semantic_hash": "46b77951cba3c5d4971bd5c50025cef3"
+  },
+  "App/Analytics/ClaudeFolderAccess.swift": {
+    "mtime": 1781120215.1418357,
+    "ast_hash": "5f5c6b29a1f6fa7775b3f73737184f02",
+    "semantic_hash": "5f5c6b29a1f6fa7775b3f73737184f02"
+  },
+  "App/Analytics/TranscriptStats.swift": {
+    "mtime": 1781157195.3852606,
+    "ast_hash": "2543eaa26d4030d2c8bdc88f19fcb297",
+    "semantic_hash": "2543eaa26d4030d2c8bdc88f19fcb297"
+  },
+  "App/Analytics/UsageHistory.swift": {
+    "mtime": 1781120185.3878126,
+    "ast_hash": "e4945176a71b77d16f7dc6b90eda31c1",
+    "semantic_hash": "e4945176a71b77d16f7dc6b90eda31c1"
+  },
+  "App/ClaudeUsageApp.swift": {
+    "mtime": 1781158650.701389,
+    "ast_hash": "7663dc0bb55b1d07a42f90cd88b6b769",
+    "semantic_hash": "7663dc0bb55b1d07a42f90cd88b6b769"
+  },
+  "App/NotificationManager.swift": {
+    "mtime": 1781076089.7485702,
+    "ast_hash": "c6e680493419865faeb95b480b952a5b",
+    "semantic_hash": "c6e680493419865faeb95b480b952a5b"
+  },
+  "App/UsageRefresher.swift": {
+    "mtime": 1781120314.3980458,
+    "ast_hash": "66c4fbd2a0f31a7b8f865fd5a0c3915c",
+    "semantic_hash": "66c4fbd2a0f31a7b8f865fd5a0c3915c"
+  },
+  "App/Views/AccountView.swift": {
+    "mtime": 1781156554.7241895,
+    "ast_hash": "dc1369426fc21b8af6182ac8aa006fca",
+    "semantic_hash": "dc1369426fc21b8af6182ac8aa006fca"
+  },
+  "App/Views/AnalyticsView.swift": {
+    "mtime": 1781157202.0378182,
+    "ast_hash": "6a3eb087f65bf5bf3bc3d00b040dbf4d",
+    "semantic_hash": "6a3eb087f65bf5bf3bc3d00b040dbf4d"
+  },
+  "App/Views/DashboardView.swift": {
+    "mtime": 1781122564.8785112,
+    "ast_hash": "a1f2e51732db9efaccbf204af33d6233",
+    "semantic_hash": "a1f2e51732db9efaccbf204af33d6233"
+  },
+  "App/Views/DesignComponents.swift": {
+    "mtime": 1781156553.2390313,
+    "ast_hash": "481742e9b7509b021ce1b3a40952190d",
+    "semantic_hash": "481742e9b7509b021ce1b3a40952190d"
+  },
+  "App/Views/MainWindowView.swift": {
+    "mtime": 1781156511.8628547,
+    "ast_hash": "242f4139d2b54ca5d67ac33ba622ebb6",
+    "semantic_hash": "242f4139d2b54ca5d67ac33ba622ebb6"
+  },
+  "App/Views/MenuBarView.swift": {
+    "mtime": 1781156532.8550754,
+    "ast_hash": "4a82a2dd8ef5e81c9af9ac606e75e50a",
+    "semantic_hash": "4a82a2dd8ef5e81c9af9ac606e75e50a"
+  },
+  "App/Views/SettingsView.swift": {
+    "mtime": 1781156549.9752598,
+    "ast_hash": "ca0d2d752a81461d27e6e3a435318f84",
+    "semantic_hash": "ca0d2d752a81461d27e6e3a435318f84"
+  },
+  "App/Views/SignInView.swift": {
+    "mtime": 1781122526.3338997,
+    "ast_hash": "fc81815a6ad1af5f34650049140bb769",
+    "semantic_hash": "fc81815a6ad1af5f34650049140bb769"
+  },
+  "Scripts/GenerateIcon.swift": {
+    "mtime": 1781158622.4116755,
+    "ast_hash": "1d8b09c3dba380e4d6987b821bdd93a5",
+    "semantic_hash": "1d8b09c3dba380e4d6987b821bdd93a5"
+  },
+  "Scripts/install-signing-refresh.sh": {
+    "mtime": 1782707043.9626193,
+    "ast_hash": "3c79ed62858863d1bfdbd8b8e9c41488",
+    "semantic_hash": "3c79ed62858863d1bfdbd8b8e9c41488"
+  },
+  "Scripts/refresh-signing.sh": {
+    "mtime": 1782707057.7930999,
+    "ast_hash": "0158b38d0760aac8856675022ae1da94",
+    "semantic_hash": "0158b38d0760aac8856675022ae1da94"
+  },
+  "Scripts/release.sh": {
+    "mtime": 1781157805.6456213,
+    "ast_hash": "870359844d71049a30e052a7cffe08ae",
+    "semantic_hash": "870359844d71049a30e052a7cffe08ae"
+  },
+  "Shared/AppGroupStore.swift": {
+    "mtime": 1781076060.9389827,
+    "ast_hash": "c306ae190d89c23f04116e948c749dd4",
+    "semantic_hash": "c306ae190d89c23f04116e948c749dd4"
+  },
+  "Shared/ClaudeCodeImport.swift": {
+    "mtime": 1781076066.165492,
+    "ast_hash": "3e8897803170677d6af6524f383e3595",
+    "semantic_hash": "3e8897803170677d6af6524f383e3595"
+  },
+  "Shared/MetricPresentation.swift": {
+    "mtime": 1781082257.314014,
+    "ast_hash": "41b5cce9a7e605056aedf82dfdf4dbba",
+    "semantic_hash": "41b5cce9a7e605056aedf82dfdf4dbba"
+  },
+  "Shared/Models.swift": {
+    "mtime": 1781082160.6053786,
+    "ast_hash": "b6d5057b22063c8cef879b728f9aa54b",
+    "semantic_hash": "b6d5057b22063c8cef879b728f9aa54b"
+  },
+  "Shared/OAuthClient.swift": {
+    "mtime": 1781076024.0799165,
+    "ast_hash": "492ff5f11e0a7f87966f072c2d0c566c",
+    "semantic_hash": "492ff5f11e0a7f87966f072c2d0c566c"
+  },
+  "Shared/PerfLog.swift": {
+    "mtime": 1781084998.9172688,
+    "ast_hash": "50b7440cb6f8e32c409c84b3f6691d6d",
+    "semantic_hash": "50b7440cb6f8e32c409c84b3f6691d6d"
+  },
+  "Shared/Theme.swift": {
+    "mtime": 1781122504.7206166,
+    "ast_hash": "2b3a9e9026fba5a57d1c35ef544accd3",
+    "semantic_hash": "2b3a9e9026fba5a57d1c35ef544accd3"
+  },
+  "Shared/TokenStore.swift": {
+    "mtime": 1781083701.2003977,
+    "ast_hash": "e18b0dd91f4e63f736a2a1678fa9828f",
+    "semantic_hash": "e18b0dd91f4e63f736a2a1678fa9828f"
+  },
+  "Shared/UsageAPI.swift": {
+    "mtime": 1781085546.895089,
+    "ast_hash": "01e9ed324465daa8b9dce28c6223690d",
+    "semantic_hash": "01e9ed324465daa8b9dce28c6223690d"
+  },
+  "Shared/UsageFetcher.swift": {
+    "mtime": 1781085544.9065614,
+    "ast_hash": "b4ec0211c0b5993bef441777728f5b8a",
+    "semantic_hash": "b4ec0211c0b5993bef441777728f5b8a"
+  },
+  "Widget/ClaudeUsageWidget.swift": {
+    "mtime": 1781156577.2710621,
+    "ast_hash": "73efb63f4e3c646e735ae7445422619c",
+    "semantic_hash": "73efb63f4e3c646e735ae7445422619c"
+  },
+  "DESIGN_HANDOFF_WINDOW.md": {
+    "mtime": 1781120787.7561593,
+    "ast_hash": "fdf543920721026da440bc06390e974d",
+    "semantic_hash": "fdf543920721026da440bc06390e974d"
+  },
+  "DESIGN_PROMPT.md": {
+    "mtime": 1781076189.2390568,
+    "ast_hash": "d529498753e4bc77a6c84d217e4d18fd",
+    "semantic_hash": "d529498753e4bc77a6c84d217e4d18fd"
+  },
+  "README.md": {
+    "mtime": 1781157801.935887,
+    "ast_hash": "f9753f18cb22a84855c2c9f83e20b6b8",
+    "semantic_hash": "f9753f18cb22a84855c2c9f83e20b6b8"
+  },
+  "project.yml": {
+    "mtime": 1781158658.9255512,
+    "ast_hash": "79d1e6c102612955f63e87678e923909",
+    "semantic_hash": "79d1e6c102612955f63e87678e923909"
+  },
+  "docs/icon.png": {
+    "mtime": 1781157756.410079,
+    "ast_hash": "831c69ff169721c9f2a2f6c36353c1d1",
+    "semantic_hash": "831c69ff169721c9f2a2f6c36353c1d1"
+  }
+}

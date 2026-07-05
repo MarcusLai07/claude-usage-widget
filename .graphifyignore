@@ -1,0 +1,3 @@
+build.noindex/
+*.dSYM/
+**/Assets.xcassets/

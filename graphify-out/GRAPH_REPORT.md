@@ -23,9 +23,9 @@
 - [[_COMMUNITY_Shared MetricPresentation|Shared: MetricPresentation]]
 - [[_COMMUNITY_Shared PerfLog|Shared: PerfLog]]
 - [[_COMMUNITY_Shared Theme|Shared: Theme]]
-- [[_COMMUNITY_misc README|misc: README]]
+- [[_COMMUNITY_personalclaude-usage-widget README|personal/claude-usage-widget: README]]
 - [[_COMMUNITY_Scripts refresh-signing|Scripts: refresh-signing]]
-- [[_COMMUNITY_misc project|misc: project]]
+- [[_COMMUNITY_personalclaude-usage-widget project|personal/claude-usage-widget: project]]
 - [[_COMMUNITY_Scripts install-signing-refresh|Scripts: install-signing-refresh]]
 - [[_COMMUNITY_Scripts release|Scripts: release]]
 
@@ -57,7 +57,7 @@
 - None detected.
 
 ## Hyperedges (group relationships)
-- **Claude Usage Consistent Design System** — design_prompt_design_prompt, design_handoff_window_design_handoff, design_handoff_window_design_language, readme_claude_usage_app [INFERRED 0.85]
+- **Claude Usage Consistent Design System** — personal_claude_usage_widget_design_prompt_design_prompt, personal_claude_usage_widget_design_handoff_window_design_handoff, personal_claude_usage_widget_design_handoff_window_design_language, personal_claude_usage_widget_readme_claude_usage_app [INFERRED 0.85]
 
 ## Communities (19 total, 2 thin omitted)
 
@@ -117,7 +117,7 @@ Nodes (8): PerfEntry, PerfLog, Bool, Date, Double, Int, String, URL
 Cohesion: 0.29
 Nodes (10): AgeBadge, Color, SunburstMark, Bool, CGFloat, Date, Double, UsageBar (+2 more)
 
-### Community 14 - "misc: README"
+### Community 14 - "personal/claude-usage-widget: README"
 Cohesion: 0.36
 Nodes (8): Claude Usage Main Window Design Handoff, Claude Usage Design Language (Clay Accent, Semantic Escalation), Claude Usage Widget Design Prompt, WidgetKit Constraints (Static Snapshots), Claude Usage App, Fetch Coalescing Actor, OAuth Usage Endpoint (api.anthropic.com/api/oauth/usage), Per-Model Token Analytics (Local Transcripts)
 
@@ -125,7 +125,7 @@ Nodes (8): Claude Usage Main Window Design Handoff, Claude Usage Design Language
 Cohesion: 0.47
 Nodes (4): log(), notify(), PATH, refresh-signing.sh script
 
-### Community 16 - "misc: project"
+### Community 16 - "personal/claude-usage-widget: project"
 Cohesion: 1.00
 Nodes (3): ClaudeUsage macOS App Target, ClaudeUsageWidget WidgetKit Extension Target, Shared App Group group.com.marcuslai.ClaudeUsage
 

@@ -7,15 +7,15 @@
         "id": "claude_usage_design_system",
         "label": "Claude Usage Consistent Design System",
         "nodes": [
-          "design_prompt_design_prompt",
-          "design_handoff_window_design_handoff",
-          "design_handoff_window_design_language",
-          "readme_claude_usage_app"
+          "personal_claude_usage_widget_design_prompt_design_prompt",
+          "personal_claude_usage_widget_design_handoff_window_design_handoff",
+          "personal_claude_usage_widget_design_handoff_window_design_language",
+          "personal_claude_usage_widget_readme_claude_usage_app"
         ],
         "relation": "participate_in",
         "confidence": "INFERRED",
         "confidence_score": 0.85,
-        "source_file": "DESIGN_HANDOFF_WINDOW.md"
+        "source_file": "personal/claude-usage-widget/DESIGN_HANDOFF_WINDOW.md"
       }
     ]
   },
@@ -3621,144 +3621,144 @@
     {
       "label": "Claude Usage Main Window Design Handoff",
       "file_type": "document",
-      "source_file": "DESIGN_HANDOFF_WINDOW.md",
+      "source_file": "personal/claude-usage-widget/DESIGN_HANDOFF_WINDOW.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "design_handoff_window_design_handoff",
+      "id": "personal_claude_usage_widget_design_handoff_window_design_handoff",
       "community": 14,
       "norm_label": "claude usage main window design handoff"
     },
     {
       "label": "Claude Usage Design Language (Clay Accent, Semantic Escalation)",
       "file_type": "concept",
-      "source_file": "DESIGN_HANDOFF_WINDOW.md",
+      "source_file": "personal/claude-usage-widget/DESIGN_HANDOFF_WINDOW.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "design_handoff_window_design_language",
+      "id": "personal_claude_usage_widget_design_handoff_window_design_language",
       "community": 14,
       "norm_label": "claude usage design language (clay accent, semantic escalation)"
     },
     {
       "label": "Claude Usage Widget Design Prompt",
       "file_type": "document",
-      "source_file": "DESIGN_PROMPT.md",
+      "source_file": "personal/claude-usage-widget/DESIGN_PROMPT.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "design_prompt_design_prompt",
+      "id": "personal_claude_usage_widget_design_prompt_design_prompt",
       "community": 14,
       "norm_label": "claude usage widget design prompt"
     },
     {
       "label": "WidgetKit Constraints (Static Snapshots)",
       "file_type": "concept",
-      "source_file": "DESIGN_PROMPT.md",
+      "source_file": "personal/claude-usage-widget/DESIGN_PROMPT.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "design_prompt_widgetkit_constraints",
+      "id": "personal_claude_usage_widget_design_prompt_widgetkit_constraints",
       "community": 14,
       "norm_label": "widgetkit constraints (static snapshots)"
     },
     {
       "label": "Claude Usage App",
       "file_type": "document",
-      "source_file": "README.md",
+      "source_file": "personal/claude-usage-widget/README.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "readme_claude_usage_app",
+      "id": "personal_claude_usage_widget_readme_claude_usage_app",
       "community": 14,
       "norm_label": "claude usage app"
     },
     {
       "label": "OAuth Usage Endpoint (api.anthropic.com/api/oauth/usage)",
       "file_type": "concept",
-      "source_file": "README.md",
+      "source_file": "personal/claude-usage-widget/README.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "readme_oauth_usage_endpoint",
+      "id": "personal_claude_usage_widget_readme_oauth_usage_endpoint",
       "community": 14,
       "norm_label": "oauth usage endpoint (api.anthropic.com/api/oauth/usage)"
     },
     {
       "label": "Per-Model Token Analytics (Local Transcripts)",
       "file_type": "concept",
-      "source_file": "README.md",
+      "source_file": "personal/claude-usage-widget/README.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "readme_token_analytics",
+      "id": "personal_claude_usage_widget_readme_token_analytics",
       "community": 14,
       "norm_label": "per-model token analytics (local transcripts)"
     },
     {
       "label": "Fetch Coalescing Actor",
       "file_type": "concept",
-      "source_file": "README.md",
+      "source_file": "personal/claude-usage-widget/README.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "readme_fetch_coalescing",
+      "id": "personal_claude_usage_widget_readme_fetch_coalescing",
       "community": 14,
       "norm_label": "fetch coalescing actor"
     },
     {
       "label": "ClaudeUsage macOS App Target",
       "file_type": "code",
-      "source_file": "project.yml",
+      "source_file": "personal/claude-usage-widget/project.yml",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "project_claudeusage_app",
+      "id": "personal_claude_usage_widget_project_claudeusage_app",
       "community": 16,
       "norm_label": "claudeusage macos app target"
     },
     {
       "label": "ClaudeUsageWidget WidgetKit Extension Target",
       "file_type": "code",
-      "source_file": "project.yml",
+      "source_file": "personal/claude-usage-widget/project.yml",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "project_claudeusagewidget_extension",
+      "id": "personal_claude_usage_widget_project_claudeusagewidget_extension",
       "community": 16,
       "norm_label": "claudeusagewidget widgetkit extension target"
     },
     {
       "label": "Shared App Group group.com.marcuslai.ClaudeUsage",
       "file_type": "concept",
-      "source_file": "project.yml",
+      "source_file": "personal/claude-usage-widget/project.yml",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
       "rationale": "App and widget extension share the same app group and keychain access group so usage data fetched by the app is readable by the sandboxed widget.",
-      "id": "project_shared_app_group",
+      "id": "personal_claude_usage_widget_project_shared_app_group",
       "community": 16,
       "norm_label": "shared app group group.com.marcuslai.claudeusage"
     }
@@ -10960,8 +10960,8 @@
       "source_file": "DESIGN_HANDOFF_WINDOW.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "design_handoff_window_design_handoff",
-      "target": "design_handoff_window_design_language"
+      "source": "personal_claude_usage_widget_design_handoff_window_design_handoff",
+      "target": "personal_claude_usage_widget_design_handoff_window_design_language"
     },
     {
       "relation": "references",
@@ -10970,8 +10970,8 @@
       "source_file": "DESIGN_HANDOFF_WINDOW.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "design_handoff_window_design_handoff",
-      "target": "design_prompt_design_prompt"
+      "source": "personal_claude_usage_widget_design_handoff_window_design_handoff",
+      "target": "personal_claude_usage_widget_design_prompt_design_prompt"
     },
     {
       "relation": "references",
@@ -10980,8 +10980,8 @@
       "source_file": "DESIGN_HANDOFF_WINDOW.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "design_handoff_window_design_handoff",
-      "target": "readme_claude_usage_app"
+      "source": "personal_claude_usage_widget_design_handoff_window_design_handoff",
+      "target": "personal_claude_usage_widget_readme_claude_usage_app"
     },
     {
       "relation": "references",
@@ -10990,8 +10990,8 @@
       "source_file": "DESIGN_HANDOFF_WINDOW.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "design_handoff_window_design_handoff",
-      "target": "readme_token_analytics"
+      "source": "personal_claude_usage_widget_design_handoff_window_design_handoff",
+      "target": "personal_claude_usage_widget_readme_token_analytics"
     },
     {
       "relation": "conceptually_related_to",
@@ -11000,8 +11000,8 @@
       "source_file": "DESIGN_HANDOFF_WINDOW.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "design_handoff_window_design_language",
-      "target": "design_prompt_widgetkit_constraints"
+      "source": "personal_claude_usage_widget_design_handoff_window_design_language",
+      "target": "personal_claude_usage_widget_design_prompt_widgetkit_constraints"
     },
     {
       "relation": "references",
@@ -11010,8 +11010,8 @@
       "source_file": "DESIGN_PROMPT.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "design_prompt_design_prompt",
-      "target": "design_prompt_widgetkit_constraints"
+      "source": "personal_claude_usage_widget_design_prompt_design_prompt",
+      "target": "personal_claude_usage_widget_design_prompt_widgetkit_constraints"
     },
     {
       "relation": "references",
@@ -11020,8 +11020,8 @@
       "source_file": "DESIGN_PROMPT.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "design_prompt_design_prompt",
-      "target": "readme_claude_usage_app"
+      "source": "personal_claude_usage_widget_design_prompt_design_prompt",
+      "target": "personal_claude_usage_widget_readme_claude_usage_app"
     },
     {
       "relation": "references",
@@ -11030,8 +11030,8 @@
       "source_file": "README.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "readme_claude_usage_app",
-      "target": "readme_fetch_coalescing"
+      "source": "personal_claude_usage_widget_readme_claude_usage_app",
+      "target": "personal_claude_usage_widget_readme_fetch_coalescing"
     },
     {
       "relation": "references",
@@ -11040,8 +11040,8 @@
       "source_file": "README.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "readme_claude_usage_app",
-      "target": "readme_oauth_usage_endpoint"
+      "source": "personal_claude_usage_widget_readme_claude_usage_app",
+      "target": "personal_claude_usage_widget_readme_oauth_usage_endpoint"
     },
     {
       "relation": "references",
@@ -11050,8 +11050,8 @@
       "source_file": "README.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "readme_claude_usage_app",
-      "target": "readme_token_analytics"
+      "source": "personal_claude_usage_widget_readme_claude_usage_app",
+      "target": "personal_claude_usage_widget_readme_token_analytics"
     },
     {
       "relation": "shares_data_with",
@@ -11060,8 +11060,8 @@
       "source_file": "project.yml",
       "source_location": null,
       "weight": 1.0,
-      "source": "project_claudeusage_app",
-      "target": "project_claudeusagewidget_extension"
+      "source": "personal_claude_usage_widget_project_claudeusage_app",
+      "target": "personal_claude_usage_widget_project_claudeusagewidget_extension"
     },
     {
       "relation": "shares_data_with",
@@ -11070,8 +11070,8 @@
       "source_file": "project.yml",
       "source_location": null,
       "weight": 1.0,
-      "source": "project_claudeusage_app",
-      "target": "project_shared_app_group"
+      "source": "personal_claude_usage_widget_project_claudeusage_app",
+      "target": "personal_claude_usage_widget_project_shared_app_group"
     },
     {
       "relation": "shares_data_with",
@@ -11080,8 +11080,8 @@
       "source_file": "project.yml",
       "source_location": null,
       "weight": 1.0,
-      "source": "project_claudeusagewidget_extension",
-      "target": "project_shared_app_group"
+      "source": "personal_claude_usage_widget_project_claudeusagewidget_extension",
+      "target": "personal_claude_usage_widget_project_shared_app_group"
     }
   ],
   "hyperedges": [
@@ -11089,16 +11089,16 @@
       "id": "claude_usage_design_system",
       "label": "Claude Usage Consistent Design System",
       "nodes": [
-        "design_prompt_design_prompt",
-        "design_handoff_window_design_handoff",
-        "design_handoff_window_design_language",
-        "readme_claude_usage_app"
+        "personal_claude_usage_widget_design_prompt_design_prompt",
+        "personal_claude_usage_widget_design_handoff_window_design_handoff",
+        "personal_claude_usage_widget_design_handoff_window_design_language",
+        "personal_claude_usage_widget_readme_claude_usage_app"
       ],
       "relation": "participate_in",
       "confidence": "INFERRED",
       "confidence_score": 0.85,
-      "source_file": "DESIGN_HANDOFF_WINDOW.md"
+      "source_file": "personal/claude-usage-widget/DESIGN_HANDOFF_WINDOW.md"
     }
   ],
-  "built_at_commit": "11e65a7cf6bf6a5bdad1c574e071bc272b2641b8"
+  "built_at_commit": "5daeb7b76ce630bab9dad322f5bdc51792017f46"
 }

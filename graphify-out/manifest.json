@@ -90,9 +90,9 @@
     "semantic_hash": "0158b38d0760aac8856675022ae1da94"
   },
   "Scripts/release.sh": {
-    "mtime": 1781157805.6456213,
-    "ast_hash": "870359844d71049a30e052a7cffe08ae",
-    "semantic_hash": "870359844d71049a30e052a7cffe08ae"
+    "mtime": 1788872270.384058,
+    "ast_hash": "2f9b83f76fced7278e9961994dd53270",
+    "semantic_hash": "2f9b83f76fced7278e9961994dd53270"
   },
   "Shared/AppGroupStore.swift": {
     "mtime": 1781076060.9389827,
@@ -173,5 +173,10 @@
     "mtime": 1781157756.410079,
     "ast_hash": "831c69ff169721c9f2a2f6c36353c1d1",
     "semantic_hash": "831c69ff169721c9f2a2f6c36353c1d1"
+  },
+  "Scripts/refresh-and-open.sh": {
+    "mtime": 1783929177.777787,
+    "ast_hash": "8e3e38f4815a74b462f1a5d721b3fe96",
+    "semantic_hash": "8e3e38f4815a74b462f1a5d721b3fe96"
   }
 }

@@ -265,7 +265,7 @@ table to maintain. Keep it as a later, optional extra.
 | **1, done** | Allowances card: pace, Used/Left, plan badge, hide account; pace in popover and widgets | Medium |
 | **2, done** | Left over time: cycle chart, even-pace line, forecast, past-cycle picker | Medium |
 | **3, done** | Usage › Overview: period picker, stat strip, activity chart, Apps/Models/Projects lists; merges Dashboard and Analytics | Large |
-| **4** | Requests table and Sessions list | Medium |
+| **4, done** | Requests table and Sessions list | Medium |
 | **5** | Menu bar percentages, reset reminder, pace alert | Small–medium |
 
 ### Phase 1 notes (as built)
@@ -320,3 +320,19 @@ table to maintain. Keep it as a later, optional extra.
 - **Lists**: Apps from `entrypoint` (Claude Desktop, VS Code, Terminal,
   Agent SDK), Models, Projects from `cwd` (worktrees count toward their
   repository). Collapsible, remembered per list.
+
+### Phase 4 notes (as built)
+
+- **Tabs** Overview · Requests · Sessions sit in the Usage page header; the
+  session warning pill shrinks to its icon when the header runs out of room.
+- **Requests**: a sortable `Table`, newest first: Time · App (icon; ↳ for a
+  subagent) · Project · Model with effort · In (incl. cache writes) · Out ·
+  Cached · Thinking · Context. Fixed column widths so it fits the default
+  900 pt window. Search covers app, project, model, effort, session id and
+  title. CSV export writes every field, cache writes and effort included
+  (the app's file entitlement is now `user-selected.read-write`).
+- **Sessions**: whole sessions active in the period, grouped by project,
+  titled from the transcripts' `custom-title` / `ai-title` lines (cache v3).
+  Each row: first → last, duration, requests (with subagent share), peak
+  context, model chips with shares, apps. A click opens Requests filtered
+  to that session.

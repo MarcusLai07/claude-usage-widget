@@ -83,6 +83,35 @@ struct UsageOverview {
     var isEmpty: Bool { totals.requests == 0 }
 }
 
+/// One Claude Code session, for the Sessions tab.
+struct SessionSummary: Identifiable {
+    let id: String
+    let title: String?
+    let project: String?
+    let first: Date
+    let last: Date
+    let requests: Int
+    let subagentRequests: Int
+    let input: Int
+    let output: Int
+    /// The largest prompt the model saw in one request.
+    let peakContext: Int
+    /// Models by tokens, most first.
+    let models: [(name: String, tokens: Int)]
+    let apps: [String]
+
+    var tokens: Int { input + output }
+    var duration: TimeInterval { last.timeIntervalSince(first) }
+}
+
+/// Sessions of one project, most recent first.
+struct ProjectSessions: Identifiable {
+    let id: String
+    let name: String
+    let path: String?
+    let sessions: [SessionSummary]
+}
+
 @MainActor
 final class AnalyticsModel: ObservableObject {
     /// Every request in the local transcripts, oldest first.
@@ -92,8 +121,11 @@ final class AnalyticsModel: ObservableObject {
     @Published private(set) var lastLoaded: Date?
     /// Stable model → chart color assignment, by all-time share.
     @Published private(set) var modelColors: [String: Color] = [:]
+    /// Session id → title, from the transcripts' title lines.
+    @Published private(set) var sessionTitles: [String: String] = [:]
 
     private var overviews: [UsagePeriod: (at: Date, overview: UsageOverview)] = [:]
+    private var sessionLists: [UsagePeriod: (at: Date, projects: [ProjectSessions])] = [:]
 
     func grantAccess() {
         if ClaudeFolderAccess.requestAccess() != nil {
@@ -114,18 +146,25 @@ final class AnalyticsModel: ObservableObject {
         }
         hasClaudeAccess = true
         let scanStarted = Date()
-        let samples = await Task.detached(priority: .userInitiated) {
+        let scan = await Task.detached(priority: .userInitiated) {
             let scoped = folder.startAccessingSecurityScopedResource()
             defer { if scoped { folder.stopAccessingSecurityScopedResource() } }
-            return TranscriptStats.collectSamples(claudeFolder: folder, since: .distantPast)
-                .sorted { $0.ts < $1.ts }
+            var scan = TranscriptStats.scan(claudeFolder: folder, since: .distantPast)
+            scan.samples.sort { $0.ts < $1.ts }
+            return scan
         }.value
         PerfLog.record(source: "scan", started: scanStarted, error: nil)
+        apply(scan)
+    }
 
-        tokenSamples = samples
+    /// Takes in a scan's requests (sorted oldest first) and session titles.
+    func apply(_ scan: TranscriptScan) {
+        tokenSamples = scan.samples
+        sessionTitles = scan.titles
         overviews = [:]
+        sessionLists = [:]
         var byModel: [String: Int] = [:]
-        for sample in samples { byModel[sample.model, default: 0] += sample.billable }
+        for sample in scan.samples { byModel[sample.model, default: 0] += sample.billable }
         let ordered = byModel.sorted { $0.value > $1.value }.map(\.key)
         modelColors = Dictionary(uniqueKeysWithValues: ordered.enumerated().map {
             ($0.element, modelPalette[$0.offset % modelPalette.count])
@@ -148,6 +187,64 @@ final class AnalyticsModel: ObservableObject {
     func samples(in period: UsagePeriod) -> [TokenSample] {
         let since = period.since()
         return tokenSamples.reversed().prefix { $0.ts >= since }.map { $0 }
+    }
+
+    /// Sessions active in the period, grouped by project; both ordered by
+    /// latest activity. Reused for a minute.
+    func sessions(_ period: UsagePeriod) -> [ProjectSessions] {
+        let now = Date()
+        if let cached = sessionLists[period], now.timeIntervalSince(cached.at) < 60 {
+            return cached.projects
+        }
+        let projects = Self.groupSessions(tokenSamples, titles: sessionTitles, since: period.since(now: now))
+        sessionLists[period] = (now, projects)
+        return projects
+    }
+
+    nonisolated static func groupSessions(_ all: [TokenSample], titles: [String: String],
+                                          since: Date) -> [ProjectSessions] {
+        struct Acc {
+            var project: String?
+            var first: Date
+            var last: Date
+            var requests = 0, subagent = 0, input = 0, output = 0, peak = 0
+            var models: [String: Int] = [:]
+            var apps: Set<String> = []
+        }
+        // Whole sessions: every request of a session active in the period.
+        let active = Set(all.lazy.filter { $0.ts >= since }.map(\.sessionID))
+        var bySession: [String: Acc] = [:]
+        for sample in all where active.contains(sample.sessionID) {
+            var acc = bySession[sample.sessionID]
+                ?? Acc(project: projectPath(sample.project), first: sample.ts, last: sample.ts)
+            acc.first = min(acc.first, sample.ts)
+            acc.last = max(acc.last, sample.ts)
+            acc.requests += 1
+            if sample.isSidechain { acc.subagent += 1 }
+            acc.input += sample.inputTotal
+            acc.output += sample.output
+            acc.peak = max(acc.peak, sample.context)
+            acc.models[sample.model, default: 0] += sample.billable
+            acc.apps.insert(appName(appKey(sample.app)))
+            if acc.project == nil { acc.project = projectPath(sample.project) }
+            bySession[sample.sessionID] = acc
+        }
+        let sessions = bySession.map { id, acc in
+            SessionSummary(id: id, title: titles[id], project: acc.project,
+                           first: acc.first, last: acc.last, requests: acc.requests,
+                           subagentRequests: acc.subagent, input: acc.input, output: acc.output,
+                           peakContext: acc.peak,
+                           models: acc.models.sorted { $0.value > $1.value }.map { ($0.key, $0.value) },
+                           apps: acc.apps.sorted())
+        }
+        let byProject = Dictionary(grouping: sessions) { $0.project ?? "—" }
+        return byProject.map { key, sessions in
+            ProjectSessions(id: key,
+                            name: key == "—" ? "Unknown folder" : projectName(key),
+                            path: key == "—" ? nil : abbreviateHome(key),
+                            sessions: sessions.sorted { $0.last > $1.last })
+        }
+        .sorted { ($0.sessions.first?.last ?? .distantPast) > ($1.sessions.first?.last ?? .distantPast) }
     }
 
     // MARK: Summaries

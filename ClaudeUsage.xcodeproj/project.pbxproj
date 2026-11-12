@@ -28,6 +28,7 @@
 		6BACE2E6E91928CD3CA54CA5 /* ClaudeCodeImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1ADC922D989DC1AD17BFFA /* ClaudeCodeImport.swift */; };
 		70B93F3F377B52BDEB2F5911 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9598317CDA9AAF24482ABB2C /* AppIcon.icns */; };
 		72F1F4AE8CA65A56AE8988CD /* LeftOverTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8213A284D99612E3E53F0757 /* LeftOverTimeView.swift */; };
+		8201F8C97CC042B3C1F82A5E /* RequestsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FED1D98609A873CCCBE954 /* RequestsView.swift */; };
 		826A5FD75868AF1505FDC23C /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC477B6568DC675B2F9AAD16 /* SignInView.swift */; };
 		85E3193EDD18DAAD8CAD6D74 /* UsageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB14FC06BD59E4415EE2DBD /* UsageView.swift */; };
 		88A370439E89AE04CE403982 /* ClaudeCodeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3BFFA5510504728CD6C4E73 /* ClaudeCodeSection.swift */; };
@@ -35,6 +36,7 @@
 		9774411F816C9C9C3FB7A6ED /* UsageFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8900757A61756CC87E954D /* UsageFetcher.swift */; };
 		A88AFAD0716175DA7FD0C3E9 /* OAuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */; };
 		ABDCE375683EC0E7FFB79238 /* AnalyticsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CA6CBBEFF88D1ABCA49D20C /* AnalyticsModel.swift */; };
+		AE1A2542CEE9C54D2427238F /* SessionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D1B832196A2D75D10ACB3A /* SessionsView.swift */; };
 		B12793EF77E5E3D46808CB5F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C72995DE871F034CA68B79 /* Theme.swift */; };
 		B23E6003B3841B8957E1E6BE /* ClaudeUsageWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB4851F82804202E410BB46 /* ClaudeUsageWidget.swift */; };
 		B8B9DDBD3BF4F11EDCB9C868 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97788F0DEBD8BFA7EFE8DED /* SettingsView.swift */; };
@@ -89,6 +91,7 @@
 		2AB4851F82804202E410BB46 /* ClaudeUsageWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeUsageWidget.swift; sourceTree = "<group>"; };
 		2B1ADC922D989DC1AD17BFFA /* ClaudeCodeImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCodeImport.swift; sourceTree = "<group>"; };
 		2D8530E203C99CDB7CAA371F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		32D1B832196A2D75D10ACB3A /* SessionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsView.swift; sourceTree = "<group>"; };
 		32E86351762BC954A07DAE5F /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		34C72995DE871F034CA68B79 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		3DDB3669F215EFC0C1958C20 /* ClaudeUsage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudeUsage.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -102,6 +105,7 @@
 		9598317CDA9AAF24482ABB2C /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9AD55D9098A9467D7664BE4C /* UsageAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageAPI.swift; sourceTree = "<group>"; };
 		9EB14FC06BD59E4415EE2DBD /* UsageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageView.swift; sourceTree = "<group>"; };
+		A5FED1D98609A873CCCBE954 /* RequestsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestsView.swift; sourceTree = "<group>"; };
 		ACC7B0BA1FAD7D9D38A65CF5 /* ClaudeFolderAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeFolderAccess.swift; sourceTree = "<group>"; };
 		B3BFFA5510504728CD6C4E73 /* ClaudeCodeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCodeSection.swift; sourceTree = "<group>"; };
 		B97C3A43D85709AA956F3522 /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
@@ -152,6 +156,8 @@
 				8213A284D99612E3E53F0757 /* LeftOverTimeView.swift */,
 				B97C3A43D85709AA956F3522 /* MainWindowView.swift */,
 				0212915E642A4295BB319865 /* MenuBarView.swift */,
+				A5FED1D98609A873CCCBE954 /* RequestsView.swift */,
+				32D1B832196A2D75D10ACB3A /* SessionsView.swift */,
 				C97788F0DEBD8BFA7EFE8DED /* SettingsView.swift */,
 				FC477B6568DC675B2F9AAD16 /* SignInView.swift */,
 				9EB14FC06BD59E4415EE2DBD /* UsageView.swift */,
@@ -340,6 +346,8 @@
 				FD22448E9AF1EE91A9DF9282 /* NotificationManager.swift in Sources */,
 				E590066085D27EA41A0AB299 /* OAuthClient.swift in Sources */,
 				8DCD650C64FE5A905A434D26 /* PerfLog.swift in Sources */,
+				8201F8C97CC042B3C1F82A5E /* RequestsView.swift in Sources */,
+				AE1A2542CEE9C54D2427238F /* SessionsView.swift in Sources */,
 				B8B9DDBD3BF4F11EDCB9C868 /* SettingsView.swift in Sources */,
 				826A5FD75868AF1505FDC23C /* SignInView.swift in Sources */,
 				B12793EF77E5E3D46808CB5F /* Theme.swift in Sources */,

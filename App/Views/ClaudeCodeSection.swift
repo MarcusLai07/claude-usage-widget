@@ -34,27 +34,8 @@ struct ClaudeCodeSection: View {
         }
     }
 
-    @ViewBuilder
     private var content: some View {
-        if !analytics.hasClaudeAccess {
-            EmptyStateView(icon: "folder",
-                           title: "Grant access to see token usage",
-                           message: "Claude Usage reads transcript files in ~/.claude to count tokens by app, model and project. This stays on your Mac.",
-                           actionLabel: "Grant Access to ~/.claude…",
-                           action: { analytics.grantAccess() })
-                .designCard()
-        } else if analytics.lastLoaded == nil || (analytics.isLoading && analytics.tokenSamples.isEmpty) {
-            VStack(spacing: 10) {
-                ProgressView()
-                Text("Scanning transcripts…")
-                    .font(.system(size: 13, weight: .semibold))
-                Text("The first scan reads all of ~/.claude once; later ones only read what changed.")
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity, minHeight: 160)
-            .designCard()
-        } else {
+        TranscriptGate(analytics: analytics) {
             let overview = analytics.overview(period)
             if overview.isEmpty {
                 EmptyStateView(icon: "tray",

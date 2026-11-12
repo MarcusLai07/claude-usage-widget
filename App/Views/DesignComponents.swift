@@ -29,6 +29,11 @@ func compactTokens(_ count: Int) -> String {
     count.formatted(.number.notation(.compactName))
 }
 
+/// "Nov 12 15:20" (the system's month-day-hour format adds "at").
+func shortDateTime(_ date: Date) -> String {
+    "\(date.formatted(.dateTime.month(.abbreviated).day())) \(date.formatted(.dateTime.hour().minute()))"
+}
+
 // MARK: - Card
 
 extension View {

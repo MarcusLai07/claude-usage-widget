@@ -4,7 +4,9 @@ import Foundation
 /// (`~/.claude/projects/**/*.jsonl`). This covers Claude Code activity on this
 /// Mac only — claude.ai chats and other devices count toward the same limits
 /// but leave no local trace.
-struct TokenSample {
+struct TokenSample: Identifiable {
+    /// The request's dedupe key (message id | request id).
+    let id: String
     let ts: Date
     let model: String
     let input: Int
@@ -32,7 +34,22 @@ struct TokenSample {
     var context: Int { input + cacheCreate + cacheRead }
 }
 
+/// What a scan of the transcripts found.
+struct TranscriptScan {
+    var samples: [TokenSample] = []
+    /// Session id → its title: one you set (`/rename`), else Claude's own.
+    var titles: [String: String] = [:]
+}
+
 enum TranscriptStats {
+    /// A session's title line: `custom-title` or `ai-title`.
+    private struct TitleLine: Decodable {
+        let type: String?
+        let sessionId: String?
+        let customTitle: String?
+        let aiTitle: String?
+    }
+
     private struct Line: Decodable {
         struct Message: Decodable {
             struct Usage: Decodable {
@@ -94,29 +111,35 @@ enum TranscriptStats {
         let mtime: Date
         let size: Int
         let samples: [CachedSample]
+        let titles: [String: String]
     }
 
     private static var cacheURL: URL? {
         FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: AppGroupStore.suiteName)?
-            .appendingPathComponent("transcript-cache-v2.json")
+            .appendingPathComponent("transcript-cache-v3.json")
     }
 
-    /// The first cache format, without sessions, folders or apps.
-    private static var legacyCacheURL: URL? {
-        cacheURL?.deletingLastPathComponent().appendingPathComponent("transcript-cache.json")
+    /// Earlier cache formats: without sessions, folders and apps (v1), or
+    /// without session titles (v2).
+    private static var legacyCacheURLs: [URL] {
+        guard let folder = cacheURL?.deletingLastPathComponent() else { return [] }
+        return ["transcript-cache.json", "transcript-cache-v2.json"].map {
+            folder.appendingPathComponent($0)
+        }
     }
 
-    static func collectSamples(claudeFolder: URL, since: Date) -> [TokenSample] {
+    static func scan(claudeFolder: URL, since: Date) -> TranscriptScan {
         let projects = claudeFolder.appendingPathComponent("projects")
         guard let enumerator = FileManager.default.enumerator(
             at: projects,
             includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey]
-        ) else { return [] }
+        ) else { return TranscriptScan() }
 
         var cache = loadCache()
         var livePaths = Set<String>()
         var collected: [CachedSample] = []
+        var titles: [String: String] = [:]
         var changed = false
 
         for case let fileURL as URL in enumerator where fileURL.pathExtension == "jsonl" {
@@ -132,10 +155,12 @@ enum TranscriptStats {
 
             if let entry = cache[path], entry.mtime == mtime, entry.size == size {
                 collected.append(contentsOf: entry.samples)
+                titles.merge(entry.titles) { _, new in new }
             } else {
                 let parsed = parse(fileURL, since: since)
-                cache[path] = FileEntry(mtime: mtime, size: size, samples: parsed)
-                collected.append(contentsOf: parsed)
+                cache[path] = FileEntry(mtime: mtime, size: size, samples: parsed.samples, titles: parsed.titles)
+                collected.append(contentsOf: parsed.samples)
+                titles.merge(parsed.titles) { _, new in new }
                 changed = true
             }
         }
@@ -151,14 +176,14 @@ enum TranscriptStats {
         samples.reserveCapacity(collected.count)
         for sample in collected {
             guard sample.ts >= since, seenKeys.insert(sample.key).inserted else { continue }
-            samples.append(TokenSample(ts: sample.ts, model: sample.model,
+            samples.append(TokenSample(id: sample.key, ts: sample.ts, model: sample.model,
                                        input: sample.input, output: sample.output,
                                        cacheRead: sample.cacheRead, cacheCreate: sample.cacheCreate,
                                        thinking: sample.thinking, sessionID: sample.session,
                                        project: sample.cwd, app: sample.app,
                                        effort: sample.effort, isSidechain: sample.side))
         }
-        return samples
+        return TranscriptScan(samples: samples, titles: titles)
     }
 
     private static let isoFractional: ISO8601DateFormatter = {
@@ -168,15 +193,29 @@ enum TranscriptStats {
     }()
     private static let iso = ISO8601DateFormatter()
 
-    private static func parse(_ fileURL: URL, since: Date) -> [CachedSample] {
+    private static func parse(_ fileURL: URL, since: Date) -> (samples: [CachedSample], titles: [String: String]) {
         let decoder = JSONDecoder()
         var samples: [CachedSample] = []
+        var customTitles: [String: String] = [:]
+        var aiTitles: [String: String] = [:]
         // Claude Code names each transcript after its session.
         let fileSession = fileURL.deletingPathExtension().lastPathComponent
         autoreleasepool {
             guard let content = try? String(contentsOf: fileURL, encoding: .utf8) else { return }
-            for line in content.split(separator: "\n") where line.contains("\"usage\"") {
-                guard let data = line.data(using: .utf8),
+            for line in content.split(separator: "\n") {
+                // Title lines are short; the latest of each kind wins.
+                if line.count < 4000, line.contains("\"custom-title\"") || line.contains("\"ai-title\""),
+                   let title = try? decoder.decode(TitleLine.self, from: Data(line.utf8)),
+                   let session = title.sessionId {
+                    if title.type == "custom-title", let text = title.customTitle, !text.isEmpty {
+                        customTitles[session] = text
+                    } else if title.type == "ai-title", let text = title.aiTitle, !text.isEmpty {
+                        aiTitles[session] = text
+                    }
+                    continue
+                }
+                guard line.contains("\"usage\""),
+                      let data = line.data(using: .utf8),
                       let entry = try? decoder.decode(Line.self, from: data),
                       entry.type == "assistant",
                       let message = entry.message,
@@ -202,7 +241,7 @@ enum TranscriptStats {
                 ))
             }
         }
-        return samples
+        return (samples, aiTitles.merging(customTitles) { _, custom in custom })
     }
 
     private static func loadCache() -> [String: FileEntry] {
@@ -215,7 +254,7 @@ enum TranscriptStats {
     private static func saveCache(_ cache: [String: FileEntry]) {
         guard let url = cacheURL, let data = try? JSONEncoder().encode(cache) else { return }
         try? data.write(to: url)
-        if let legacy = legacyCacheURL { try? FileManager.default.removeItem(at: legacy) }
+        for legacy in legacyCacheURLs { try? FileManager.default.removeItem(at: legacy) }
     }
 
     /// "claude-opus-4-8" → "Opus 4.8", "claude-sonnet-4-6-20250930" → "Sonnet 4.6".

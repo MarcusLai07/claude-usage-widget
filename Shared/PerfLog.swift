@@ -5,7 +5,7 @@ import Foundation
 /// so the app and widget share one file. Nothing ever leaves the machine.
 ///
 /// Inspect with:
-///   cat ~/Library/Group\ Containers/group.com.marcuslai.ClaudeUsage/perf-log.jsonl | jq
+///   cat ~/Library/Group\ Containers/P7DV5ZUK9A.com.marcuslai.ClaudeUsage/perf-log.jsonl | jq
 struct PerfEntry: Codable {
     let ts: Date
     let source: String     // "app" | "widget"

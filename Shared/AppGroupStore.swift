@@ -4,10 +4,45 @@ import Foundation
 /// widget extension through an App Group UserDefaults suite. Tokens never
 /// live here — they stay in the keychain.
 enum AppGroupStore {
-    static let suiteName = "group.com.marcuslai.ClaudeUsage"
+    /// Team-prefixed, as macOS expects: a `group.`-style id has to be
+    /// authorized by the provisioning profile, which the development
+    /// profile doesn't do, so every access to it asked "would like to access
+    /// data from other apps" (and blocked the thread that asked).
+    static let suiteName = "P7DV5ZUK9A.com.marcuslai.ClaudeUsage"
+    /// The group used before 0.6.1; read once, to move its data over.
+    static let legacySuiteName = "group.com.marcuslai.ClaudeUsage"
 
     static var defaults: UserDefaults {
         UserDefaults(suiteName: suiteName) ?? .standard
+    }
+
+    /// Moves settings, folder grants, usage history and logs from the old
+    /// group, once. Reading the old group asks for permission one last time;
+    /// declined, the app starts with empty history and the old data stays
+    /// where it was. The transcript cache isn't moved: a scan rebuilds it.
+    static func migrateLegacyGroupIfNeeded() {
+        let doneKey = "migratedFromLegacyGroup"
+        guard !defaults.bool(forKey: doneKey) else { return }
+        defaults.set(true, forKey: doneKey)
+        // A store that already has a snapshot has nothing to receive.
+        guard defaults.object(forKey: Key.snapshot) == nil else { return }
+
+        if let legacy = UserDefaults(suiteName: legacySuiteName),
+           let values = legacy.persistentDomain(forName: legacySuiteName) {
+            for (key, value) in values where defaults.object(forKey: key) == nil {
+                defaults.set(value, forKey: key)
+            }
+        }
+        let files = FileManager.default
+        guard let from = files.containerURL(forSecurityApplicationGroupIdentifier: legacySuiteName),
+              let to = files.containerURL(forSecurityApplicationGroupIdentifier: suiteName) else { return }
+        for name in ["usage-history.jsonl", "usage-history.old.jsonl", "perf-log.jsonl", "perf-log.old.jsonl"] {
+            let source = from.appendingPathComponent(name)
+            let target = to.appendingPathComponent(name)
+            if files.fileExists(atPath: source.path), !files.fileExists(atPath: target.path) {
+                try? files.copyItem(at: source, to: target)
+            }
+        }
     }
 
     private enum Key {

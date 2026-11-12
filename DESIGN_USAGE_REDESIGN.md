@@ -525,3 +525,14 @@ own calls, as Magpie's Context tab does.
 - On this Mac, 7 days: Opus 5.5 now 1M → 410K, 18% fewer weighted tokens
   (≈$78); main-conversation cache already leanest at 1 hour (5 min +21%);
   subagents leanest at 5 min (1 hour +18%). Transcript cache v5.
+
+### App group fix (0.6.1)
+
+- The development provisioning profile authorizes no app group, and on
+  recent macOS a `group.`-style group the profile doesn't cover makes every
+  access ask "would like to access data from other apps" — and blocks the
+  thread that asked (the earlier "not responding"). The app and widget now
+  use the team-prefixed group `P7DV5ZUK9A.com.marcuslai.ClaudeUsage`, which
+  needs no profile entry. On first launch, 0.6.1 copies the old group's
+  settings, folder grants, history and logs over once (the app keeps the old
+  group in its entitlements only for that); the transcript cache is rebuilt.

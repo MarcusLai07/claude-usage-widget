@@ -13,6 +13,11 @@ struct ClaudeUsageApp: App {
     @StateObject private var refresher = UsageRefresher()
     @StateObject private var router = WindowRouter()
 
+    init() {
+        // Before anything reads the store: bring the old group's data over.
+        AppGroupStore.migrateLegacyGroupIfNeeded()
+    }
+
     var body: some Scene {
         MenuBarExtra {
             MenuBarView()

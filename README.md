@@ -95,11 +95,11 @@ Anthropic doesn't offer OAuth registration for third-party apps, so Claude Usage
 - OAuth tokens live **only in the macOS keychain** (data-protection keychain, shared app group so the widget can refresh independently). They never touch files, UserDefaults, or logs.
 - The app is **sandboxed**. Network access goes only to `api.anthropic.com`, `claude.ai`, and `console.anthropic.com`.
 - `~/.claude` transcripts are read locally through a user-granted, revocable security-scoped bookmark; the app only reads them. Nothing is uploaded anywhere. (The sandbox's user-selected file access is read-write so Requests can be exported to a CSV file you choose.)
-- Local-only telemetry (fetch duration, CPU, memory, scan times) is written to `~/Library/Group Containers/group.com.marcuslai.ClaudeUsage/perf-log.jsonl` so polling cost is measurable. It never leaves your machine. Inspect it:
+- Local-only telemetry (fetch duration, CPU, memory, scan times) is written to `~/Library/Group Containers/P7DV5ZUK9A.com.marcuslai.ClaudeUsage/perf-log.jsonl` so polling cost is measurable. It never leaves your machine. Inspect it:
 
 ```sh
 jq -s 'group_by(.source)[] | {source: .[0].source, n: length, avgMs: (map(.durationMs) | add/length)}' \
-  ~/Library/Group\ Containers/group.com.marcuslai.ClaudeUsage/perf-log.jsonl
+  ~/Library/Group\ Containers/P7DV5ZUK9A.com.marcuslai.ClaudeUsage/perf-log.jsonl
 ```
 
 ## Architecture

@@ -9,8 +9,8 @@ settings:
     SWIFT_VERSION: "5.9"
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: P7DV5ZUK9A
-    CURRENT_PROJECT_VERSION: 11
-    MARKETING_VERSION: 0.6.0
+    CURRENT_PROJECT_VERSION: 12
+    MARKETING_VERSION: 0.6.1
 targets:
   ClaudeUsage:
     type: application
@@ -37,6 +37,8 @@ targets:
         com.apple.security.network.client: true
         com.apple.security.files.user-selected.read-write: true
         com.apple.security.application-groups:
+          - P7DV5ZUK9A.com.marcuslai.ClaudeUsage
+          # The old group, kept only so 0.6.1 can move its data over once.
           - group.com.marcuslai.ClaudeUsage
         keychain-access-groups:
           - $(AppIdentifierPrefix)com.marcuslai.ClaudeUsage.shared
@@ -71,7 +73,7 @@ targets:
         com.apple.security.app-sandbox: true
         com.apple.security.network.client: true
         com.apple.security.application-groups:
-          - group.com.marcuslai.ClaudeUsage
+          - P7DV5ZUK9A.com.marcuslai.ClaudeUsage
         keychain-access-groups:
           - $(AppIdentifierPrefix)com.marcuslai.ClaudeUsage.shared
     settings:

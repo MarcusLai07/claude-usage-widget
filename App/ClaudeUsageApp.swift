@@ -19,7 +19,7 @@ struct ClaudeUsageApp: App {
                 .environmentObject(refresher)
                 .environmentObject(router)
         } label: {
-            MenuBarLabel()
+            MenuBarLabel(refresher: refresher)
         }
         .menuBarExtraStyle(.window)
 
@@ -40,42 +40,50 @@ extension Notification.Name {
     static let openMainWindow = Notification.Name("openMainWindow")
 }
 
+/// What the menu bar shows beside nothing but the icon.
+enum MenuBarStyle: String, CaseIterable, Identifiable {
+    case icon, percentages
+
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .icon: return "Icon"
+        case .percentages: return "Icon + percentages"
+        }
+    }
+}
+
 /// The menu bar label is the one view that's always alive, so it hosts the
 /// bridge from AppKit URL delivery to SwiftUI's openWindow action.
 struct MenuBarLabel: View {
     @Environment(\.openWindow) private var openWindow
-
-    /// The sunburst brand mark as a template image, so it adapts to menu bar
-    /// appearance (dark/light, active/inactive) like system status items.
-    private static let markImage: NSImage = {
-        let side: CGFloat = 18
-        let image = NSImage(size: NSSize(width: side, height: side), flipped: false) { rect in
-            guard let ctx = NSGraphicsContext.current?.cgContext else { return false }
-            let unit = rect.width / 24
-            let center = CGPoint(x: rect.midX, y: rect.midY)
-            ctx.setStrokeColor(NSColor.black.cgColor)
-            ctx.setLineWidth(unit * 2.4)
-            ctx.setLineCap(.round)
-            for i in 0..<12 {
-                let angle = CGFloat(i) * 30 * .pi / 180
-                ctx.move(to: CGPoint(x: center.x + cos(angle) * unit * 3.2,
-                                     y: center.y + sin(angle) * unit * 3.2))
-                ctx.addLine(to: CGPoint(x: center.x + cos(angle) * unit * 9,
-                                        y: center.y + sin(angle) * unit * 9))
-            }
-            ctx.strokePath()
-            return true
-        }
-        image.isTemplate = true
-        return image
-    }()
+    @ObservedObject var refresher: UsageRefresher
+    @AppStorage(AppGroupStore.SharedKey.menuBarStyle, store: AppGroupStore.defaults)
+    private var style: MenuBarStyle = .percentages
+    @AppStorage(AppGroupStore.SharedKey.showLeft, store: AppGroupStore.defaults)
+    private var showLeft = false
 
     var body: some View {
-        Image(nsImage: Self.markImage)
+        Image(nsImage: image)
             .onReceive(NotificationCenter.default.publisher(for: .openMainWindow)) { _ in
                 NSApp.activate(ignoringOtherApps: true)
                 openWindow(id: "main")
             }
+    }
+
+    /// The icon, or the icon with Session over Weekly beside it (Magpie's
+    /// menu bar), in the Used/Left figure the rest of the app shows.
+    private var image: NSImage {
+        guard style == .percentages, refresher.isSignedIn, let snapshot = refresher.snapshot else {
+            return MenuBarIcon.mark
+        }
+        let figures = [snapshot.session, snapshot.weekly].compactMap { window -> String? in
+            guard let window else { return nil }
+            let used = Int(window.utilization ?? 0)
+            return "\(showLeft ? max(0, 100 - used) : used)%"
+        }
+        guard !figures.isEmpty else { return MenuBarIcon.mark }
+        return MenuBarIcon.label(figures)
     }
 }
 

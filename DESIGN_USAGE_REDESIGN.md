@@ -266,7 +266,7 @@ table to maintain. Keep it as a later, optional extra.
 | **2, done** | Left over time: cycle chart, even-pace line, forecast, past-cycle picker | Medium |
 | **3, done** | Usage › Overview: period picker, stat strip, activity chart, Apps/Models/Projects lists; merges Dashboard and Analytics | Large |
 | **4, done** | Requests table and Sessions list | Medium |
-| **5** | Menu bar percentages, reset reminder, pace alert | Small–medium |
+| **5, done** | Menu bar percentages, reset reminder, pace alert | Small–medium |
 
 ### Phase 1 notes (as built)
 
@@ -336,3 +336,19 @@ table to maintain. Keep it as a later, optional extra.
   Each row: first → last, duration, requests (with subagent share), peak
   context, model chips with shares, apps. A click opens Requests filtered
   to that session.
+
+### Phase 5 notes (as built)
+
+- **Menu bar** (Settings › Display › Menu bar): *Icon + percentages* is the
+  default — Session over Weekly beside the sunburst in one template image,
+  as used or left. *Icon* brings back the plain mark.
+- **Reset reminder** (on by default): once per weekly cycle, up to 12 hours
+  before the reset (3/6/12/24) with at least 40% left (20–60%): "Weekly
+  limit resets in 5 hours — 60% of it is still unused, and it doesn't carry
+  over."
+- **Pace alert** (on by default): once per weekly cycle, when the forecast
+  says the week runs out more than 6 hours before it resets. It reads only
+  this week's history, off the main thread; `UsageHistory.load(since:)`
+  now reads back from the newest line and stops at the start date.
+- Both go through the same once-per-window record as the threshold alerts
+  (5-minute slack on the reset time).

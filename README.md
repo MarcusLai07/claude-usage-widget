@@ -5,7 +5,7 @@
 <h1 align="center">Claude Usage</h1>
 
 <p align="center">
-  Your Claude plan limits, on your Mac — menu bar, desktop widgets, and a full analytics window.
+  Your Claude plan limits, on your Mac — menu bar, desktop widgets, and a full usage window.
 </p>
 
 <p align="center">
@@ -19,10 +19,10 @@
 Claude subscriptions have rolling usage limits — a 5-hour **session** window and a 7-day **weekly** window — but checking them means opening Claude Code or claude.ai. **Claude Usage** puts them where you can see them:
 
 - 🖥️ **Desktop widgets** (WidgetKit) in two styles — progress **bars** or radial **rings** — in small, medium, and large, with live reset countdowns. Tap to open the app.
-- 📊 **Menu bar popover** for a quick glance: every metric, manual refresh, last-updated age.
-- 📈 **Analytics window** — utilization charted over time (burn rate, reset cliffs) plus **per-model token breakdowns** parsed from Claude Code's local transcripts.
-- 🔔 **Notifications** when usage crosses thresholds you set (50–95%, separately for session and weekly), and when a limit is reached — at most one alert per rolling window.
-- 🎛️ **Configurable metrics**: Session, Weekly, Opus 7-day, Sonnet 7-day, Extra usage (prepaid credits).
+- 📊 **Menu bar** percentages (Session over Weekly) and a popover for a quick glance: every metric with its reset and pace, manual refresh, last-updated age.
+- 📈 **Usage window** — an Allowances card (each limit's figure, reset and **pace**, plan badge, Used/Left switch), a **left-over-time** chart per cycle with an even-pace line and a run-out forecast, and Claude Code's token activity from local transcripts: stat strip, activity chart, **Apps / Models / Projects** breakdowns, a **Requests** ledger with CSV export, and a **Sessions** list.
+- 🔔 **Notifications** when usage crosses thresholds you set (50–95%, separately for session and weekly), when a limit is reached, before a weekly reset with much of it unused, and when the week is on pace to run out early — each at most once per window.
+- 🎛️ **Configurable metrics**: Session, Weekly, Fable 7-day, Opus 7-day, Sonnet 7-day, Extra usage (prepaid credits).
 
 > ⚠️ **Unofficial.** This app reads the same undocumented endpoint Claude Code uses internally. It may change or stop working without notice. Not affiliated with Anthropic.
 
@@ -72,7 +72,7 @@ Prebuilt zips are attached to [Releases](https://github.com/MarcusLai07/claude-u
 1. The app lives in the **menu bar** (gauge icon) — no dock icon.
 2. **Sign in** from the window (menu bar → Open Claude Usage): use the browser OAuth flow or one-click import of existing Claude Code credentials from your keychain.
 3. Add widgets: right-click the desktop → *Edit Widgets* → search "Claude Usage". Two styles, three sizes each.
-4. For token analytics, open **Analytics** and grant read access to `~/.claude` (one-time, sandboxed, read-only).
+4. For token activity, open **Usage** and grant access to `~/.claude` (one-time, sandboxed; the app only reads it).
 
 ### Why does the sign-in page say "Claude Code"?
 
@@ -82,19 +82,19 @@ Anthropic doesn't offer OAuth registration for third-party apps, so Claude Usage
 
 **A metric shows "—" / "no data yet".** Anthropic isn't reporting that window for your account (e.g. `seven_day_opus` is often `null` until you've used Opus that week). It appears automatically once reported. Pro plans report fewer windows than Max plans.
 
-**The utilization chart is mostly empty.** History is recorded forward-only, one sample per 5 minutes while the app runs — there's no historical API to backfill from. It fills in within a day or two.
+**The left-over-time chart is mostly empty.** History is recorded forward-only, one sample per 5 minutes while the app runs — there's no historical API to backfill from. It fills in within a day or two; the run-out forecast needs an hour of readings this cycle.
 
 **I use Claude on two Macs.** Percentages already include both (they're account-level). Token analytics are per-Mac — run the app on each machine to see each one's Claude Code activity.
 
 **Widget data lags a little.** WidgetKit refresh is best-effort (~15 min worst case). The menu bar popover and window are the live views.
 
-**Charted tokens vs. the table.** Charts count input + output + cache-write ("billable"). Cache *reads* are excluded from charts — they're ~90% of raw volume and cheap — but shown in the model table.
+**Which tokens count.** Token totals are input (with cache writes) plus output. Cache *reads* are counted apart — they're ~90% of raw volume and cheap — in the stat strip and the Requests table.
 
 ## Privacy & security
 
 - OAuth tokens live **only in the macOS keychain** (data-protection keychain, shared app group so the widget can refresh independently). They never touch files, UserDefaults, or logs.
 - The app is **sandboxed**. Network access goes only to `api.anthropic.com`, `claude.ai`, and `console.anthropic.com`.
-- `~/.claude` transcripts are read locally with a user-granted, revocable, read-only security-scoped bookmark. Nothing is uploaded anywhere.
+- `~/.claude` transcripts are read locally through a user-granted, revocable security-scoped bookmark; the app only reads them. Nothing is uploaded anywhere. (The sandbox's user-selected file access is read-write so Requests can be exported to a CSV file you choose.)
 - Local-only telemetry (fetch duration, CPU, memory, scan times) is written to `~/Library/Group Containers/group.com.marcuslai.ClaudeUsage/perf-log.jsonl` so polling cost is measurable. It never leaves your machine. Inspect it:
 
 ```sh
@@ -108,8 +108,8 @@ jq -s 'group_by(.source)[] | {source: .[0].source, n: length, avgMs: (map(.durat
 App/                     Menu bar app + main window (SwiftUI)
   Analytics/             Usage history, transcript parsing (incremental,
                          per-file cache), ~/.claude bookmark access
-  Views/                 Window (sidebar/dashboard/analytics/settings/account),
-                         popover, onboarding, design components
+  Views/                 Window (sidebar/usage — overview, requests, sessions —
+                         /settings/account), popover, onboarding, components
 Widget/                  WidgetKit extension — two widget kinds, three sizes
 Shared/                  OAuth (PKCE), keychain token store, usage API client,
                          fetch coalescing, models, theme, app-group storage

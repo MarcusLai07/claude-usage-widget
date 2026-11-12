@@ -69,17 +69,21 @@ enum UsageHistory {
         }
     }
 
+    /// Samples at or after `since`, oldest first. Lines are appended in time
+    /// order, so it reads back from the newest and stops at the first one
+    /// older than `since`: a week costs a week of lines, not the whole file.
     static func load(since: Date) -> [UsageSample] {
         guard let url = fileURL,
               let content = try? String(contentsOf: url, encoding: .utf8) else { return [] }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return content.split(separator: "\n").compactMap { line in
-            guard let data = line.data(using: .utf8),
-                  let sample = try? decoder.decode(UsageSample.self, from: data),
-                  sample.ts >= since else { return nil }
-            return sample
+        var samples: [UsageSample] = []
+        for line in content.split(separator: "\n").reversed() {
+            guard let sample = try? decoder.decode(UsageSample.self, from: Data(line.utf8)) else { continue }
+            if sample.ts < since { break }
+            samples.append(sample)
         }
+        return samples.reversed()
     }
 
     /// ~5 MB ≈ two years of 5-minute samples; keep one rotated generation.

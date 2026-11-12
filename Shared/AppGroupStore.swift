@@ -26,6 +26,11 @@ enum AppGroupStore {
     enum SharedKey {
         static let showLeft = "showLeft"
         static let hideAccount = "hideAccount"
+        static let menuBarStyle = "menuBarStyle"
+        static let resetReminderEnabled = "resetReminderEnabled"
+        static let resetReminderHours = "resetReminderHours"
+        static let resetReminderMinLeft = "resetReminderMinLeft"
+        static let paceAlertEnabled = "paceAlertEnabled"
     }
 
     // MARK: Cached usage
@@ -105,6 +110,26 @@ enum AppGroupStore {
     static var weeklyWarnThreshold: Double {
         get { defaults.object(forKey: Key.weeklyWarnThreshold) as? Double ?? 80 }
         set { defaults.set(newValue, forKey: Key.weeklyWarnThreshold) }
+    }
+
+    /// Remind before the weekly reset when much of the week is unused.
+    static var resetReminderEnabled: Bool {
+        defaults.object(forKey: SharedKey.resetReminderEnabled) as? Bool ?? true
+    }
+
+    /// How long before the weekly reset the reminder may come.
+    static var resetReminderHours: Int {
+        defaults.object(forKey: SharedKey.resetReminderHours) as? Int ?? 12
+    }
+
+    /// The least % left worth a reminder.
+    static var resetReminderMinLeft: Double {
+        defaults.object(forKey: SharedKey.resetReminderMinLeft) as? Double ?? 40
+    }
+
+    /// Warn when the weekly limit is on pace to run out well before it resets.
+    static var paceAlertEnabled: Bool {
+        defaults.object(forKey: SharedKey.paceAlertEnabled) as? Bool ?? true
     }
 
     // MARK: Notification dedupe (one alert per threshold per reset window)

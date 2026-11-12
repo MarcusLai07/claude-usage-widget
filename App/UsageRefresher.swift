@@ -46,6 +46,8 @@ final class UsageRefresher: ObservableObject {
             PerfLog.record(source: "app", started: started, error: nil)
             WidgetCenter.shared.reloadAllTimelines()
             NotificationManager.evaluate(snapshot)
+            // The pace alert reads this week's history: off the main thread.
+            Task.detached(priority: .utility) { NotificationManager.checkPace(snapshot) }
             await refreshProfileIfNeeded()
         } catch UsageAPIError.notSignedIn {
             isSignedIn = false

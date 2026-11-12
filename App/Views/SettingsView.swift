@@ -28,6 +28,8 @@ struct DisplaySettingsView: View {
     private var showLeft = false
     @AppStorage(AppGroupStore.SharedKey.hideAccount, store: AppGroupStore.defaults)
     private var hideAccount = false
+    @AppStorage(AppGroupStore.SharedKey.menuBarStyle, store: AppGroupStore.defaults)
+    private var menuBarStyle: MenuBarStyle = .percentages
 
     private var unreported: Set<MetricKind> {
         guard let snapshot = AppGroupStore.cachedSnapshot else { return [] }
@@ -90,6 +92,23 @@ struct DisplaySettingsView: View {
             Divider()
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 1) {
+                    Text("Menu bar")
+                        .font(.system(size: 13, weight: .medium))
+                    Text("Session over Weekly beside the icon, as used or left")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Picker("Menu bar", selection: $menuBarStyle) {
+                    ForEach(MenuBarStyle.allCases) { Text($0.title).tag($0) }
+                }
+                .labelsHidden()
+                .fixedSize()
+            }
+            .padding(.vertical, 12)
+            Divider()
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 1) {
                     Text("Hide account email")
                         .font(.system(size: 13, weight: .medium))
                     Text("Masks it on the Usage and Account pages, for screenshots")
@@ -137,6 +156,14 @@ struct NotificationSettingsView: View {
     @State private var notifyOnLimit = AppGroupStore.notifyOnLimitReached
     @State private var sessionThreshold = AppGroupStore.sessionWarnThreshold
     @State private var weeklyThreshold = AppGroupStore.weeklyWarnThreshold
+    @AppStorage(AppGroupStore.SharedKey.resetReminderEnabled, store: AppGroupStore.defaults)
+    private var resetReminder = true
+    @AppStorage(AppGroupStore.SharedKey.resetReminderHours, store: AppGroupStore.defaults)
+    private var reminderHours = 12
+    @AppStorage(AppGroupStore.SharedKey.resetReminderMinLeft, store: AppGroupStore.defaults)
+    private var reminderMinLeft = 40.0
+    @AppStorage(AppGroupStore.SharedKey.paceAlertEnabled, store: AppGroupStore.defaults)
+    private var paceAlert = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -161,11 +188,41 @@ struct NotificationSettingsView: View {
                 Divider()
                 thresholdRow(title: "Weekly warning", value: $weeklyThreshold)
                     .onChange(of: weeklyThreshold) { _, value in AppGroupStore.weeklyWarnThreshold = value }
+                Divider()
+                VStack(alignment: .leading, spacing: 0) {
+                    toggleRow(title: "Remind me before the weekly reset",
+                              subtitle: "When much of the week is still unused — it doesn't carry over",
+                              isOn: $resetReminder)
+                    HStack(spacing: 8) {
+                        Text("Up to")
+                        Picker("Hours before the reset", selection: $reminderHours) {
+                            ForEach([3, 6, 12, 24], id: \.self) { Text("\($0) hours").tag($0) }
+                        }
+                        .labelsHidden()
+                        .fixedSize()
+                        Text("before it, with at least")
+                        Picker("Least left", selection: $reminderMinLeft) {
+                            ForEach([20.0, 30, 40, 50, 60], id: \.self) { Text("\(Int($0))%").tag($0) }
+                        }
+                        .labelsHidden()
+                        .fixedSize()
+                        Text("left")
+                    }
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 12)
+                    .disabled(!resetReminder)
+                    .opacity(resetReminder ? 1 : 0.5)
+                }
+                Divider()
+                toggleRow(title: "Warn when on pace to run out early",
+                          subtitle: "When the weekly limit would run out 6+ hours before it resets",
+                          isOn: $paceAlert)
             }
             .disabled(!enabled)
             .opacity(enabled ? 1 : 0.4)
 
-            HintRow("Each threshold fires once per rolling window so you're not alerted repeatedly.")
+            HintRow("Each alert fires once per window so you're not alerted repeatedly.")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .designCard()

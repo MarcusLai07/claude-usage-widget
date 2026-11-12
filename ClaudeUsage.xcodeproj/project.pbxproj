@@ -20,6 +20,7 @@
 		32EDEF82B724E10707C4978C /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E523773952E01523EA9066 /* TokenStore.swift */; };
 		39B94C1E0A7691AB2A9512A2 /* ClaudeFolderAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC7B0BA1FAD7D9D38A65CF5 /* ClaudeFolderAccess.swift */; };
 		46217628552499310B0F81C3 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E86351762BC954A07DAE5F /* Models.swift */; };
+		463D4BA80BB24093FFE22E16 /* MenuBarIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880F32EA5EA94F0AA1D52224 /* MenuBarIcon.swift */; };
 		511217524E03B26B8379C3F3 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9598317CDA9AAF24482ABB2C /* AppIcon.icns */; };
 		5B2B2EAE018FE359B2D31EBD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F687E4F0FAD67B196BD0ED2D /* Assets.xcassets */; };
 		5C2B48F8759A109B564C0F37 /* UsageFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8900757A61756CC87E954D /* UsageFetcher.swift */; };
@@ -102,6 +103,7 @@
 		75401BE469C1FB046A8DFC12 /* DesignComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignComponents.swift; sourceTree = "<group>"; };
 		7B73EA8A4AB5738107893EB5 /* ClaudeUsageWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ClaudeUsageWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		8213A284D99612E3E53F0757 /* LeftOverTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeftOverTimeView.swift; sourceTree = "<group>"; };
+		880F32EA5EA94F0AA1D52224 /* MenuBarIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarIcon.swift; sourceTree = "<group>"; };
 		9598317CDA9AAF24482ABB2C /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9AD55D9098A9467D7664BE4C /* UsageAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageAPI.swift; sourceTree = "<group>"; };
 		9EB14FC06BD59E4415EE2DBD /* UsageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageView.swift; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 				D2D075FEF47C5CBC62414384 /* ClaudeUsage.entitlements */,
 				1520DE729C71CBF445CFC145 /* ClaudeUsageApp.swift */,
 				C83428CAB7277078A2677D14 /* Info.plist */,
+				880F32EA5EA94F0AA1D52224 /* MenuBarIcon.swift */,
 				1C38BCAEF55783EA8A2A2576 /* NotificationManager.swift */,
 				123B2B85D5C14AE1B91BC8AD /* UsageRefresher.swift */,
 				E9615E168B87A67AE6E4AC3C /* Analytics */,
@@ -340,6 +343,7 @@
 				C05943C43151A16944896E54 /* DesignComponents.swift in Sources */,
 				72F1F4AE8CA65A56AE8988CD /* LeftOverTimeView.swift in Sources */,
 				2976816337441DE1BEB37941 /* MainWindowView.swift in Sources */,
+				463D4BA80BB24093FFE22E16 /* MenuBarIcon.swift in Sources */,
 				E12A5E1AD7DE18B0FB736C57 /* MenuBarView.swift in Sources */,
 				5D05FDE354FE5466BC887C98 /* MetricPresentation.swift in Sources */,
 				46217628552499310B0F81C3 /* Models.swift in Sources */,
@@ -443,7 +447,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = P7DV5ZUK9A;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -463,7 +467,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 0.5.0;
+				MARKETING_VERSION = 0.6.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -510,7 +514,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = P7DV5ZUK9A;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -524,7 +528,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 0.5.0;
+				MARKETING_VERSION = 0.6.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

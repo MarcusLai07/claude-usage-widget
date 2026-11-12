@@ -19,6 +19,13 @@ struct ClaudeCodeSection: View {
                         .foregroundStyle(.tertiary)
                 }
                 Spacer()
+                if analytics.hasClaudeAccess && !analytics.hasDesktopAccess {
+                    Button("Add Claude Desktop sessions…") { analytics.grantDesktopAccess() }
+                        .buttonStyle(.plain)
+                        .font(.system(size: 11.5, weight: .medium))
+                        .foregroundStyle(Color.clay)
+                        .help("Claude Desktop's local-agent sessions keep transcripts of their own in ~/Library/Application Support/Claude")
+                }
                 if analytics.hasClaudeAccess {
                     Picker("Period", selection: $period) {
                         ForEach(UsagePeriod.allCases) { Text($0.title).tag($0) }
@@ -69,7 +76,7 @@ struct ClaudeCodeSection: View {
         HStack(alignment: .top, spacing: 9) {
             Image(systemName: "info.circle")
                 .font(.system(size: 12))
-            Text("Token counts cover **Claude Code on this Mac only** — claude.ai and other devices count toward the same limits but leave no trace here, so Anthropic's percentages above are the source of truth. Tokens are input (with cache writes) plus output; cache reads are counted apart.")
+            Text("Token counts cover **Claude Code on this Mac only** — claude.ai and other devices count toward the same limits but leave no trace here, so Anthropic's percentages above are the source of truth. Tokens are fresh input + output + cache reads and writes, as Magpie counts them. Cost is what the same calls would cost at Anthropic API list prices, not what a subscription bills.")
         }
         .font(.system(size: 10.5))
         .foregroundStyle(.tertiary)
@@ -87,15 +94,22 @@ struct StatStrip: View {
     var body: some View {
         HStack(spacing: 0) {
             tile("Tokens", compactTokens(totals.tokens),
-                 "in \(compactTokens(totals.input)) · out \(compactTokens(totals.output))")
-            Divider()
-            tile("Cache read", compactTokens(totals.cacheRead),
-                 "hit rate \(Int(totals.cacheHitRate.rounded()))%")
-            Divider()
-            tile("Thinking", compactTokens(totals.thinking), "inside output")
+                 "\(compactTokens(totals.input)) in · \(compactTokens(totals.output)) out · \(compactTokens(totals.cache)) cache")
             Divider()
             tile("Requests", totals.requests.formatted(),
-                 "\(totals.sessions.formatted()) session\(totals.sessions == 1 ? "" : "s")")
+                 totals.failed > 0
+                    ? "\(totals.failed) failed · \(String(format: "%.1f", totals.successRate))% succeeded"
+                    : "\(totals.sessions.formatted()) session\(totals.sessions == 1 ? "" : "s")")
+            Divider()
+            tile("Cost", costText(totals.cost), "at API list prices", valueColor: .costGreen)
+            Divider()
+            tile("Cache hit rate", String(format: "%.1f%%", totals.cacheHitRate),
+                 "\(compactTokens(totals.cacheRead)) read from cache")
+            if let speed = totals.outputSpeed {
+                Divider()
+                tile("Output speed", "\(Int(speed.rounded())) tok/s",
+                     "\(totals.timedReplies.formatted()) replies")
+            }
         }
         .fixedSize(horizontal: false, vertical: true)
         .padding(.vertical, 14)
@@ -103,7 +117,8 @@ struct StatStrip: View {
         .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.cardStroke, lineWidth: 0.5))
     }
 
-    private func tile(_ label: String, _ value: String, _ caption: String) -> some View {
+    private func tile(_ label: String, _ value: String, _ caption: String,
+                      valueColor: Color? = nil) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(label.uppercased())
                 .font(.system(size: 10, weight: .semibold))
@@ -111,6 +126,7 @@ struct StatStrip: View {
                 .foregroundStyle(.tertiary)
             Text(value)
                 .font(.system(size: 21, weight: .bold, design: .rounded))
+                .foregroundStyle(valueColor.map(AnyShapeStyle.init) ?? AnyShapeStyle(.primary))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Text(caption)
@@ -284,7 +300,7 @@ struct BreakdownRowView<Icon: View>: View {
                     .font(.system(size: 12.5, weight: .medium))
                     .lineLimit(1)
                     .truncationMode(.middle)
-                Text("\(row.requests.formatted()) request\(row.requests == 1 ? "" : "s") · \(row.sessions.formatted()) session\(row.sessions == 1 ? "" : "s")")
+                Text("\(row.requests.formatted()) request\(row.requests == 1 ? "" : "s") · \(row.sessions.formatted()) session\(row.sessions == 1 ? "" : "s")\(row.failed > 0 ? " · \(row.failed) failed" : "")")
                     .font(.system(size: 10.5))
                     .foregroundStyle(.tertiary)
             }
@@ -299,9 +315,9 @@ struct BreakdownRowView<Icon: View>: View {
             VStack(alignment: .trailing, spacing: 1) {
                 Text(compactTokens(row.tokens))
                     .font(.system(size: 12.5, weight: .semibold, design: .rounded))
-                Text("in \(compactTokens(row.input)) · out \(compactTokens(row.output))")
-                    .font(.system(size: 10.5))
-                    .foregroundStyle(.tertiary)
+                Text(costText(row.cost))
+                    .font(.system(size: 10.5, weight: .medium))
+                    .foregroundStyle(Color.costGreen)
             }
             .frame(width: 118, alignment: .trailing)
         }

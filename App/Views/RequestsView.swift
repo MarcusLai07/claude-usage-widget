@@ -47,8 +47,11 @@ struct RequestRow: Identifiable {
     let output: Int
     let cacheRead: Int
     let cacheWrite: Int
-    /// Input as the stat strip counts it: fresh input plus cache writes.
-    let inputTotal: Int
+    /// Cache reads and writes.
+    let cache: Int
+    let cost: Double
+    /// "" when it succeeded; the API error code when it failed.
+    let status: String
     let thinking: Int
     let context: Int
     let sessionID: String
@@ -62,13 +65,15 @@ struct RequestRow: Identifiable {
         let path = AnalyticsModel.projectPath(sample.project)
         projectName = path.map(AnalyticsModel.projectName) ?? "—"
         projectPath = path.map(AnalyticsModel.abbreviateHome) ?? ""
-        model = sample.model
+        model = sample.failed ? "Failed" : sample.model
         effort = sample.effort ?? ""
         input = sample.input
         output = sample.output
         cacheRead = sample.cacheRead
-        cacheWrite = sample.cacheCreate
-        inputTotal = sample.inputTotal
+        cacheWrite = sample.cacheWrite
+        cache = sample.cacheRead + sample.cacheWrite
+        cost = sample.cost ?? 0
+        status = sample.error ?? ""
         thinking = sample.thinking
         context = sample.context
         sessionID = sample.sessionID
@@ -210,13 +215,18 @@ struct RequestsView: View {
             }
             .width(88)
             Group {
-                TableColumn("In", value: \RequestRow.inputTotal) { (row: RequestRow) in number(row.inputTotal) }
+                TableColumn("In", value: \RequestRow.input) { (row: RequestRow) in number(row.input) }
                     .width(42)
                 TableColumn("Out", value: \RequestRow.output) { (row: RequestRow) in number(row.output) }
                     .width(40)
-                TableColumn("Cached", value: \RequestRow.cacheRead) { (row: RequestRow) in number(row.cacheRead) }
+                TableColumn("Cache", value: \RequestRow.cache) { (row: RequestRow) in number(row.cache) }
                     .width(46)
-                TableColumn("Thinking", value: \RequestRow.thinking) { (row: RequestRow) in number(row.thinking) }
+                TableColumn("Cost", value: \RequestRow.cost) { (row: RequestRow) in
+                    Text(row.cost > 0 ? costText(row.cost) : "–")
+                        .monospacedDigit()
+                        .foregroundStyle(row.cost > 0 ? Color.costGreen : Color.secondary)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
                     .width(54)
                 TableColumn("Context", value: \RequestRow.context) { (row: RequestRow) in number(row.context) }
                     .width(48)
@@ -236,12 +246,14 @@ struct RequestsView: View {
     }
 
     private func summary(_ rows: [RequestRow]) -> some View {
-        let tokens = rows.reduce(0) { $0 + $1.input + $1.cacheWrite + $1.output }
+        let tokens = rows.reduce(0) { $0 + $1.input + $1.cache + $1.output }
+        let cost = rows.reduce(0) { $0 + $1.cost }
         let sessions = Set(rows.map(\.sessionID)).count
+        let failed = rows.filter { !$0.status.isEmpty }.count
         return HStack {
-            Text("\(rows.count.formatted()) request\(rows.count == 1 ? "" : "s") · \(sessions.formatted()) session\(sessions == 1 ? "" : "s") · \(compactTokens(tokens)) tokens")
+            Text("\(rows.count.formatted()) request\(rows.count == 1 ? "" : "s")\(failed > 0 ? " (\(failed) failed)" : "") · \(sessions.formatted()) session\(sessions == 1 ? "" : "s") · \(compactTokens(tokens)) tokens · \(costText(cost))")
             Spacer()
-            Text("In includes cache writes · Cached = cache reads · Context = everything the model read")
+            Text("Cache = reads + writes · Cost ≈ API list prices")
         }
         .font(.system(size: 10.5))
         .foregroundStyle(.tertiary)
@@ -265,13 +277,14 @@ struct RequestsView: View {
                 ? "\"\(value.replacingOccurrences(of: "\"", with: "\"\""))\"" : value
         }
         let iso = ISO8601DateFormatter()
-        var lines = ["time,app,subagent,project,model,effort,input,output,cache_read,cache_write,thinking,context,session_id,session_title"]
+        var lines = ["time,app,subagent,project,model,effort,status,input,output,cache_read,cache_write,thinking,context,cost_usd,session_id,session_title"]
         for row in rows {
             lines.append([
                 iso.string(from: row.ts), field(row.app), row.isSubagent ? "1" : "0",
                 field(row.projectPath), field(row.model), field(row.effort),
+                field(row.status.isEmpty ? "ok" : row.status),
                 String(row.input), String(row.output), String(row.cacheRead), String(row.cacheWrite),
-                String(row.thinking), String(row.context), row.sessionID,
+                String(row.thinking), String(row.context), String(format: "%.4f", row.cost), row.sessionID,
                 field(titles[row.sessionID] ?? ""),
             ].joined(separator: ","))
         }

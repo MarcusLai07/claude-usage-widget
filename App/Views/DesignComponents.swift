@@ -25,8 +25,22 @@ extension Color {
 /// No orange: next to clay it reads as the same color.
 let modelPalette: [Color] = [.clay, .chartIndigo, .chartTeal, .purple, .green, .yellow, .pink, .gray]
 
+/// "7.16B", "22.8M", "267K": three significant digits, as Magpie shows them.
 func compactTokens(_ count: Int) -> String {
-    count.formatted(.number.notation(.compactName))
+    count.formatted(.number.notation(.compactName).precision(.significantDigits(1...3)))
+}
+
+/// "≈$4,112", "≈$0.128": dollars at API list prices, more precision when small.
+func costText(_ usd: Double, approximate: Bool = true) -> String {
+    let prefix = approximate ? "≈$" : "$"
+    if usd >= 100 { return prefix + Int(usd.rounded()).formatted() }
+    if usd >= 1 { return prefix + String(format: "%.2f", usd) }
+    return prefix + String(format: "%.3f", usd)
+}
+
+extension Color {
+    /// Cost figures, as Magpie shows them.
+    static let costGreen = Color(lightHex: 0x1E9E5A, darkHex: 0x4CC38A)
 }
 
 /// "Nov 12 15:20" (the system's month-day-hour format adds "at").

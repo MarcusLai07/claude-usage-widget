@@ -3,6 +3,7 @@ import SwiftUI
 struct AccountView: View {
     @EnvironmentObject private var refresher: UsageRefresher
     @State private var hasClaudeAccess = ClaudeFolderAccess.resolve() != nil
+    @State private var hasDesktopAccess = ClaudeFolderAccess.resolve(ClaudeFolderAccess.claudeDesktop) != nil
     @AppStorage(AppGroupStore.SharedKey.hideAccount, store: AppGroupStore.defaults)
     private var hideAccount = false
 
@@ -74,58 +75,76 @@ struct AccountView: View {
         VStack(alignment: .leading, spacing: 0) {
             CardTitle("Claude Code access")
                 .padding(.bottom, 12)
-            HStack(spacing: 11) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.clay.opacity(0.2))
-                        .frame(width: 34, height: 34)
-                    Image(systemName: "folder")
-                        .font(.system(size: 15))
-                        .foregroundStyle(Color.clay)
-                }
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("~/.claude folder")
-                        .font(.system(size: 13, weight: .medium))
-                    if hasClaudeAccess {
-                        HStack(spacing: 5) {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 9, weight: .bold))
-                            Text("Access granted")
-                        }
-                        .font(.system(size: 11.5, weight: .medium))
-                        .foregroundStyle(.green)
-                    } else {
-                        Text("Not granted")
-                            .font(.system(size: 11.5, weight: .medium))
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                Spacer()
-                if hasClaudeAccess {
-                    Button("Revoke") {
-                        ClaudeFolderAccess.revoke()
-                        hasClaudeAccess = false
-                    }
-                    .buttonStyle(.plain)
-                    .font(.system(size: 12.5, weight: .medium))
-                    .foregroundStyle(Color.clay)
-                } else {
-                    Button("Grant Access…") {
-                        if ClaudeFolderAccess.requestAccess() != nil {
-                            hasClaudeAccess = true
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.clay)
-                }
+            VStack(spacing: 8) {
+                folderRow(title: "~/.claude folder", icon: "folder", granted: hasClaudeAccess,
+                          grant: {
+                              if ClaudeFolderAccess.requestAccess() != nil { hasClaudeAccess = true }
+                          },
+                          revoke: {
+                              ClaudeFolderAccess.revoke()
+                              hasClaudeAccess = false
+                          })
+                folderRow(title: "Claude Desktop sessions (optional)", icon: "sparkles",
+                          granted: hasDesktopAccess,
+                          grant: {
+                              if ClaudeFolderAccess.requestAccess(ClaudeFolderAccess.claudeDesktop) != nil {
+                                  hasDesktopAccess = true
+                              }
+                          },
+                          revoke: {
+                              ClaudeFolderAccess.revoke(ClaudeFolderAccess.claudeDesktop)
+                              hasDesktopAccess = false
+                          })
             }
-            .padding(12)
-            .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10))
-            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.cardStroke, lineWidth: 0.5))
-            HintRow("Used to count Claude Code tokens by app, model and project on the Usage page. Files are read locally and never uploaded.")
+            HintRow("Used to count Claude Code tokens by app, model and project on the Usage page. Claude Desktop's local-agent sessions keep their own transcripts in ~/Library/Application Support/Claude. Files are read locally and never uploaded.")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .designCard()
+    }
+
+    private func folderRow(title: String, icon: String, granted: Bool,
+                           grant: @escaping () -> Void, revoke: @escaping () -> Void) -> some View {
+        HStack(spacing: 11) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.clay.opacity(0.2))
+                    .frame(width: 34, height: 34)
+                Image(systemName: icon)
+                    .font(.system(size: 15))
+                    .foregroundStyle(Color.clay)
+            }
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.system(size: 13, weight: .medium))
+                if granted {
+                    HStack(spacing: 5) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 9, weight: .bold))
+                        Text("Access granted")
+                    }
+                    .font(.system(size: 11.5, weight: .medium))
+                    .foregroundStyle(.green)
+                } else {
+                    Text("Not granted")
+                        .font(.system(size: 11.5, weight: .medium))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            Spacer()
+            if granted {
+                Button("Revoke", action: revoke)
+                    .buttonStyle(.plain)
+                    .font(.system(size: 12.5, weight: .medium))
+                    .foregroundStyle(Color.clay)
+            } else {
+                Button("Grant Access…", action: grant)
+                    .buttonStyle(.borderedProminent)
+                    .tint(.clay)
+            }
+        }
+        .padding(12)
+        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.cardStroke, lineWidth: 0.5))
     }
 
     private var credentialsCard: some View {

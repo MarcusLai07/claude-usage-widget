@@ -35,6 +35,7 @@
 		88A370439E89AE04CE403982 /* ClaudeCodeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3BFFA5510504728CD6C4E73 /* ClaudeCodeSection.swift */; };
 		8DCD650C64FE5A905A434D26 /* PerfLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FCE82BA732A47459B4C094 /* PerfLog.swift */; };
 		9774411F816C9C9C3FB7A6ED /* UsageFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8900757A61756CC87E954D /* UsageFetcher.swift */; };
+		97F3A4A2F02FCF980D8E5B84 /* ModelPricing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1944FD57641D09CFA901CB /* ModelPricing.swift */; };
 		A88AFAD0716175DA7FD0C3E9 /* OAuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */; };
 		ABDCE375683EC0E7FFB79238 /* AnalyticsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CA6CBBEFF88D1ABCA49D20C /* AnalyticsModel.swift */; };
 		AE1A2542CEE9C54D2427238F /* SessionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D1B832196A2D75D10ACB3A /* SessionsView.swift */; };
@@ -107,6 +108,7 @@
 		9598317CDA9AAF24482ABB2C /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9AD55D9098A9467D7664BE4C /* UsageAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageAPI.swift; sourceTree = "<group>"; };
 		9EB14FC06BD59E4415EE2DBD /* UsageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageView.swift; sourceTree = "<group>"; };
+		9F1944FD57641D09CFA901CB /* ModelPricing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelPricing.swift; sourceTree = "<group>"; };
 		A5FED1D98609A873CCCBE954 /* RequestsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestsView.swift; sourceTree = "<group>"; };
 		ACC7B0BA1FAD7D9D38A65CF5 /* ClaudeFolderAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeFolderAccess.swift; sourceTree = "<group>"; };
 		B3BFFA5510504728CD6C4E73 /* ClaudeCodeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCodeSection.swift; sourceTree = "<group>"; };
@@ -219,6 +221,7 @@
 			children = (
 				0CA6CBBEFF88D1ABCA49D20C /* AnalyticsModel.swift */,
 				ACC7B0BA1FAD7D9D38A65CF5 /* ClaudeFolderAccess.swift */,
+				9F1944FD57641D09CFA901CB /* ModelPricing.swift */,
 				700F93DC5B26167BC3B0982F /* TranscriptStats.swift */,
 				FBBEDF3C81AFB6BBD9F95751 /* UsageHistory.swift */,
 				2A4D6967644E22285B37CD9E /* UsageTrends.swift */,
@@ -346,6 +349,7 @@
 				463D4BA80BB24093FFE22E16 /* MenuBarIcon.swift in Sources */,
 				E12A5E1AD7DE18B0FB736C57 /* MenuBarView.swift in Sources */,
 				5D05FDE354FE5466BC887C98 /* MetricPresentation.swift in Sources */,
+				97F3A4A2F02FCF980D8E5B84 /* ModelPricing.swift in Sources */,
 				46217628552499310B0F81C3 /* Models.swift in Sources */,
 				FD22448E9AF1EE91A9DF9282 /* NotificationManager.swift in Sources */,
 				E590066085D27EA41A0AB299 /* OAuthClient.swift in Sources */,

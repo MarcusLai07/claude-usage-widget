@@ -4,7 +4,7 @@ import SwiftUI
 /// The stretch of Claude Code activity the token sections cover. The
 /// allowances above them are always "now".
 enum UsagePeriod: String, CaseIterable, Identifiable {
-    case today, week, month, all
+    case today, week, month, quarter, all
 
     var id: String { rawValue }
 
@@ -13,6 +13,7 @@ enum UsagePeriod: String, CaseIterable, Identifiable {
         case .today: return "Today"
         case .week: return "7 days"
         case .month: return "30 days"
+        case .quarter: return "90 days"
         case .all: return "All"
         }
     }
@@ -22,25 +23,60 @@ enum UsagePeriod: String, CaseIterable, Identifiable {
         case .today: return Calendar.current.startOfDay(for: now)
         case .week: return now.addingTimeInterval(-7 * 86400)
         case .month: return now.addingTimeInterval(-30 * 86400)
+        case .quarter: return now.addingTimeInterval(-90 * 86400)
         case .all: return .distantPast
         }
     }
 }
 
-/// Totals for the stat strip.
+/// Totals for the stat strips. Tokens count as Magpie counts them: fresh
+/// input + output + cache reads + cache writes.
 struct UsageTotals {
-    var input = 0          // fresh input + cache writes
+    var input = 0          // fresh (uncached) input
     var output = 0
     var cacheRead = 0
+    var cacheWrite = 0
     var thinking = 0
     var requests = 0
+    var failed = 0
     var sessions = 0
+    /// ≈ USD at API list prices, of the priced calls.
+    var cost: Double = 0
+    var unpriced = 0
+    /// Replies with a known duration, for output speed.
+    var timedReplies = 0
+    var timedOutput = 0
+    var timedMs = 0
 
-    var tokens: Int { input + output }
+    var cache: Int { cacheRead + cacheWrite }
+    var tokens: Int { input + output + cacheRead + cacheWrite }
     /// Share of the prompt served from cache.
     var cacheHitRate: Double {
-        let prompt = input + cacheRead
+        let prompt = input + cacheRead + cacheWrite
         return prompt > 0 ? Double(cacheRead) / Double(prompt) * 100 : 0
+    }
+    var successRate: Double {
+        requests > 0 ? Double(requests - failed) / Double(requests) * 100 : 100
+    }
+    /// Output tokens per second across timed replies.
+    var outputSpeed: Double? {
+        timedMs > 0 ? Double(timedOutput) / (Double(timedMs) / 1000) : nil
+    }
+
+    mutating func add(_ sample: TokenSample) {
+        input += sample.input
+        output += sample.output
+        cacheRead += sample.cacheRead
+        cacheWrite += sample.cacheWrite
+        thinking += sample.thinking
+        requests += 1
+        if sample.failed { failed += 1 }
+        if let callCost = sample.cost { cost += callCost } else { unpriced += 1 }
+        if let ms = sample.durationMs, ms > 0, sample.output > 0 {
+            timedReplies += 1
+            timedOutput += sample.output
+            timedMs += ms
+        }
     }
 }
 
@@ -52,18 +88,23 @@ struct BreakdownRow: Identifiable {
     let detail: String?
     var input = 0
     var output = 0
+    var cache = 0
     var requests = 0
+    var failed = 0
     var sessions = 0
+    var cost: Double = 0
     var share: Double = 0
 
-    var tokens: Int { input + output }
+    var tokens: Int { input + output + cache }
 }
 
 /// Tokens of one model in one bar of the activity chart.
 struct ActivityBar: Identifiable {
     let start: Date
     let model: String
-    let tokens: Int
+    var tokens: Int
+    var cost: Double
+    var requests: Int
     var id: String { "\(start.timeIntervalSince1970)-\(model)" }
 }
 
@@ -92,15 +133,18 @@ struct SessionSummary: Identifiable {
     let last: Date
     let requests: Int
     let subagentRequests: Int
+    let failed: Int
     let input: Int
     let output: Int
+    let cache: Int
+    let cost: Double
     /// The largest prompt the model saw in one request.
     let peakContext: Int
     /// Models by tokens, most first.
     let models: [(name: String, tokens: Int)]
     let apps: [String]
 
-    var tokens: Int { input + output }
+    var tokens: Int { input + output + cache }
     var duration: TimeInterval { last.timeIntervalSince(first) }
 }
 
@@ -117,6 +161,8 @@ final class AnalyticsModel: ObservableObject {
     /// Every request in the local transcripts, oldest first.
     @Published private(set) var tokenSamples: [TokenSample] = []
     @Published var hasClaudeAccess = ClaudeFolderAccess.resolve() != nil
+    /// Claude Desktop's folder, for its local-agent sessions (optional).
+    @Published var hasDesktopAccess = ClaudeFolderAccess.resolve(ClaudeFolderAccess.claudeDesktop) != nil
     @Published private(set) var isLoading = false
     @Published private(set) var lastLoaded: Date?
     /// Stable model → chart color assignment, by all-time share.
@@ -134,6 +180,19 @@ final class AnalyticsModel: ObservableObject {
         }
     }
 
+    func grantDesktopAccess() {
+        if ClaudeFolderAccess.requestAccess(ClaudeFolderAccess.claudeDesktop) != nil {
+            hasDesktopAccess = true
+            Task { await reload() }
+        }
+    }
+
+    func revokeDesktopAccess() {
+        ClaudeFolderAccess.revoke(ClaudeFolderAccess.claudeDesktop)
+        hasDesktopAccess = false
+        Task { await reload() }
+    }
+
     func reload() async {
         guard !isLoading else { return }
         isLoading = true
@@ -145,11 +204,17 @@ final class AnalyticsModel: ObservableObject {
             return
         }
         hasClaudeAccess = true
+        let desktop = ClaudeFolderAccess.resolve(ClaudeFolderAccess.claudeDesktop)
+        hasDesktopAccess = desktop != nil
         let scanStarted = Date()
         let scan = await Task.detached(priority: .userInitiated) {
             let scoped = folder.startAccessingSecurityScopedResource()
-            defer { if scoped { folder.stopAccessingSecurityScopedResource() } }
-            var scan = TranscriptStats.scan(claudeFolder: folder, since: .distantPast)
+            let desktopScoped = desktop?.startAccessingSecurityScopedResource() ?? false
+            defer {
+                if scoped { folder.stopAccessingSecurityScopedResource() }
+                if desktopScoped { desktop?.stopAccessingSecurityScopedResource() }
+            }
+            var scan = TranscriptStats.scan(claudeFolder: folder, desktopFolder: desktop, since: .distantPast)
             scan.samples.sort { $0.ts < $1.ts }
             return scan
         }.value
@@ -164,7 +229,7 @@ final class AnalyticsModel: ObservableObject {
         overviews = [:]
         sessionLists = [:]
         var byModel: [String: Int] = [:]
-        for sample in scan.samples { byModel[sample.model, default: 0] += sample.billable }
+        for sample in scan.samples where !sample.failed { byModel[sample.model, default: 0] += sample.tokens }
         let ordered = byModel.sorted { $0.value > $1.value }.map(\.key)
         modelColors = Dictionary(uniqueKeysWithValues: ordered.enumerated().map {
             ($0.element, modelPalette[$0.offset % modelPalette.count])
@@ -207,7 +272,8 @@ final class AnalyticsModel: ObservableObject {
             var project: String?
             var first: Date
             var last: Date
-            var requests = 0, subagent = 0, input = 0, output = 0, peak = 0
+            var requests = 0, subagent = 0, failed = 0, input = 0, output = 0, cache = 0, peak = 0
+            var cost: Double = 0
             var models: [String: Int] = [:]
             var apps: Set<String> = []
         }
@@ -221,10 +287,13 @@ final class AnalyticsModel: ObservableObject {
             acc.last = max(acc.last, sample.ts)
             acc.requests += 1
             if sample.isSidechain { acc.subagent += 1 }
-            acc.input += sample.inputTotal
+            if sample.failed { acc.failed += 1 }
+            acc.input += sample.input
             acc.output += sample.output
+            acc.cache += sample.cacheRead + sample.cacheWrite
+            acc.cost += sample.cost ?? 0
             acc.peak = max(acc.peak, sample.context)
-            acc.models[sample.model, default: 0] += sample.billable
+            if !sample.failed { acc.models[sample.model, default: 0] += sample.tokens }
             acc.apps.insert(appName(appKey(sample.app)))
             if acc.project == nil { acc.project = projectPath(sample.project) }
             bySession[sample.sessionID] = acc
@@ -232,7 +301,8 @@ final class AnalyticsModel: ObservableObject {
         let sessions = bySession.map { id, acc in
             SessionSummary(id: id, title: titles[id], project: acc.project,
                            first: acc.first, last: acc.last, requests: acc.requests,
-                           subagentRequests: acc.subagent, input: acc.input, output: acc.output,
+                           subagentRequests: acc.subagent, failed: acc.failed,
+                           input: acc.input, output: acc.output, cache: acc.cache, cost: acc.cost,
                            peakContext: acc.peak,
                            models: acc.models.sorted { $0.value > $1.value }.map { ($0.key, $0.value) },
                            apps: acc.apps.sorted())
@@ -263,24 +333,25 @@ final class AnalyticsModel: ObservableObject {
         func add(_ sample: TokenSample, to table: inout [String: (row: BreakdownRow, sessions: Set<String>)],
                  key: String, name: String, detail: String?) {
             var entry = table[key] ?? (BreakdownRow(id: key, name: name, detail: detail), [])
-            entry.row.input += sample.inputTotal
+            entry.row.input += sample.input
             entry.row.output += sample.output
+            entry.row.cache += sample.cacheRead + sample.cacheWrite
+            entry.row.cost += sample.cost ?? 0
             entry.row.requests += 1
+            if sample.failed { entry.row.failed += 1 }
             entry.sessions.insert(sample.sessionID)
             table[key] = entry
         }
 
         for sample in samples {
-            totals.input += sample.inputTotal
-            totals.output += sample.output
-            totals.cacheRead += sample.cacheRead
-            totals.thinking += sample.thinking
-            totals.requests += 1
+            totals.add(sample)
             sessions.insert(sample.sessionID)
 
             let app = appKey(sample.app)
             add(sample, to: &apps, key: app, name: appName(app), detail: nil)
-            add(sample, to: &models, key: sample.model, name: sample.model, detail: nil)
+            if !sample.failed {
+                add(sample, to: &models, key: sample.model, name: sample.model, detail: nil)
+            }
             let project = projectPath(sample.project)
             add(sample, to: &projects, key: project ?? "—",
                 name: project.map(projectName) ?? "Unknown folder", detail: project.map(abbreviateHome))
@@ -305,12 +376,15 @@ final class AnalyticsModel: ObservableObject {
         let unit: Calendar.Component = period == .today ? .hour : (span <= 62 * 86400 ? .day : .weekOfYear)
         var buckets: [String: ActivityBar] = [:]
         var perBar: [Date: Int] = [:]
-        for sample in samples {
+        for sample in samples where !sample.failed {
             let barStart = calendar.dateInterval(of: unit, for: sample.ts)?.start ?? sample.ts
             let key = "\(barStart.timeIntervalSince1970)-\(sample.model)"
-            let tokens = (buckets[key]?.tokens ?? 0) + sample.billable
-            buckets[key] = ActivityBar(start: barStart, model: sample.model, tokens: tokens)
-            perBar[barStart, default: 0] += sample.billable
+            var bar = buckets[key] ?? ActivityBar(start: barStart, model: sample.model, tokens: 0, cost: 0, requests: 0)
+            bar.tokens += sample.tokens
+            bar.cost += sample.cost ?? 0
+            bar.requests += 1
+            buckets[key] = bar
+            perBar[barStart, default: 0] += sample.tokens
         }
         let peak = perBar.max { $0.value < $1.value }.map { (start: $0.key, tokens: $0.value) }
 
@@ -337,6 +411,7 @@ final class AnalyticsModel: ObservableObject {
         case "claude-jetbrains": return "JetBrains"
         case "cli": return "Terminal"
         case "sdk": return "Agent SDK"
+        case "local-agent": return "Desktop agent"
         case "other": return "Other"
         default: return key
         }
@@ -348,13 +423,19 @@ final class AnalyticsModel: ObservableObject {
         case "claude-vscode", "claude-jetbrains": return "chevron.left.forwardslash.chevron.right"
         case "cli": return "terminal"
         case "sdk": return "shippingbox"
+        case "local-agent": return "sparkles"
         default: return "questionmark.app"
         }
     }
 
-    /// A worktree counts toward the repository it was made from.
+    /// A worktree counts toward the repository it was made from; Claude
+    /// Desktop's local-agent sessions (each in a scratch folder of its own)
+    /// count as one project, Claude Desktop.
     nonisolated static func projectPath(_ cwd: String?) -> String? {
         guard let cwd, !cwd.isEmpty else { return nil }
+        if let range = cwd.range(of: "/local-agent-mode-sessions/") {
+            return String(cwd[..<range.lowerBound])
+        }
         if let range = cwd.range(of: "/.claude/worktrees/") {
             return String(cwd[..<range.lowerBound])
         }
@@ -363,15 +444,11 @@ final class AnalyticsModel: ObservableObject {
 
     /// The user's real home folder. In the sandbox `NSHomeDirectory()` is
     /// the app's container, but transcripts record real paths.
-    nonisolated static let realHome: String = {
-        if let entry = getpwuid(getuid()), let dir = entry.pointee.pw_dir {
-            return String(cString: dir)
-        }
-        return NSHomeDirectory()
-    }()
+    nonisolated static var realHome: String { ClaudeFolderAccess.realHome.path }
 
     nonisolated static func projectName(_ path: String) -> String {
         if path == realHome { return "~" }
+        if path.hasSuffix("/Application Support/Claude") { return "Claude Desktop" }
         return (path as NSString).lastPathComponent
     }
 

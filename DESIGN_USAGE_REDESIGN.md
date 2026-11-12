@@ -352,3 +352,102 @@ table to maintain. Keep it as a later, optional extra.
   now reads back from the newest line and stops at the start date.
 - Both go through the same once-per-window record as the threshold alerts
   (5-minute slack on the reset time).
+
+---
+
+## 7. Round 2: data parity with Magpie and a fresh look
+
+### 7.1 Why "All" differs from Magpie (measured on this Mac, Nov 12)
+
+| | Ours (0.6.0) | Last line per message | + Desktop local-agent sessions | = | Magpie |
+|---|---|---|---|---|---|
+| Fresh input | 0.11M | 0.11M | +0.16M | 0.27M | 267K |
+| Output | 21.25M | **22.59M** | +0.17M | 22.76M | 23M |
+| Cache read | 6.96B | 6.96B | +0.02B | 6.98B | 6.98B |
+| Cache write | 158M | 158M | +3M | 161M | 161M |
+| Requests | 21,303 | 21,303 | +335, +20 API errors | 21,658 | 21,656 |
+
+Four causes:
+
+1. **We keep a message's first line; Magpie its last.** Claude Code writes one
+   line per content block and repeats `usage` on each; the last has the final
+   count. 955 messages grew after their first line, so our output is 1.34M
+   (6%) short. A bug: fix it.
+2. **Claude Desktop's local-agent sessions.** Desktop keeps a Claude Code
+   folder per local-agent session under `~/Library/Application Support/
+   Claude/local-agent-mode-sessions/*/*/local_*/.claude/projects` (47 files,
+   335 requests, 26M tokens here). We read only `~/.claude`; reading these
+   needs one more folder grant in the sandbox.
+3. **Failed calls.** Magpie counts API-error replies (`<synthetic>` with
+   `isApiErrorMessage`) as failed requests; we drop them (20 here).
+4. **The headline differs by definition, not data.** Magpie's *Tokens* is
+   everything — in + out + cache read + cache write (7.16B). Ours is in +
+   cache write + out (179M), with cache reads shown apart (7B).
+
+### 7.2 What Magpie's data pages do (from its 0.1.1566 screens)
+
+- **One toolbar** for the page: tabs Overview · Requests · Sessions · Context,
+  then the period (Today · 7 · 30 · 90 days · All · Custom), refresh, and a
+  running cost "≈$4106 effective prices" (models.dev prices).
+- **Requests**: filters (agent, provider, All/Failed/Retried), search, CSV;
+  stat strip Tokens (in · out · cache) · Requests (failed, % succeeded) ·
+  Cost · Cache hit rate (with a bar) · Output speed; a chart with metric tabs
+  (Tokens/Cost/Requests/Speed), bar/line, *Split by* Model/Provider/Agent and
+  a ranked legend list beside it; a 53-week daily heatmap (Tokens/Requests/
+  Cost); the ledger with cost, TTFT, duration, speed, status.
+- **Sessions**: filters (app, model, folder); stat strip Sessions (median,
+  p90) · Tokens · Cost · Cache read · Active hours on N days · Projects;
+  *By day* bars with metric tabs (Tokens, Output, Messages, Sessions, Cost,
+  Active); Projects and Models as bar lists with cost; *By hour* weekday ×
+  hour heatmap ("Busiest at Wed 16:00"); *Top sessions* (Tokens/Cost/Active).
+- **Context**: "Tuned for you" — replays your own calls to find the
+  auto-compact window and prompt-cache TTL that would have spent the fewest
+  tokens.
+- **Look**: dark, flat and dense; hairline-bordered cards; small uppercase
+  section labels; light-weight large numerals with muted captions; one
+  periwinkle accent for data, green for cost; controls live in section heads.
+
+### 7.3 Proposal
+
+**Phase 6 — data parity.** Last line per message; failed calls as requests
+with a status; optional Desktop local-agent folder; Magpie's token headline
+(in · out · cache) with fresh tokens kept as a caption; active time per
+session and day (gaps under 10 minutes); optional ≈ cost at API list prices
+from a bundled Claude-only price table (no new network calls); 90 days and a
+custom range. Cache format v4.
+
+**Phase 7 — shell and visual language.** The tabs and period move into the
+window's toolbar (native, unified; no duplicated "Usage" title); section labels
+in small caps; lighter numerals with monospaced digits; a periwinkle-led data
+palette in both appearances (clay stays the brand and selection color);
+Allowances gets Magpie's section head (Trends: Cycle/2 days/Off, Hide account,
+Used/Left) and slimmer meters.
+
+**Phase 8 — Requests.** Filters (app, model, All/Failed), stat strip with cache
+hit bar, metric-tab chart with *Split by* Model/App/Project and a ranked legend,
+53-week heatmap, ledger with cost and status.
+
+**Phase 9 — Sessions.** Filters, stat strip (median/p90, active hours,
+projects), By day metric chart, Projects/Models bar lists, By hour heatmap,
+Top sessions, then the grouped list.
+
+**Phase 10 (optional) — Context.** Compaction and cache-TTL "what if" from your
+own calls, as Magpie's Context tab does.
+
+### Phase 6 notes (as built)
+
+- Parser: a message's **last** line counts; API-error replies are failed
+  requests (with their error code); each reply is timed from the prompt (or
+  the previous reply) to its last line; cache writes keep their 1-hour part;
+  the earliest file owns a message copied into a resumed session. Cache v4.
+- Claude Desktop's local-agent sessions are read when its folder is granted
+  (Account page, or "Add Claude Desktop sessions…" on Usage); they show as the
+  app "Desktop agent" and the project "Claude Desktop".
+- `ModelPricing` holds Anthropic API list prices for every model seen here
+  (cache reads per model, writes 1.25×/2×, Haiku 5.5's long-prompt tier).
+- Measured against Magpie on this Mac: 21,681 requests (20 failed), 267K in,
+  22.8M out, 7.16B cache, 7.18B tokens, ≈$4,114 (Magpie ≈$4,106), hit rate
+  97.7% (97.7%).
+- Tokens everywhere are Magpie's (in + out + cache read + write), shown with
+  three significant digits. The stat strip is Tokens · Requests · Cost ·
+  Cache hit rate · Output speed. Periods gain 90 days.

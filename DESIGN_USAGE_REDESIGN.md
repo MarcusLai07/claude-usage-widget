@@ -471,3 +471,19 @@ own calls, as Magpie's Context tab does.
   Models and Apps side by side, Projects below, as one-line bar lists with
   cost (details on hover).
 - Window default 1180×820, minimum 940×600.
+
+### Phase 8 notes (as built)
+
+- Requests scrolls as one page: filters (app, model, All/Failed, session chip,
+  search, Export CSV) · the stat strip for what's filtered · a chart with
+  Tokens/Cost/Requests/Speed tabs, bars or lines, *Split by* Model/App/Project
+  (seven series and "Other (n)") and a ranked legend (exact value, requests,
+  cost, speed, hit rate, share) · a 53-week daily heatmap (Tokens/Cost/
+  Requests, same filters, any period) · a summary line · the ledger.
+- The ledger is a sortable custom list (click a header), 100 rows at a time:
+  Time · App · Model with effort · Project · In · Out · Cache · Cost ·
+  Duration · Speed · Status. Fixed widths leave Project ~110 pt by default.
+- `RequestsDerived` computes filters, totals, the split, buckets, the heatmap
+  and the sorted rows off the main thread, once per change of filters.
+- `Heatmaps.swift`: `DailyHeatmap` (53 weeks, Monday first, month labels) and
+  `HourHeatmap` (weekday × hour), quantile-scaled in five steps.

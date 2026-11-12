@@ -159,11 +159,10 @@ struct UsageView: View {
                 .padding(20)
             }
         case .requests:
-            VStack {
+            ScrollView {
                 RequestsView(analytics: analytics, period: period, sessionFilter: $sessionFilter)
-                Spacer(minLength: 0)
+                    .padding(20)
             }
-            .padding(.init(top: 14, leading: 14, bottom: 14, trailing: 14))
         case .sessions:
             ScrollView {
                 SessionsView(analytics: analytics, period: period) { session in

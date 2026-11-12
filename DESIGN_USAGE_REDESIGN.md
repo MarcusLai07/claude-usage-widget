@@ -487,3 +487,20 @@ own calls, as Magpie's Context tab does.
   and the sorted rows off the main thread, once per change of filters.
 - `Heatmaps.swift`: `DailyHeatmap` (53 weeks, Monday first, month labels) and
   `HourHeatmap` (weekday × hour), quantile-scaled in five steps.
+
+### Phase 9 notes (as built)
+
+- Sessions: filters (All / Claude Code / Claude Desktop, model, folder) ·
+  stat strip Sessions (median, p90) · Tokens (in · out, as Magpie's Sessions
+  page counts them) · Cost · Cache read (hit rate) · Active (gaps under 10
+  minutes, and on how many days) · Projects (top share) · By day with
+  Tokens/Output/Messages/Sessions/Cost/Active tabs · Projects and Models bar
+  lists · By hour (weekday × hour, time zone, busiest hour) · Top sessions
+  (Tokens/Cost/Active; a click opens their requests) · every session by
+  project.
+- Every call of a session is filed under the folder the session started in,
+  as Magpie does, so changing into a subfolder no longer splits a project
+  (96 "projects" → 11 over 30 days; Magpie shows 10, top SCM-Portal at
+  28% vs 29%). Top sessions match Magpie's (1.3M, 1.29M, 1.18M) and so does
+  the busiest hour (Wed 16:00).
+- `SessionsDerived` computes it all off the main thread per filter change.

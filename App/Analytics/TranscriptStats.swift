@@ -39,6 +39,15 @@ struct TokenSample: Identifiable {
     let cost: Double?
 
     var failed: Bool { error != nil }
+
+    /// The same call filed under another folder.
+    func with(project: String?) -> TokenSample {
+        TokenSample(id: id, ts: ts, model: model, input: input, output: output,
+                    cacheRead: cacheRead, cacheWrite: cacheWrite, cacheWrite1h: cacheWrite1h,
+                    thinking: thinking, sessionID: sessionID, project: project, app: app,
+                    effort: effort, isSidechain: isSidechain, error: error,
+                    durationMs: durationMs, cost: cost)
+    }
     /// Every token the call moved, as Magpie counts them.
     var tokens: Int { input + output + cacheRead + cacheWrite }
     /// The prompt as the model saw it: everything read, cached or not.

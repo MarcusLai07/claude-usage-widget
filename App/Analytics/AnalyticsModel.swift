@@ -184,7 +184,8 @@ struct SessionSummary: Identifiable {
     let models: [(name: String, tokens: Int)]
     let apps: [String]
 
-    var tokens: Int { input + output + cache }
+    /// In + out, as Magpie's Sessions page counts a session's tokens.
+    var tokens: Int { input + output }
     var duration: TimeInterval { last.timeIntervalSince(first) }
 }
 
@@ -264,7 +265,7 @@ final class AnalyticsModel: ObservableObject {
 
     /// Takes in a scan's requests (sorted oldest first) and session titles.
     func apply(_ scan: TranscriptScan) {
-        tokenSamples = scan.samples
+        tokenSamples = Self.fileBySessionFolder(scan.samples)
         sessionTitles = scan.titles
         overviews = [:]
         sessionLists = [:]
@@ -358,6 +359,21 @@ final class AnalyticsModel: ObservableObject {
                             sessions: sessions.sorted { $0.last > $1.last })
         }
         .sorted { ($0.sessions.first?.last ?? .distantPast) > ($1.sessions.first?.last ?? .distantPast) }
+    }
+
+    /// Files every call of a session under the folder the session started
+    /// in, as Magpie does: a session that changes into a subfolder stays one
+    /// project rather than spreading over several.
+    nonisolated static func fileBySessionFolder(_ samples: [TokenSample]) -> [TokenSample] {
+        var startFolder: [String: String] = [:]
+        for sample in samples {
+            guard startFolder[sample.sessionID] == nil, let project = sample.project, !project.isEmpty else { continue }
+            startFolder[sample.sessionID] = project
+        }
+        return samples.map { sample in
+            guard let folder = startFolder[sample.sessionID], folder != sample.project else { return sample }
+            return sample.with(project: folder)
+        }
     }
 
     // MARK: Summaries

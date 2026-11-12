@@ -8,13 +8,17 @@ final class UsageRefresher: ObservableObject {
     @Published var lastError: String?
     @Published var isSignedIn: Bool = TokenStore.load() != nil
     @Published var isRefreshing = false
+    @Published var profile: AccountProfile? = AppGroupStore.accountProfile
 
     /// True when the last fetch failed and we're showing cached data.
     var isStale: Bool { lastError != nil && snapshot != nil }
 
     static let refreshInterval: TimeInterval = 5 * 60
+    /// Plan and email rarely change; re-read them twice a day.
+    static let profileMaxAge: TimeInterval = 12 * 3600
 
     private var timer: Timer?
+    private var lastProfileAttempt: Date?
 
     init() {
         let timer = Timer(timeInterval: Self.refreshInterval, repeats: true) { _ in
@@ -42,6 +46,7 @@ final class UsageRefresher: ObservableObject {
             PerfLog.record(source: "app", started: started, error: nil)
             WidgetCenter.shared.reloadAllTimelines()
             NotificationManager.evaluate(snapshot)
+            await refreshProfileIfNeeded()
         } catch UsageAPIError.notSignedIn {
             isSignedIn = false
         } catch {
@@ -50,8 +55,23 @@ final class UsageRefresher: ObservableObject {
         }
     }
 
+    /// Reads the plan and email after a successful usage fetch (the token is
+    /// fresh then). A failure only costs the badge; it retries hourly.
+    private func refreshProfileIfNeeded() async {
+        if let profile, Date().timeIntervalSince(profile.fetchedAt) < Self.profileMaxAge { return }
+        if let lastProfileAttempt, Date().timeIntervalSince(lastProfileAttempt) < 3600 { return }
+        lastProfileAttempt = Date()
+        guard let fetched = try? await UsageAPI.fetchProfile() else { return }
+        profile = fetched
+        AppGroupStore.accountProfile = fetched
+    }
+
     func signIn(with tokens: TokenSet) {
         TokenStore.save(tokens)
+        // Possibly a different account: read its plan and email afresh.
+        AppGroupStore.accountProfile = nil
+        profile = nil
+        lastProfileAttempt = nil
         isSignedIn = true
         Task { await refresh() }
     }
@@ -59,7 +79,10 @@ final class UsageRefresher: ObservableObject {
     func signOut() {
         TokenStore.clear()
         AppGroupStore.cachedSnapshot = nil
+        AppGroupStore.accountProfile = nil
         snapshot = nil
+        profile = nil
+        lastProfileAttempt = nil
         isSignedIn = false
         WidgetCenter.shared.reloadAllTimelines()
     }

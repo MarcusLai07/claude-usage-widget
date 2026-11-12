@@ -262,8 +262,25 @@ table to maintain. Keep it as a later, optional extra.
 | Phase | Scope | Size |
 |---|---|---|
 | **0, done** | Fable window, unstarted session, `resetsAt` in history samples | Small; starts the history clock |
-| **1** | Allowances card: pace, Used/Left, plan badge, hide account; pace in popover and widgets | Medium |
+| **1, done** | Allowances card: pace, Used/Left, plan badge, hide account; pace in popover and widgets | Medium |
 | **2** | Left over time: cycle chart, even-pace line, forecast, past-cycle picker | Medium |
 | **3** | Usage › Overview: period picker, stat strip, activity chart, Apps/Models/Projects lists; merges Dashboard and Analytics | Large |
 | **4** | Requests table and Sessions list | Medium |
 | **5** | Menu bar percentages, reset reminder, pace alert | Small–medium |
+
+### Phase 1 notes (as built)
+
+- **Plan and email** come from `GET /api/oauth/profile` (Bearer token, no beta
+  header), the endpoint Claude Code reads for its plan name. Plan =
+  `organization.plan_display_name` when sent, else `organization_type`
+  (`claude_max` → Max) plus the multiplier from `rate_limit_tier`
+  (`default_claude_max_5x` → "Max 5x"). Cached in the App Group, re-read every
+  12 h, cleared on sign-in and sign-out.
+- **Used/Left**: the bar or ring fills with the figure shown; the color still
+  follows what's used. Left = 100 − whole % used, so the two always add up.
+- **Pace** shows as "On pace" within ±1 point, and is hidden for a window that
+  hasn't started, is used up, or whose reset has passed. Small widgets leave
+  it out (no room); widget timelines carry an entry every 5 minutes so pace
+  keeps moving between fetches.
+- **Reset times are rounded to the minute** when shown, so the same reset no
+  longer reads 17:59 on one row and 18:00 on the next.

@@ -37,10 +37,13 @@ struct SunburstMark: View {
     }
 }
 
-/// Capsule progress bar on a quaternary track (6 pt, or 4 pt thin).
+/// Capsule progress bar on a quaternary track (6 pt, or 4 pt thin). `tint`
+/// overrides the escalation color of `percent`, for Left mode, where the
+/// fill is what's left but the color still follows what's used.
 struct UsageBar: View {
     let percent: Double
     var height: CGFloat = 6
+    var tint: Color? = nil
 
     var body: some View {
         GeometryReader { geo in
@@ -48,7 +51,7 @@ struct UsageBar: View {
                 Capsule().fill(.quaternary)
                 if percent > 0 {
                     Capsule()
-                        .fill(usageColor(percent))
+                        .fill(tint ?? usageColor(percent))
                         .frame(width: max(height, geo.size.width * min(percent, 100) / 100))
                 }
             }
@@ -57,11 +60,31 @@ struct UsageBar: View {
     }
 }
 
-/// Radial gauge with the percentage centered in rounded numerals.
+/// Radial gauge with the percentage centered in rounded numerals. `tint`
+/// overrides the escalation color (see `UsageBar`); `label` ("left") sits
+/// under the number.
 struct UsageRing: View {
     let percent: Double
     let size: CGFloat
     let stroke: CGFloat
+    var tint: Color? = nil
+    var label: String? = nil
+
+    init(percent: Double, size: CGFloat, stroke: CGFloat,
+         tint: Color? = nil, label: String? = nil) {
+        self.percent = percent
+        self.size = size
+        self.stroke = stroke
+        self.tint = tint
+        self.label = label
+    }
+
+    /// The metric's shown figure, colored by what's used, labelled "left" in
+    /// Left mode.
+    init(metric: MetricDisplay, size: CGFloat, stroke: CGFloat) {
+        self.init(percent: metric.shownPercent, size: size, stroke: stroke,
+                  tint: metric.color, label: metric.showLeft ? "left" : nil)
+    }
 
     var body: some View {
         ZStack {
@@ -69,12 +92,19 @@ struct UsageRing: View {
                 .stroke(.quaternary, lineWidth: stroke)
             Circle()
                 .trim(from: 0, to: min(percent, 100) / 100)
-                .stroke(usageColor(percent), style: StrokeStyle(lineWidth: stroke, lineCap: .round))
+                .stroke(tint ?? usageColor(percent), style: StrokeStyle(lineWidth: stroke, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-            (Text("\(Int(percent))")
-                .font(.system(size: size * 0.28, weight: .bold, design: .rounded))
-             + Text("%")
-                .font(.system(size: size * 0.15, weight: .semibold, design: .rounded)))
+            VStack(spacing: 0) {
+                (Text("\(Int(percent.rounded(.down)))")
+                    .font(.system(size: size * 0.28, weight: .bold, design: .rounded))
+                 + Text("%")
+                    .font(.system(size: size * 0.15, weight: .semibold, design: .rounded)))
+                if let label {
+                    Text(label)
+                        .font(.system(size: max(8, size * 0.11), weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .padding(stroke / 2)
         .frame(width: size, height: size)

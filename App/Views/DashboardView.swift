@@ -1,7 +1,12 @@
 import SwiftUI
+import WidgetKit
 
 struct DashboardView: View {
     @EnvironmentObject private var refresher: UsageRefresher
+    @AppStorage(AppGroupStore.SharedKey.showLeft, store: AppGroupStore.defaults)
+    private var showLeft = false
+    @AppStorage(AppGroupStore.SharedKey.hideAccount, store: AppGroupStore.defaults)
+    private var hideAccount = false
 
     private var sessionPercent: Double {
         refresher.snapshot?.session?.utilization ?? 0
@@ -27,79 +32,25 @@ struct DashboardView: View {
             }
         }
         .background(Color.windowContent)
+        // Widgets read the mode from the shared store; redraw them with it.
+        .onChange(of: showLeft) { _, _ in WidgetCenter.shared.reloadAllTimelines() }
     }
 
     @ViewBuilder
     private var content: some View {
         if let snapshot = refresher.snapshot {
-            let displays = MetricPresentation.displays(for: snapshot, kinds: MetricKind.allCases)
             VStack(spacing: 16) {
                 if refresher.isStale {
                     StaleBanner()
                 }
-
-                HStack(spacing: 16) {
-                    if let session = displays.first(where: { $0.kind == .session }) {
-                        heroCard(session, windowLabel: "5-hour window")
-                    }
-                    if let weekly = displays.first(where: { $0.kind == .weekly }) {
-                        heroCard(weekly, windowLabel: "7-day window")
-                    }
-                }
-
-                moreLimits(displays)
+                AllowancesCard(snapshot: snapshot, profile: refresher.profile,
+                               showLeft: $showLeft, hideAccount: $hideAccount,
+                               isStale: refresher.isStale)
             }
         } else {
             ProgressView("Loading usage…")
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 80)
         }
-    }
-
-    private func heroCard(_ metric: MetricDisplay, windowLabel: String) -> some View {
-        HStack(spacing: 16) {
-            UsageRing(percent: metric.percent, size: 108, stroke: 11)
-                .opacity(refresher.isStale ? 0.75 : 1)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(metric.name)
-                    .font(.system(size: 15, weight: .semibold))
-                Text(windowLabel)
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(.tertiary)
-                    .padding(.init(top: 1, leading: 0, bottom: 8, trailing: 0))
-                MetricCaption(metric: metric, font: .system(size: 12.5, weight: .medium))
-            }
-            Spacer(minLength: 0)
-        }
-        .designCard()
-    }
-
-    private func moreLimits(_ displays: [MetricDisplay]) -> some View {
-        let others = displays.filter { $0.kind != .session && $0.kind != .weekly }
-        let reported = Set(displays.map(\.kind))
-        let unreported = MetricKind.allCases.filter { !reported.contains($0) }
-        return VStack(alignment: .leading, spacing: 14) {
-            CardTitle("More limits")
-            ForEach(others) { metric in
-                MetricBarRow(metric: metric)
-            }
-            ForEach(unreported) { kind in
-                HStack(alignment: .firstTextBaseline) {
-                    Text(kind.title)
-                        .font(.system(size: 12.5, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Text("—")
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
-                        .foregroundStyle(.tertiary)
-                    Text("not reported for your account yet")
-                        .font(.system(size: 10.5))
-                        .foregroundStyle(.tertiary)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .designCard()
-        .opacity(refresher.isStale ? 0.85 : 1)
     }
 }

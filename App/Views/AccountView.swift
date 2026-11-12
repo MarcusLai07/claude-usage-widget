@@ -3,6 +3,8 @@ import SwiftUI
 struct AccountView: View {
     @EnvironmentObject private var refresher: UsageRefresher
     @State private var hasClaudeAccess = ClaudeFolderAccess.resolve() != nil
+    @AppStorage(AppGroupStore.SharedKey.hideAccount, store: AppGroupStore.defaults)
+    private var hideAccount = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -32,8 +34,13 @@ struct AccountView: View {
                         .foregroundStyle(Color.clay)
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Signed in")
-                        .font(.system(size: 15, weight: .semibold))
+                    HStack(spacing: 7) {
+                        Text(signedInTitle)
+                            .font(.system(size: 15, weight: .semibold))
+                        if let plan = refresher.profile?.plan {
+                            PlanBadge(text: plan)
+                        }
+                    }
                     Text("Usage data refreshes every 5 minutes.")
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
@@ -56,6 +63,11 @@ struct AccountView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
         }
+    }
+
+    private var signedInTitle: String {
+        guard let email = refresher.profile?.email else { return "Signed in" }
+        return hideAccount ? AccountProfile.masked(email) : email
     }
 
     private var claudeAccessCard: some View {

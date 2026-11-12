@@ -9,17 +9,22 @@ struct UsageEntry: TimelineEntry {
     let visibleMetrics: [MetricKind]
     let signedIn: Bool
     let isStale: Bool
+    var showLeft = AppGroupStore.showLeft
 
+    /// Pace is measured at the entry's date, so later entries of one
+    /// timeline move it along without a new fetch.
     var displays: [MetricDisplay] {
         guard let snapshot else { return [] }
-        return MetricPresentation.displays(for: snapshot, kinds: visibleMetrics)
+        return MetricPresentation.displays(for: snapshot, kinds: visibleMetrics,
+                                           showLeft: showLeft, now: date)
     }
 }
 
 struct UsageProvider: TimelineProvider {
     func placeholder(in context: Context) -> UsageEntry {
         UsageEntry(date: Date(), snapshot: .placeholder,
-                   visibleMetrics: [.session, .weekly], signedIn: true, isStale: false)
+                   visibleMetrics: [.session, .weekly], signedIn: true, isStale: false,
+                   showLeft: false)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (UsageEntry) -> Void) {
@@ -49,11 +54,17 @@ struct UsageProvider: TimelineProvider {
                 stale = true
                 PerfLog.record(source: "widget", started: started, error: error.localizedDescription)
             }
-            let entry = UsageEntry(date: Date(), snapshot: snapshot,
-                                   visibleMetrics: AppGroupStore.visibleMetrics,
-                                   signedIn: signedIn, isStale: stale)
-            let refresh = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
-            completion(Timeline(entries: [entry], policy: .after(refresh)))
+            // One entry per 5 minutes until the next reload: the session's
+            // pace moves about 1.7 points in that time.
+            let now = Date()
+            let visible = AppGroupStore.visibleMetrics
+            let entries = stride(from: 0, to: 15, by: 5).map { minutes in
+                UsageEntry(date: now.addingTimeInterval(TimeInterval(minutes * 60)),
+                           snapshot: snapshot, visibleMetrics: visible,
+                           signedIn: signedIn, isStale: stale)
+            }
+            let refresh = now.addingTimeInterval(15 * 60)
+            completion(Timeline(entries: entries, policy: .after(refresh)))
         }
     }
 }
@@ -172,14 +183,20 @@ struct BarsWidgetView: View {
                     AgeBadge(since: fetchedAt, stale: entry.isStale)
                 }
             }
-            (Text("\(Int(hero.percent))")
+            (Text("\(Int(hero.shownPercent))")
                 .font(.system(size: 44, weight: .bold, design: .rounded))
              + Text("%")
-                .font(.system(size: 22, weight: .semibold, design: .rounded)))
+                .font(.system(size: 22, weight: .semibold, design: .rounded))
+             + Text(hero.unitText.map { " \($0)" } ?? "")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.secondary))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .padding(.vertical, 4)
-            UsageBar(percent: hero.percent)
+            UsageBar(percent: hero.shownPercent, tint: hero.color)
                 .opacity(entry.isStale ? 0.62 : 1)
-            let heroCaption = MetricCaption(metric: hero, font: .system(size: 11))
+            // No room for pace in the small widget; medium and large show it.
+            let heroCaption = MetricCaption(metric: hero, font: .system(size: 11), pace: .hidden)
             if heroCaption.hasContent {
                 heroCaption.padding(.top, 6)
             }
@@ -189,12 +206,12 @@ struct BarsWidgetView: View {
                 HStack {
                     Text(second.name)
                     Spacer()
-                    Text(second.valueText)
+                    Text(second.valueWithUnit)
                 }
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.secondary)
                 .padding(.bottom, 5)
-                UsageBar(percent: second.percent, height: 4)
+                UsageBar(percent: second.shownPercent, height: 4, tint: second.color)
                     .opacity(entry.isStale ? 0.62 : 1)
             }
         }
@@ -268,12 +285,12 @@ struct RingsWidgetView: View {
                 }
             }
             Spacer(minLength: 2)
-            UsageRing(percent: hero.percent, size: 78, stroke: 9)
+            UsageRing(metric: hero, size: 78, stroke: 9)
                 .opacity(entry.isStale ? 0.75 : 1)
             VStack(spacing: 1) {
                 Text(hero.name)
                     .font(.system(size: 12.5, weight: .semibold))
-                MetricCaption(metric: hero, font: .system(size: 10.5))
+                MetricCaption(metric: hero, font: .system(size: 10.5), pace: .hidden)
             }
             .padding(.top, 7)
             Spacer(minLength: 2)
@@ -281,9 +298,9 @@ struct RingsWidgetView: View {
                 let second = metrics[1]
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(usageColor(second.percent))
+                        .fill(second.color)
                         .frame(width: 7, height: 7)
-                    Text("\(second.name) \(second.valueText)")
+                    Text("\(second.name) \(second.valueWithUnit)")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.secondary)
                 }
@@ -298,11 +315,12 @@ struct RingsWidgetView: View {
             HStack(alignment: .top, spacing: 0) {
                 ForEach(entry.displays.prefix(3)) { metric in
                     VStack(spacing: 5) {
-                        UsageRing(percent: metric.percent, size: 62, stroke: 7)
+                        UsageRing(metric: metric, size: 62, stroke: 7)
                             .opacity(entry.isStale ? 0.75 : 1)
                         Text(metric.name)
                             .font(.system(size: 11.5, weight: .semibold))
-                        MetricCaption(metric: metric, font: .system(size: 9.5))
+                        MetricCaption(metric: metric, font: .system(size: 9.5),
+                                      pace: .below, alignment: .center)
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -317,7 +335,7 @@ struct RingsWidgetView: View {
         return VStack(alignment: .leading, spacing: 0) {
             WidgetHeader(entry: entry, markSize: 16, showAge: false)
             HStack(spacing: 14) {
-                UsageRing(percent: hero.percent, size: 96, stroke: 10)
+                UsageRing(metric: hero, size: 96, stroke: 10)
                     .opacity(entry.isStale ? 0.75 : 1)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(hero.name)

@@ -16,12 +16,11 @@ enum NotificationManager {
 
     private static func check(kind: MetricKind, window: UsageWindow?, threshold: Double) {
         guard let window, let utilization = window.utilization else { return }
-        let windowID = window.resetsAt.map { String(Int($0.timeIntervalSince1970)) } ?? "current"
 
         if AppGroupStore.notifyOnLimitReached, utilization >= 100 {
-            let key = "\(kind.rawValue)-limit-\(windowID)"
-            if !AppGroupStore.hasNotified(key) {
-                AppGroupStore.markNotified(key)
+            let alert = "\(kind.rawValue)-limit"
+            if !AppGroupStore.hasNotified(alert, resetsAt: window.resetsAt) {
+                AppGroupStore.markNotified(alert, resetsAt: window.resetsAt)
                 send(title: "\(kind.title) limit reached",
                      body: resetText(window.resetsAt, prefix: "Usage is at 100%."))
             }
@@ -29,9 +28,9 @@ enum NotificationManager {
         }
 
         if utilization >= threshold {
-            let key = "\(kind.rawValue)-warn-\(Int(threshold))-\(windowID)"
-            if !AppGroupStore.hasNotified(key) {
-                AppGroupStore.markNotified(key)
+            let alert = "\(kind.rawValue)-warn-\(Int(threshold))"
+            if !AppGroupStore.hasNotified(alert, resetsAt: window.resetsAt) {
+                AppGroupStore.markNotified(alert, resetsAt: window.resetsAt)
                 send(title: "\(kind.title) usage at \(Int(utilization))%",
                      body: resetText(window.resetsAt, prefix: "You set a warning at \(Int(threshold))%."))
             }

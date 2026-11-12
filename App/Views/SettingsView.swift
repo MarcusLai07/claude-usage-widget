@@ -24,6 +24,10 @@ private extension MetricKind {
 
 struct DisplaySettingsView: View {
     @State private var visible = Set(AppGroupStore.visibleMetrics)
+    @AppStorage(AppGroupStore.SharedKey.showLeft, store: AppGroupStore.defaults)
+    private var showLeft = false
+    @AppStorage(AppGroupStore.SharedKey.hideAccount, store: AppGroupStore.defaults)
+    private var hideAccount = false
 
     private var unreported: Set<MetricKind> {
         guard let snapshot = AppGroupStore.cachedSnapshot else { return [] }
@@ -61,6 +65,43 @@ struct DisplaySettingsView: View {
             }
 
             HintRow("Widgets show your first two enabled metrics. The small widget always leads with these.")
+
+            Divider()
+                .padding(.top, 14)
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Show percentages as")
+                        .font(.system(size: 13, weight: .medium))
+                    Text("What's used, or what's left — in the window, menu bar and widgets")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Picker("Show percentages as", selection: $showLeft) {
+                    Text("Used").tag(false)
+                    Text("Left").tag(true)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+            }
+            .padding(.vertical, 12)
+            .onChange(of: showLeft) { _, _ in WidgetCenter.shared.reloadAllTimelines() }
+            Divider()
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Hide account email")
+                        .font(.system(size: 13, weight: .medium))
+                    Text("Masks it on the Dashboard and Account page, for screenshots")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Toggle("Hide account email", isOn: $hideAccount)
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+            }
+            .padding(.top, 12)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .designCard()

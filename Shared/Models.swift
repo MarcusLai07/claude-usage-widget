@@ -20,11 +20,39 @@ enum MetricKind: String, CaseIterable, Codable, Identifiable {
         case .extraUsage: return "Extra usage"
         }
     }
+
+    /// How long one cycle of the window lasts; nil for extra usage, which
+    /// has no rolling window. Pace is measured against this.
+    var span: TimeInterval? {
+        switch self {
+        case .session: return 5 * 3600
+        case .weekly, .weeklyFable, .weeklyOpus, .weeklySonnet: return 7 * 86400
+        case .extraUsage: return nil
+        }
+    }
 }
 
 struct UsageWindow: Codable, Equatable {
     var utilization: Double?
     var resetsAt: Date?
+}
+
+/// Who is signed in and on which plan, from the OAuth profile endpoint.
+/// Shown in the Allowances card header; the email can be masked.
+struct AccountProfile: Codable, Equatable {
+    var email: String?
+    /// "Max 20x", "Pro", "Team"… nil when the endpoint doesn't say.
+    var plan: String?
+    var fetchedAt: Date
+
+    /// "m•••@g•••.com", for screenshots with *Hide account* on.
+    static func masked(_ email: String) -> String {
+        let parts = email.split(separator: "@", maxSplits: 1)
+        guard parts.count == 2 else { return "•••" }
+        let domain = parts[1]
+        let tld = domain.split(separator: ".").last.map { ".\($0)" } ?? ""
+        return "\(parts[0].prefix(1))•••@\(domain.prefix(1))•••\(tld)"
+    }
 }
 
 struct ExtraUsage: Codable, Equatable {

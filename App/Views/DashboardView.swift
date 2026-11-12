@@ -3,6 +3,7 @@ import WidgetKit
 
 struct DashboardView: View {
     @EnvironmentObject private var refresher: UsageRefresher
+    @ObservedObject var trends: TrendModel
     @AppStorage(AppGroupStore.SharedKey.showLeft, store: AppGroupStore.defaults)
     private var showLeft = false
     @AppStorage(AppGroupStore.SharedKey.hideAccount, store: AppGroupStore.defaults)
@@ -34,6 +35,8 @@ struct DashboardView: View {
         .background(Color.windowContent)
         // Widgets read the mode from the shared store; redraw them with it.
         .onChange(of: showLeft) { _, _ in WidgetCenter.shared.reloadAllTimelines() }
+        // Each fetch may have added a history sample.
+        .task(id: refresher.snapshot?.fetchedAt) { await trends.reload() }
     }
 
     @ViewBuilder
@@ -45,7 +48,7 @@ struct DashboardView: View {
                 }
                 AllowancesCard(snapshot: snapshot, profile: refresher.profile,
                                showLeft: $showLeft, hideAccount: $hideAccount,
-                               isStale: refresher.isStale)
+                               isStale: refresher.isStale, trends: trends)
             }
         } else {
             ProgressView("Loading usage…")

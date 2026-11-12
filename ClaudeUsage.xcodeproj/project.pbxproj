@@ -28,6 +28,7 @@
 		6689E4C7F8D857ED5425E9A0 /* ClaudeUsageApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1520DE729C71CBF445CFC145 /* ClaudeUsageApp.swift */; };
 		6BACE2E6E91928CD3CA54CA5 /* ClaudeCodeImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1ADC922D989DC1AD17BFFA /* ClaudeCodeImport.swift */; };
 		70B93F3F377B52BDEB2F5911 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9598317CDA9AAF24482ABB2C /* AppIcon.icns */; };
+		72F1F4AE8CA65A56AE8988CD /* LeftOverTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8213A284D99612E3E53F0757 /* LeftOverTimeView.swift */; };
 		826A5FD75868AF1505FDC23C /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC477B6568DC675B2F9AAD16 /* SignInView.swift */; };
 		8DCD650C64FE5A905A434D26 /* PerfLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FCE82BA732A47459B4C094 /* PerfLog.swift */; };
 		9774411F816C9C9C3FB7A6ED /* UsageFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8900757A61756CC87E954D /* UsageFetcher.swift */; };
@@ -41,6 +42,7 @@
 		DAE954B7EEF187EEFFDCA7E2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F687E4F0FAD67B196BD0ED2D /* Assets.xcassets */; };
 		DB26A044F07B3028F16FF5AA /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0F2160FA1C50EE7EF8B5C96 /* AnalyticsView.swift */; };
 		DB57F6E2ED03D314E9A20222 /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E523773952E01523EA9066 /* TokenStore.swift */; };
+		DFABE196B8A6BDE228DEA268 /* UsageTrends.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A4D6967644E22285B37CD9E /* UsageTrends.swift */; };
 		E12A5E1AD7DE18B0FB736C57 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212915E642A4295BB319865 /* MenuBarView.swift */; };
 		E2DFDCADE38BD1DF3DAFDEB5 /* TranscriptStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700F93DC5B26167BC3B0982F /* TranscriptStats.swift */; };
 		E590066085D27EA41A0AB299 /* OAuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */; };
@@ -83,6 +85,7 @@
 		161BB7F34856C3E7D6F81978 /* ClaudeUsageWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ClaudeUsageWidget.entitlements; sourceTree = "<group>"; };
 		19E523773952E01523EA9066 /* TokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenStore.swift; sourceTree = "<group>"; };
 		1C38BCAEF55783EA8A2A2576 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		2A4D6967644E22285B37CD9E /* UsageTrends.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageTrends.swift; sourceTree = "<group>"; };
 		2AB4851F82804202E410BB46 /* ClaudeUsageWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeUsageWidget.swift; sourceTree = "<group>"; };
 		2B1ADC922D989DC1AD17BFFA /* ClaudeCodeImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCodeImport.swift; sourceTree = "<group>"; };
 		2D8530E203C99CDB7CAA371F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -96,6 +99,7 @@
 		700F93DC5B26167BC3B0982F /* TranscriptStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptStats.swift; sourceTree = "<group>"; };
 		75401BE469C1FB046A8DFC12 /* DesignComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignComponents.swift; sourceTree = "<group>"; };
 		7B73EA8A4AB5738107893EB5 /* ClaudeUsageWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ClaudeUsageWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8213A284D99612E3E53F0757 /* LeftOverTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeftOverTimeView.swift; sourceTree = "<group>"; };
 		9598317CDA9AAF24482ABB2C /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9AD55D9098A9467D7664BE4C /* UsageAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageAPI.swift; sourceTree = "<group>"; };
 		ACC7B0BA1FAD7D9D38A65CF5 /* ClaudeFolderAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeFolderAccess.swift; sourceTree = "<group>"; };
@@ -146,6 +150,7 @@
 				E0F2160FA1C50EE7EF8B5C96 /* AnalyticsView.swift */,
 				41F3922816D4D8D422D256B7 /* DashboardView.swift */,
 				75401BE469C1FB046A8DFC12 /* DesignComponents.swift */,
+				8213A284D99612E3E53F0757 /* LeftOverTimeView.swift */,
 				B97C3A43D85709AA956F3522 /* MainWindowView.swift */,
 				0212915E642A4295BB319865 /* MenuBarView.swift */,
 				C97788F0DEBD8BFA7EFE8DED /* SettingsView.swift */,
@@ -207,6 +212,7 @@
 				ACC7B0BA1FAD7D9D38A65CF5 /* ClaudeFolderAccess.swift */,
 				700F93DC5B26167BC3B0982F /* TranscriptStats.swift */,
 				FBBEDF3C81AFB6BBD9F95751 /* UsageHistory.swift */,
+				2A4D6967644E22285B37CD9E /* UsageTrends.swift */,
 			);
 			path = Analytics;
 			sourceTree = "<group>";
@@ -327,6 +333,7 @@
 				6689E4C7F8D857ED5425E9A0 /* ClaudeUsageApp.swift in Sources */,
 				23BAF7A08F359FB0274B0FCF /* DashboardView.swift in Sources */,
 				C05943C43151A16944896E54 /* DesignComponents.swift in Sources */,
+				72F1F4AE8CA65A56AE8988CD /* LeftOverTimeView.swift in Sources */,
 				2976816337441DE1BEB37941 /* MainWindowView.swift in Sources */,
 				E12A5E1AD7DE18B0FB736C57 /* MenuBarView.swift in Sources */,
 				5D05FDE354FE5466BC887C98 /* MetricPresentation.swift in Sources */,
@@ -343,6 +350,7 @@
 				9774411F816C9C9C3FB7A6ED /* UsageFetcher.swift in Sources */,
 				2837E8CB5B521A8008B26D78 /* UsageHistory.swift in Sources */,
 				05948C9BB01967542C474609 /* UsageRefresher.swift in Sources */,
+				DFABE196B8A6BDE228DEA268 /* UsageTrends.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

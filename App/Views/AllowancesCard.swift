@@ -9,23 +9,39 @@ struct AllowancesCard: View {
     @Binding var showLeft: Bool
     @Binding var hideAccount: Bool
     var isStale = false
+    @ObservedObject var trends: TrendModel
 
     var body: some View {
+        let now = Date()
         let metrics = MetricPresentation.displays(for: snapshot, kinds: MetricKind.allCases,
-                                                  showLeft: showLeft)
+                                                  showLeft: showLeft, now: now)
         VStack(alignment: .leading, spacing: 18) {
             header
             // Two columns when there's room, one in a narrow window.
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 28, alignment: .top)],
                       alignment: .leading, spacing: 20) {
                 ForEach(metrics) { metric in
-                    AllowanceMeter(metric: metric) { showLeft.toggle() }
+                    AllowanceMeter(metric: metric, runsOut: runsOut(metric.kind, now: now)) {
+                        showLeft.toggle()
+                    }
                 }
             }
             .opacity(isStale ? 0.75 : 1)
+            if trends.loadedAt != nil {
+                Divider()
+                LeftOverTimeView(snapshot: snapshot, trends: trends)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .designCard()
+    }
+
+    /// A forecast worth a line on the meter: the window empties before it
+    /// resets. ("Lasts past the reset" goes once, in the chart's head.)
+    private func runsOut(_ kind: MetricKind, now: Date) -> Forecast? {
+        let forecast = trends.forecast(for: kind, window: snapshot.window(for: kind), now: now)
+        if case .runsOut = forecast { return forecast }
+        return nil
     }
 
     private var header: some View {
@@ -79,6 +95,8 @@ struct AllowancesCard: View {
 /// Pace −8%". Clicking the figure flips Used/Left everywhere.
 struct AllowanceMeter: View {
     let metric: MetricDisplay
+    /// "Runs out Sat 14:00 at this pace", when it will.
+    var runsOut: Forecast? = nil
     var onToggleMode: () -> Void
 
     var body: some View {
@@ -94,8 +112,13 @@ struct AllowanceMeter: View {
                 .help(metric.showLeft ? "Show what's used" : "Show what's left")
             }
             UsageBar(percent: metric.shownPercent, height: 7, tint: metric.color)
-            MetricCaption(metric: metric, font: .system(size: 11.5), countdown: true)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 2) {
+                MetricCaption(metric: metric, font: .system(size: 11.5), countdown: true)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let runsOut {
+                    ForecastLine(forecast: runsOut)
+                }
+            }
         }
     }
 }

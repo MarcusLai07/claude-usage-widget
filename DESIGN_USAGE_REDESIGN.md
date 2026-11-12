@@ -263,7 +263,7 @@ table to maintain. Keep it as a later, optional extra.
 |---|---|---|
 | **0, done** | Fable window, unstarted session, `resetsAt` in history samples | Small; starts the history clock |
 | **1, done** | Allowances card: pace, Used/Left, plan badge, hide account; pace in popover and widgets | Medium |
-| **2** | Left over time: cycle chart, even-pace line, forecast, past-cycle picker | Medium |
+| **2, done** | Left over time: cycle chart, even-pace line, forecast, past-cycle picker | Medium |
 | **3** | Usage › Overview: period picker, stat strip, activity chart, Apps/Models/Projects lists; merges Dashboard and Analytics | Large |
 | **4** | Requests table and Sessions list | Medium |
 | **5** | Menu bar percentages, reset reminder, pace alert | Small–medium |
@@ -284,3 +284,20 @@ table to maintain. Keep it as a later, optional extra.
   keeps moving between fetches.
 - **Reset times are rounded to the minute** when shown, so the same reset no
   longer reads 17:59 on one row and 18:00 on the next.
+
+### Phase 2 notes (as built)
+
+- **Cycles** split where Magpie's `quotaCycleBreak` says (reset passed, or
+  moved by more than 5 minutes). Lines older than phase 0 have no reset times,
+  so between those a refill of more than 5 points marks the break. Past cycles
+  without recorded resets snap to the weekly deadline grid when a grid point
+  falls in the gap between two cycles, so they read "Oct 27 – Nov 3" rather
+  than from the first reading after the reset; mid-week resets keep their
+  real times.
+- **Chart** (`LeftOverTimeView`): range Cycle · 2 days · Off plus up to 26
+  past cycles, one menu. A window under 1/12 of the span (the session in a
+  week) shows only its current cycle and no even pace; past cycles leave it
+  out. Windows that share a cycle share one even-pace line. Click to enlarge.
+- **Forecast**: the chart's head carries the furthest-resetting window's
+  forecast ("Lasts past the reset at this pace" or "Runs out …"); a meter
+  only adds a line, in orange, when its window runs out before it resets.

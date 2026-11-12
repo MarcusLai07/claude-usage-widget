@@ -28,6 +28,7 @@ struct MainWindowView: View {
     @EnvironmentObject private var refresher: UsageRefresher
     @EnvironmentObject private var router: WindowRouter
     @StateObject private var analytics = AnalyticsModel()
+    @StateObject private var trends = TrendModel()
 
     private var section: MainSection { router.section }
 
@@ -56,7 +57,7 @@ struct MainWindowView: View {
     private var detail: some View {
         switch section {
         case .dashboard:
-            DashboardView()
+            DashboardView(trends: trends)
         case .analytics:
             AnalyticsView(model: analytics)
         case .settings:

@@ -51,7 +51,7 @@ struct MenuBarView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button {
-                openMain(.dashboard)
+                openMain(.usage)
             } label: {
                 Text("Open Claude Usage to Sign In")
                     .font(.system(size: 13, weight: .semibold))
@@ -136,7 +136,7 @@ struct MenuBarView: View {
     private var footer: some View {
         VStack(spacing: 1) {
             Button {
-                openMain(.dashboard)
+                openMain(.usage)
             } label: {
                 MenuRow(icon: "macwindow", title: "Open Claude Usage…", shortcut: "⌘O")
             }

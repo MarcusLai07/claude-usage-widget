@@ -4,7 +4,7 @@ import SwiftUI
 /// window — the window binds its sidebar selection to this.
 @MainActor
 final class WindowRouter: ObservableObject {
-    @Published var section: MainSection = .dashboard
+    @Published var section: MainSection = .usage
 }
 
 @main

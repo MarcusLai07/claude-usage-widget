@@ -1,14 +1,13 @@
 import SwiftUI
 
 enum MainSection: String, CaseIterable, Identifiable {
-    case dashboard, analytics, settings, account
+    case usage, settings, account
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .dashboard: return "Dashboard"
-        case .analytics: return "Analytics"
+        case .usage: return "Usage"
         case .settings: return "Settings"
         case .account: return "Account"
         }
@@ -16,8 +15,7 @@ enum MainSection: String, CaseIterable, Identifiable {
 
     var icon: String {
         switch self {
-        case .dashboard: return "gauge.medium"
-        case .analytics: return "chart.xyaxis.line"
+        case .usage: return "gauge.medium"
         case .settings: return "gearshape"
         case .account: return "person.crop.circle"
         }
@@ -56,10 +54,8 @@ struct MainWindowView: View {
     @ViewBuilder
     private var detail: some View {
         switch section {
-        case .dashboard:
-            DashboardView(trends: trends)
-        case .analytics:
-            AnalyticsView(model: analytics)
+        case .usage:
+            UsageView(trends: trends, analytics: analytics)
         case .settings:
             WindowSettingsView()
         case .account:

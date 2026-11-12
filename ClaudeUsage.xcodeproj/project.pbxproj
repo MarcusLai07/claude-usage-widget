@@ -13,7 +13,6 @@
 		14231B4F27B8A4C91A39F952 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E86351762BC954A07DAE5F /* Models.swift */; };
 		1A15FD5CE4936789D6EFAAA0 /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAF96C3ED2923D7B0C7D288 /* AppGroupStore.swift */; };
 		1E8ABF8E7606209A4EF27EA0 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F29F4A8C11562A4C0AD07B2 /* AccountView.swift */; };
-		23BAF7A08F359FB0274B0FCF /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41F3922816D4D8D422D256B7 /* DashboardView.swift */; };
 		2837E8CB5B521A8008B26D78 /* UsageHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBBEDF3C81AFB6BBD9F95751 /* UsageHistory.swift */; };
 		2976816337441DE1BEB37941 /* MainWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97C3A43D85709AA956F3522 /* MainWindowView.swift */; };
 		2CAB8C5C84459DB508C8E919 /* AllowancesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF383DDA47E91F210454585 /* AllowancesCard.swift */; };
@@ -30,6 +29,8 @@
 		70B93F3F377B52BDEB2F5911 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9598317CDA9AAF24482ABB2C /* AppIcon.icns */; };
 		72F1F4AE8CA65A56AE8988CD /* LeftOverTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8213A284D99612E3E53F0757 /* LeftOverTimeView.swift */; };
 		826A5FD75868AF1505FDC23C /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC477B6568DC675B2F9AAD16 /* SignInView.swift */; };
+		85E3193EDD18DAAD8CAD6D74 /* UsageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB14FC06BD59E4415EE2DBD /* UsageView.swift */; };
+		88A370439E89AE04CE403982 /* ClaudeCodeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3BFFA5510504728CD6C4E73 /* ClaudeCodeSection.swift */; };
 		8DCD650C64FE5A905A434D26 /* PerfLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FCE82BA732A47459B4C094 /* PerfLog.swift */; };
 		9774411F816C9C9C3FB7A6ED /* UsageFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8900757A61756CC87E954D /* UsageFetcher.swift */; };
 		A88AFAD0716175DA7FD0C3E9 /* OAuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */; };
@@ -40,7 +41,6 @@
 		C05943C43151A16944896E54 /* DesignComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75401BE469C1FB046A8DFC12 /* DesignComponents.swift */; };
 		D71B6A3D9AA01DA669BF1927 /* MetricPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */; };
 		DAE954B7EEF187EEFFDCA7E2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F687E4F0FAD67B196BD0ED2D /* Assets.xcassets */; };
-		DB26A044F07B3028F16FF5AA /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0F2160FA1C50EE7EF8B5C96 /* AnalyticsView.swift */; };
 		DB57F6E2ED03D314E9A20222 /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E523773952E01523EA9066 /* TokenStore.swift */; };
 		DFABE196B8A6BDE228DEA268 /* UsageTrends.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A4D6967644E22285B37CD9E /* UsageTrends.swift */; };
 		E12A5E1AD7DE18B0FB736C57 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212915E642A4295BB319865 /* MenuBarView.swift */; };
@@ -92,7 +92,6 @@
 		32E86351762BC954A07DAE5F /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		34C72995DE871F034CA68B79 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		3DDB3669F215EFC0C1958C20 /* ClaudeUsage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudeUsage.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		41F3922816D4D8D422D256B7 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		4F29F4A8C11562A4C0AD07B2 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		51FCE82BA732A47459B4C094 /* PerfLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfLog.swift; sourceTree = "<group>"; };
 		5B8900757A61756CC87E954D /* UsageFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageFetcher.swift; sourceTree = "<group>"; };
@@ -102,13 +101,14 @@
 		8213A284D99612E3E53F0757 /* LeftOverTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeftOverTimeView.swift; sourceTree = "<group>"; };
 		9598317CDA9AAF24482ABB2C /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9AD55D9098A9467D7664BE4C /* UsageAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageAPI.swift; sourceTree = "<group>"; };
+		9EB14FC06BD59E4415EE2DBD /* UsageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageView.swift; sourceTree = "<group>"; };
 		ACC7B0BA1FAD7D9D38A65CF5 /* ClaudeFolderAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeFolderAccess.swift; sourceTree = "<group>"; };
+		B3BFFA5510504728CD6C4E73 /* ClaudeCodeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCodeSection.swift; sourceTree = "<group>"; };
 		B97C3A43D85709AA956F3522 /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
 		C83428CAB7277078A2677D14 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C97788F0DEBD8BFA7EFE8DED /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D2D075FEF47C5CBC62414384 /* ClaudeUsage.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ClaudeUsage.entitlements; sourceTree = "<group>"; };
 		DDF383DDA47E91F210454585 /* AllowancesCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowancesCard.swift; sourceTree = "<group>"; };
-		E0F2160FA1C50EE7EF8B5C96 /* AnalyticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsView.swift; sourceTree = "<group>"; };
 		ECAF96C3ED2923D7B0C7D288 /* AppGroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStore.swift; sourceTree = "<group>"; };
 		EFBC39264B6FAFAA35DBA813 /* MetricPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricPresentation.swift; sourceTree = "<group>"; };
 		F1BDE777E8B3DA905A94E855 /* OAuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthClient.swift; sourceTree = "<group>"; };
@@ -147,14 +147,14 @@
 			children = (
 				4F29F4A8C11562A4C0AD07B2 /* AccountView.swift */,
 				DDF383DDA47E91F210454585 /* AllowancesCard.swift */,
-				E0F2160FA1C50EE7EF8B5C96 /* AnalyticsView.swift */,
-				41F3922816D4D8D422D256B7 /* DashboardView.swift */,
+				B3BFFA5510504728CD6C4E73 /* ClaudeCodeSection.swift */,
 				75401BE469C1FB046A8DFC12 /* DesignComponents.swift */,
 				8213A284D99612E3E53F0757 /* LeftOverTimeView.swift */,
 				B97C3A43D85709AA956F3522 /* MainWindowView.swift */,
 				0212915E642A4295BB319865 /* MenuBarView.swift */,
 				C97788F0DEBD8BFA7EFE8DED /* SettingsView.swift */,
 				FC477B6568DC675B2F9AAD16 /* SignInView.swift */,
+				9EB14FC06BD59E4415EE2DBD /* UsageView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -326,12 +326,11 @@
 				1E8ABF8E7606209A4EF27EA0 /* AccountView.swift in Sources */,
 				2CAB8C5C84459DB508C8E919 /* AllowancesCard.swift in Sources */,
 				ABDCE375683EC0E7FFB79238 /* AnalyticsModel.swift in Sources */,
-				DB26A044F07B3028F16FF5AA /* AnalyticsView.swift in Sources */,
 				1A15FD5CE4936789D6EFAAA0 /* AppGroupStore.swift in Sources */,
 				6BACE2E6E91928CD3CA54CA5 /* ClaudeCodeImport.swift in Sources */,
+				88A370439E89AE04CE403982 /* ClaudeCodeSection.swift in Sources */,
 				39B94C1E0A7691AB2A9512A2 /* ClaudeFolderAccess.swift in Sources */,
 				6689E4C7F8D857ED5425E9A0 /* ClaudeUsageApp.swift in Sources */,
-				23BAF7A08F359FB0274B0FCF /* DashboardView.swift in Sources */,
 				C05943C43151A16944896E54 /* DesignComponents.swift in Sources */,
 				72F1F4AE8CA65A56AE8988CD /* LeftOverTimeView.swift in Sources */,
 				2976816337441DE1BEB37941 /* MainWindowView.swift in Sources */,
@@ -351,6 +350,7 @@
 				2837E8CB5B521A8008B26D78 /* UsageHistory.swift in Sources */,
 				05948C9BB01967542C474609 /* UsageRefresher.swift in Sources */,
 				DFABE196B8A6BDE228DEA268 /* UsageTrends.swift in Sources */,
+				85E3193EDD18DAAD8CAD6D74 /* UsageView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -21,7 +21,7 @@ extension MetricKind {
         case .session: return .clay
         case .weekly: return .chartIndigo
         case .weeklyFable: return .chartTeal
-        case .weeklyOpus: return .orange
+        case .weeklyOpus: return .purple
         case .weeklySonnet: return .green
         case .extraUsage: return .gray
         }

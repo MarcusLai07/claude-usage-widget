@@ -22,7 +22,8 @@ extension Color {
 }
 
 /// Stable model → color assignment for analytics charts, in share order.
-let modelPalette: [Color] = [.clay, .chartIndigo, .chartTeal, .orange, .green, .purple]
+/// No orange: next to clay it reads as the same color.
+let modelPalette: [Color] = [.clay, .chartIndigo, .chartTeal, .purple, .green, .yellow, .pink, .gray]
 
 func compactTokens(_ count: Int) -> String {
     count.formatted(.number.notation(.compactName))

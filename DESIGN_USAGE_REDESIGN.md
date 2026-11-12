@@ -264,7 +264,7 @@ table to maintain. Keep it as a later, optional extra.
 | **0, done** | Fable window, unstarted session, `resetsAt` in history samples | Small; starts the history clock |
 | **1, done** | Allowances card: pace, Used/Left, plan badge, hide account; pace in popover and widgets | Medium |
 | **2, done** | Left over time: cycle chart, even-pace line, forecast, past-cycle picker | Medium |
-| **3** | Usage › Overview: period picker, stat strip, activity chart, Apps/Models/Projects lists; merges Dashboard and Analytics | Large |
+| **3, done** | Usage › Overview: period picker, stat strip, activity chart, Apps/Models/Projects lists; merges Dashboard and Analytics | Large |
 | **4** | Requests table and Sessions list | Medium |
 | **5** | Menu bar percentages, reset reminder, pace alert | Small–medium |
 
@@ -301,3 +301,22 @@ table to maintain. Keep it as a later, optional extra.
 - **Forecast**: the chart's head carries the furthest-resetting window's
   forecast ("Lasts past the reset at this pace" or "Runs out …"); a meter
   only adds a line, in orange, when its window runs out before it resets.
+
+### Phase 3 notes (as built)
+
+- **One page.** The sidebar is Usage · Settings · Account. Usage holds the
+  Allowances card, then "Claude Code on this Mac" with its own period picker
+  (Today · 7 days · 30 days · All), since the period only applies there.
+- **Transcripts** are now parsed in full (not 30 days) with session, `cwd`,
+  `entrypoint`, `effort`, sidechain and thinking tokens, into
+  `transcript-cache-v2.json` (short keys; about 16 MB for 21k requests). The
+  first scan after updating reads everything once (about 36 s for 1 GB of
+  transcripts); later ones only read changed files and skip rewriting the
+  cache when nothing changed.
+- **Stat strip**: Tokens (input incl. cache writes, plus output) · Cache read
+  (hit rate = cache read ÷ all prompt tokens) · Thinking · Requests (sessions).
+- **Activity**: bars per hour (Today), day (up to two months) or week,
+  stacked by model, peak in the corner.
+- **Lists**: Apps from `entrypoint` (Claude Desktop, VS Code, Terminal,
+  Agent SDK), Models, Projects from `cwd` (worktrees count toward their
+  repository). Collapsible, remembered per list.

@@ -92,7 +92,7 @@ struct DisplaySettingsView: View {
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Hide account email")
                         .font(.system(size: 13, weight: .medium))
-                    Text("Masks it on the Dashboard and Account page, for screenshots")
+                    Text("Masks it on the Usage and Account pages, for screenshots")
                         .font(.system(size: 11.5))
                         .foregroundStyle(.secondary)
                 }

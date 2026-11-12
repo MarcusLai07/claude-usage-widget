@@ -300,9 +300,12 @@ struct LeftOverTimeView: View {
         .padding(.trailing, 30)
     }
 
-    /// "Now", "14:58" today, else "Nov 10 18:00".
-    private func timeLabel(_ date: Date, now: Date, past: Bool) -> String {
-        if !past, abs(date.timeIntervalSince(now)) < 60 { return "Now" }
+    /// "Now", "14:58" today, else "Nov 10 18:00" — to the nearest minute, as
+    /// reset times are shown (a cycle's start is its reset, read as 17:59:59.6,
+    /// minus a week).
+    private func timeLabel(_ exact: Date, now: Date, past: Bool) -> String {
+        if !past, abs(exact.timeIntervalSince(now)) < 60 { return "Now" }
+        let date = Date(timeIntervalSinceReferenceDate: (exact.timeIntervalSinceReferenceDate / 60).rounded() * 60)
         let time = date.formatted(.dateTime.hour().minute())
         if !past, Calendar.current.isDate(date, inSameDayAs: now) { return time }
         return "\(date.formatted(.dateTime.month(.abbreviated).day())) \(time)"

@@ -15,15 +15,31 @@ struct AllowancesCard: View {
         let now = Date()
         let metrics = MetricPresentation.displays(for: snapshot, kinds: MetricKind.allCases,
                                                   showLeft: showLeft, now: now)
+        // Pairs of meters, row by row.
+        let pairs = stride(from: 0, to: metrics.count, by: 2).map {
+            Array(metrics[$0..<min($0 + 2, metrics.count)])
+        }
         VStack(alignment: .leading, spacing: 18) {
             header
-            // Two columns when there's room, one in a narrow window.
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 28, alignment: .top)],
-                      alignment: .leading, spacing: 20) {
-                ForEach(metrics) { metric in
-                    AllowanceMeter(metric: metric, runsOut: runsOut(metric.kind, now: now)) {
-                        showLeft.toggle()
+            // Two columns when there's room, one in a narrow window. Not a
+            // LazyVGrid: inside the page's ScrollView it could leave its
+            // items undrawn, and six meters gain nothing from laziness.
+            ViewThatFits(in: .horizontal) {
+                Grid(alignment: .topLeading, horizontalSpacing: 28, verticalSpacing: 20) {
+                    ForEach(pairs.indices, id: \.self) { row in
+                        GridRow {
+                            ForEach(pairs[row]) { metric in
+                                meter(metric, now: now)
+                                    .frame(minWidth: 250, maxWidth: .infinity, alignment: .topLeading)
+                            }
+                            if pairs[row].count == 1 {
+                                Color.clear.frame(minWidth: 250, maxWidth: .infinity, maxHeight: 0)
+                            }
+                        }
                     }
+                }
+                VStack(alignment: .leading, spacing: 20) {
+                    ForEach(metrics) { meter($0, now: now) }
                 }
             }
             .opacity(isStale ? 0.75 : 1)
@@ -34,6 +50,12 @@ struct AllowancesCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .designCard()
+    }
+
+    private func meter(_ metric: MetricDisplay, now: Date) -> some View {
+        AllowanceMeter(metric: metric, runsOut: runsOut(metric.kind, now: now)) {
+            showLeft.toggle()
+        }
     }
 
     /// A forecast worth a line on the meter: the window empties before it

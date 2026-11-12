@@ -193,6 +193,18 @@ enum TranscriptStats {
     }()
     private static let iso = ISO8601DateFormatter()
 
+    private static let usageTag = Array("\"usage\"".utf8)
+    private static let customTitleTag = Array("\"custom-title\"".utf8)
+    private static let aiTitleTag = Array("\"ai-title\"".utf8)
+
+    /// Whether `needle` occurs in the `count` bytes at `bytes`.
+    private static func contains(_ bytes: UnsafeRawPointer, _ count: Int, _ needle: [UInt8]) -> Bool {
+        needle.withUnsafeBytes { memmem(bytes, count, $0.baseAddress, $0.count) != nil }
+    }
+
+    /// Works on the file's bytes: transcripts run to hundreds of megabytes,
+    /// mostly tool output, so lines are found with memchr, the few that
+    /// matter with memmem, and only those are copied and decoded.
     private static func parse(_ fileURL: URL, since: Date) -> (samples: [CachedSample], titles: [String: String]) {
         let decoder = JSONDecoder()
         var samples: [CachedSample] = []
@@ -201,44 +213,54 @@ enum TranscriptStats {
         // Claude Code names each transcript after its session.
         let fileSession = fileURL.deletingPathExtension().lastPathComponent
         autoreleasepool {
-            guard let content = try? String(contentsOf: fileURL, encoding: .utf8) else { return }
-            for line in content.split(separator: "\n") {
-                // Title lines are short; the latest of each kind wins.
-                if line.count < 4000, line.contains("\"custom-title\"") || line.contains("\"ai-title\""),
-                   let title = try? decoder.decode(TitleLine.self, from: Data(line.utf8)),
-                   let session = title.sessionId {
-                    if title.type == "custom-title", let text = title.customTitle, !text.isEmpty {
-                        customTitles[session] = text
-                    } else if title.type == "ai-title", let text = title.aiTitle, !text.isEmpty {
-                        aiTitles[session] = text
+            guard let data = try? Data(contentsOf: fileURL, options: .mappedIfSafe) else { return }
+            data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) in
+                guard let base = buffer.baseAddress else { return }
+                var offset = 0
+                while offset < buffer.count {
+                    let line = base + offset
+                    let remaining = buffer.count - offset
+                    let length = memchr(line, 0x0A, remaining).map { line.distance(to: UnsafeRawPointer($0)) } ?? remaining
+                    offset += length + 1
+                    guard length > 0 else { continue }
+
+                    // Title lines are short; the latest of each kind wins.
+                    if length < 4000,
+                       contains(line, length, customTitleTag) || contains(line, length, aiTitleTag),
+                       let title = try? decoder.decode(TitleLine.self, from: Data(bytes: line, count: length)),
+                       let session = title.sessionId {
+                        if title.type == "custom-title", let text = title.customTitle, !text.isEmpty {
+                            customTitles[session] = text
+                        } else if title.type == "ai-title", let text = title.aiTitle, !text.isEmpty {
+                            aiTitles[session] = text
+                        }
+                        continue
                     }
-                    continue
+                    guard contains(line, length, usageTag),
+                          let entry = try? decoder.decode(Line.self, from: Data(bytes: line, count: length)),
+                          entry.type == "assistant",
+                          let message = entry.message,
+                          let usage = message.usage,
+                          let model = message.model, model != "<synthetic>",
+                          let tsString = entry.timestamp,
+                          let ts = isoFractional.date(from: tsString) ?? iso.date(from: tsString),
+                          ts >= since else { continue }
+
+                    let key = "\(message.id ?? "")|\(entry.requestId ?? "")"
+                    guard key != "|" else { continue }
+
+                    samples.append(CachedSample(
+                        key: key, ts: ts, model: displayName(for: model),
+                        input: usage.input_tokens ?? 0,
+                        output: usage.output_tokens ?? 0,
+                        cacheRead: usage.cache_read_input_tokens ?? 0,
+                        cacheCreate: usage.cache_creation_input_tokens ?? 0,
+                        thinking: usage.output_tokens_details?.thinking_tokens ?? 0,
+                        session: entry.sessionId ?? fileSession,
+                        cwd: entry.cwd, app: entry.entrypoint, effort: entry.effort,
+                        side: entry.isSidechain ?? false
+                    ))
                 }
-                guard line.contains("\"usage\""),
-                      let data = line.data(using: .utf8),
-                      let entry = try? decoder.decode(Line.self, from: data),
-                      entry.type == "assistant",
-                      let message = entry.message,
-                      let usage = message.usage,
-                      let model = message.model, model != "<synthetic>",
-                      let tsString = entry.timestamp,
-                      let ts = isoFractional.date(from: tsString) ?? iso.date(from: tsString),
-                      ts >= since else { continue }
-
-                let key = "\(message.id ?? "")|\(entry.requestId ?? "")"
-                guard key != "|" else { continue }
-
-                samples.append(CachedSample(
-                    key: key, ts: ts, model: displayName(for: model),
-                    input: usage.input_tokens ?? 0,
-                    output: usage.output_tokens ?? 0,
-                    cacheRead: usage.cache_read_input_tokens ?? 0,
-                    cacheCreate: usage.cache_creation_input_tokens ?? 0,
-                    thinking: usage.output_tokens_details?.thinking_tokens ?? 0,
-                    session: entry.sessionId ?? fileSession,
-                    cwd: entry.cwd, app: entry.entrypoint, effort: entry.effort,
-                    side: entry.isSidechain ?? false
-                ))
             }
         }
         return (samples, aiTitles.merging(customTitles) { _, custom in custom })

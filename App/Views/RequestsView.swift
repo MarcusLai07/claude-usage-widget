@@ -84,7 +84,7 @@ struct RequestRow: Identifiable {
 /// Usage › Requests: a ledger of every request, newest first.
 struct RequestsView: View {
     @ObservedObject var analytics: AnalyticsModel
-    @Binding var period: UsagePeriod
+    let period: UsagePeriod
     /// Set from the Sessions tab: show one session's requests.
     @Binding var sessionFilter: String?
 
@@ -161,15 +161,6 @@ struct RequestsView: View {
             }
 
             Spacer(minLength: 8)
-
-            if sessionFilter == nil {
-                Picker("Period", selection: $period) {
-                    ForEach(UsagePeriod.allCases) { Text($0.title).tag($0) }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .fixedSize()
-            }
 
             Button {
                 exportCSV(rows)

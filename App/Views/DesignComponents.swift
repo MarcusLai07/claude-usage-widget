@@ -13,17 +13,30 @@ extension Color {
         })
     }
 
-    static let windowContent = Color(lightHex: 0xF3F3F5, darkHex: 0x1D1D20)
-    static let cardBackground = Color(lightHex: 0xFFFFFF, darkHex: 0x2A2A2E)
-    static let cardStroke = Color.primary.opacity(0.07)
-    /// Weekly chart series — distinct from clay in lightness, dashed for grayscale safety.
-    static let chartIndigo = Color(lightHex: 0x5B53E0, darkHex: 0x9C8CFF)
-    static let chartTeal = Color(lightHex: 0x16A89A, darkHex: 0x5FD9C8)
+    // Flat and dense, as Magpie's data pages: a dark page, panels a step
+    // lighter with a hairline edge.
+    static let windowContent = Color(lightHex: 0xF4F4F6, darkHex: 0x18181A)
+    static let cardBackground = Color(lightHex: 0xFFFFFF, darkHex: 0x212124)
+    static let cardStroke = Color.primary.opacity(0.08)
+    /// Track behind bars and pills.
+    static let track = Color.primary.opacity(0.07)
+
+    /// The data accent (Magpie's periwinkle): first series, bars, heatmaps.
+    static let dataAccent = Color(lightHex: 0x5B67E8, darkHex: 0x9AA5FF)
+    static let chartSky = Color(lightHex: 0x1E8FD6, darkHex: 0x6CC6FF)
+    static let chartTeal = Color(lightHex: 0x12A38F, darkHex: 0x4FD6BF)
+    static let chartAmber = Color(lightHex: 0xD18A00, darkHex: 0xF5C04A)
+    static let chartPink = Color(lightHex: 0xD6488E, darkHex: 0xF27FB8)
+    static let chartViolet = Color(lightHex: 0x8A4FD8, darkHex: 0xC09BFF)
+    static let chartGreen = Color(lightHex: 0x2E9E4F, darkHex: 0x6FD98C)
+    /// Kept for older call sites: the weekly series.
+    static let chartIndigo = dataAccent
 }
 
-/// Stable model → color assignment for analytics charts, in share order.
-/// No orange: next to clay it reads as the same color.
-let modelPalette: [Color] = [.clay, .chartIndigo, .chartTeal, .purple, .green, .yellow, .pink, .gray]
+/// Stable model → color assignment for charts, in share order: the data
+/// accent first, then hues far enough apart to tell stacked bars apart.
+let modelPalette: [Color] = [.dataAccent, .chartSky, .chartTeal, .chartAmber, .chartPink,
+                             .chartViolet, .chartGreen, .gray]
 
 /// "7.16B", "22.8M", "267K": three significant digits, as Magpie shows them.
 func compactTokens(_ count: Int) -> String {
@@ -51,11 +64,114 @@ func shortDateTime(_ date: Date) -> String {
 // MARK: - Card
 
 extension View {
-    /// Window content card: 12 pt radius, hairline stroke, 16 pt padding.
-    func designCard() -> some View {
-        padding(16)
-            .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.cardStroke, lineWidth: 0.5))
+    /// Window content card: 10 pt radius, hairline stroke, 16 pt padding.
+    func designCard(padding: CGFloat = 16) -> some View {
+        self.padding(padding)
+            .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.cardStroke, lineWidth: 0.5))
+    }
+}
+
+/// A section's small-caps label ("ALLOWANCES"), as Magpie heads its blocks.
+struct SectionLabel: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text.uppercased())
+            .font(.system(size: 11, weight: .semibold))
+            .kerning(0.7)
+            .foregroundStyle(.secondary)
+    }
+}
+
+/// A group of pill buttons, one selected (Magpie's segmented groups).
+struct PillTabs<Value: Hashable>: View {
+    let options: [(value: Value, title: String)]
+    @Binding var selection: Value
+    var size: CGFloat = 12.5
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(options.indices, id: \.self) { index in
+                let option = options[index]
+                let selected = option.value == selection
+                Button {
+                    selection = option.value
+                } label: {
+                    Text(option.title)
+                        .font(.system(size: size, weight: selected ? .semibold : .regular))
+                        .foregroundStyle(selected ? Color.primary : Color.secondary)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(selected ? Color.primary.opacity(0.11) : .clear,
+                                    in: RoundedRectangle(cornerRadius: 6))
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(2)
+        .background(Color.track, in: RoundedRectangle(cornerRadius: 8))
+        .fixedSize()
+    }
+}
+
+/// A stat tile's parts: small label, figure, muted caption (Magpie's strip).
+struct StatTile: View {
+    let label: String
+    let value: String
+    var caption: String? = nil
+    var valueColor: Color? = nil
+    /// 0–100: a thin bar under the figure (Magpie's cache hit rate).
+    var progress: Double? = nil
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.system(size: 11.5))
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.system(size: 24, weight: .medium).monospacedDigit())
+                .foregroundStyle(valueColor.map(AnyShapeStyle.init) ?? AnyShapeStyle(.primary))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            if let progress {
+                UsageBarTinted(percent: progress, color: .costGreen)
+                    .padding(.vertical, 2)
+            }
+            if let caption {
+                Text(caption)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+    }
+}
+
+/// Tiles joined in one panel with hairline dividers.
+struct StatStripPanel<Content: View>: View {
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 0) {
+            content()
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.cardStroke, lineWidth: 0.5))
+    }
+}
+
+/// A thin vertical hairline between joined tiles.
+struct TileDivider: View {
+    var body: some View {
+        Rectangle().fill(Color.cardStroke).frame(width: 0.5)
     }
 }
 

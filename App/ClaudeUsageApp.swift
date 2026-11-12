@@ -28,7 +28,7 @@ struct ClaudeUsageApp: App {
                 .environmentObject(refresher)
                 .environmentObject(router)
         }
-        .defaultSize(width: 900, height: 640)
+        .defaultSize(width: 1180, height: 820)
         .defaultLaunchBehavior(.suppressed)
         // Tapping a widget opens claudeusage://open. The only external events
         // this app receives are its own URL scheme, so match everything.

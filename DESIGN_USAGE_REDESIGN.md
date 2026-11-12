@@ -451,3 +451,23 @@ own calls, as Magpie's Context tab does.
 - Tokens everywhere are Magpie's (in + out + cache read + write), shown with
   three significant digits. The stat strip is Tokens · Requests · Cost ·
   Cache hit rate · Output speed. Periods gain 90 days.
+
+### Phase 7 notes (as built)
+
+- One toolbar row on the Usage page (no page header): tab pills, period pills
+  (Today · 7 · 30 · 90 days · All · Custom with a from/to popover), the age,
+  refresh, and the period's ≈ cost "API prices". It wraps to two rows when
+  narrow. The period now drives every tab.
+- Visual language: `PillTabs`, `SectionLabel` (small caps), `StatTile` /
+  `StatStripPanel` (medium-weight monospaced figures, a hit-rate bar),
+  flatter 10 pt panels with hairlines, darker page in dark mode.
+- Palette: periwinkle data accent, then sky, teal, amber, pink, violet, green
+  (`modelPalette`); cost in green. Limits use series colors (Session
+  periwinkle, Weekly sky, Fable teal) and escalate to orange/red from 70/90%.
+- Allowances: the section head holds Trends (Cycle / 2 days / Off), Hide
+  account and Used/Left; the card shows the account with the plan at right;
+  the chart's head keeps only the past-cycle picker.
+- Claude Code: stat strip, activity bars with Tokens/Cost/Requests tabs,
+  Models and Apps side by side, Projects below, as one-line bar lists with
+  cost (details on hover).
+- Window default 1180×820, minimum 940×600.

@@ -4,7 +4,7 @@ import SwiftUI
 /// Clicking a session shows its requests.
 struct SessionsView: View {
     @ObservedObject var analytics: AnalyticsModel
-    @Binding var period: UsagePeriod
+    let period: UsagePeriod
     /// Opens the Requests tab filtered to a session.
     var openSession: (String) -> Void
 
@@ -18,12 +18,6 @@ struct SessionsView: View {
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Picker("Period", selection: $period) {
-                        ForEach(UsagePeriod.allCases) { Text($0.title).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .fixedSize()
                 }
                 if projects.isEmpty {
                     EmptyStateView(icon: "tray",

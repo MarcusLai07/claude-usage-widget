@@ -4,9 +4,44 @@ import SwiftUI
 /// The stretch of Claude Code activity the token sections cover. The
 /// allowances above them are always "now".
 enum UsagePeriod: String, CaseIterable, Identifiable {
-    case today, week, month, quarter, all
+    case today, week, month, quarter, all, custom
 
     var id: String { rawValue }
+
+    /// The Custom period's days, remembered across launches (start of the
+    /// first day through the end of the last).
+    static var customRange: ClosedRange<Date> {
+        get {
+            let defaults = UserDefaults.standard
+            let calendar = Calendar.current
+            let now = Date()
+            let start = (defaults.object(forKey: "customPeriodStart") as? Double).map(Date.init(timeIntervalSince1970:))
+                ?? calendar.date(byAdding: .day, value: -13, to: calendar.startOfDay(for: now))!
+            let end = (defaults.object(forKey: "customPeriodEnd") as? Double).map(Date.init(timeIntervalSince1970:))
+                ?? now
+            let lower = calendar.startOfDay(for: min(start, end))
+            let upper = calendar.date(byAdding: DateComponents(day: 1, second: -1),
+                                      to: calendar.startOfDay(for: max(start, end)))!
+            return lower...upper
+        }
+        set {
+            UserDefaults.standard.set(newValue.lowerBound.timeIntervalSince1970, forKey: "customPeriodStart")
+            UserDefaults.standard.set(newValue.upperBound.timeIntervalSince1970, forKey: "customPeriodEnd")
+        }
+    }
+
+    /// The period's span; every period but Custom runs to now.
+    func range(now: Date = Date()) -> ClosedRange<Date> {
+        if self == .custom { return Self.customRange }
+        return since(now: now)...max(now, since(now: now))
+    }
+
+    /// Changes when the period's span does: memo key for summaries.
+    var cacheKey: String {
+        self == .custom
+            ? "custom-\(Int(Self.customRange.lowerBound.timeIntervalSince1970))-\(Int(Self.customRange.upperBound.timeIntervalSince1970))"
+            : rawValue
+    }
 
     var title: String {
         switch self {
@@ -15,6 +50,7 @@ enum UsagePeriod: String, CaseIterable, Identifiable {
         case .month: return "30 days"
         case .quarter: return "90 days"
         case .all: return "All"
+        case .custom: return "Custom"
         }
     }
 
@@ -25,6 +61,7 @@ enum UsagePeriod: String, CaseIterable, Identifiable {
         case .month: return now.addingTimeInterval(-30 * 86400)
         case .quarter: return now.addingTimeInterval(-90 * 86400)
         case .all: return .distantPast
+        case .custom: return Self.customRange.lowerBound
         }
     }
 }
@@ -55,8 +92,10 @@ struct UsageTotals {
         let prompt = input + cacheRead + cacheWrite
         return prompt > 0 ? Double(cacheRead) / Double(prompt) * 100 : 0
     }
+    /// Rounded down to a tenth, so a failure never reads as 100%.
     var successRate: Double {
-        requests > 0 ? Double(requests - failed) / Double(requests) * 100 : 100
+        guard requests > 0 else { return 100 }
+        return (Double(requests - failed) / Double(requests) * 1000).rounded(.down) / 10
     }
     /// Output tokens per second across timed replies.
     var outputSpeed: Double? {
@@ -112,6 +151,7 @@ struct ActivityBar: Identifiable {
 struct UsageOverview {
     let period: UsagePeriod
     let since: Date
+    let until: Date
     let totals: UsageTotals
     let bars: [ActivityBar]
     /// .hour for Today, .day up to two months, else .weekOfYear.
@@ -170,8 +210,8 @@ final class AnalyticsModel: ObservableObject {
     /// Session id → title, from the transcripts' title lines.
     @Published private(set) var sessionTitles: [String: String] = [:]
 
-    private var overviews: [UsagePeriod: (at: Date, overview: UsageOverview)] = [:]
-    private var sessionLists: [UsagePeriod: (at: Date, projects: [ProjectSessions])] = [:]
+    private var overviews: [String: (at: Date, overview: UsageOverview)] = [:]
+    private var sessionLists: [String: (at: Date, projects: [ProjectSessions])] = [:]
 
     func grantAccess() {
         if ClaudeFolderAccess.requestAccess() != nil {
@@ -240,34 +280,37 @@ final class AnalyticsModel: ObservableObject {
     /// The period's summary, reused for a minute (views ask on every draw).
     func overview(_ period: UsagePeriod) -> UsageOverview {
         let now = Date()
-        if let cached = overviews[period], now.timeIntervalSince(cached.at) < 60 {
+        if let cached = overviews[period.cacheKey], now.timeIntervalSince(cached.at) < 60 {
             return cached.overview
         }
         let overview = Self.summarize(tokenSamples, period: period, now: now)
-        overviews[period] = (now, overview)
+        overviews[period.cacheKey] = (now, overview)
         return overview
     }
 
     /// Requests in a period, newest first (the Requests tab).
     func samples(in period: UsagePeriod) -> [TokenSample] {
-        let since = period.since()
-        return tokenSamples.reversed().prefix { $0.ts >= since }.map { $0 }
+        let range = period.range()
+        return tokenSamples.reversed()
+            .drop { $0.ts > range.upperBound }
+            .prefix { $0.ts >= range.lowerBound }
+            .map { $0 }
     }
 
     /// Sessions active in the period, grouped by project; both ordered by
     /// latest activity. Reused for a minute.
     func sessions(_ period: UsagePeriod) -> [ProjectSessions] {
         let now = Date()
-        if let cached = sessionLists[period], now.timeIntervalSince(cached.at) < 60 {
+        if let cached = sessionLists[period.cacheKey], now.timeIntervalSince(cached.at) < 60 {
             return cached.projects
         }
-        let projects = Self.groupSessions(tokenSamples, titles: sessionTitles, since: period.since(now: now))
-        sessionLists[period] = (now, projects)
+        let projects = Self.groupSessions(tokenSamples, titles: sessionTitles, range: period.range(now: now))
+        sessionLists[period.cacheKey] = (now, projects)
         return projects
     }
 
     nonisolated static func groupSessions(_ all: [TokenSample], titles: [String: String],
-                                          since: Date) -> [ProjectSessions] {
+                                          range: ClosedRange<Date>) -> [ProjectSessions] {
         struct Acc {
             var project: String?
             var first: Date
@@ -278,7 +321,7 @@ final class AnalyticsModel: ObservableObject {
             var apps: Set<String> = []
         }
         // Whole sessions: every request of a session active in the period.
-        let active = Set(all.lazy.filter { $0.ts >= since }.map(\.sessionID))
+        let active = Set(all.lazy.filter { range.contains($0.ts) }.map(\.sessionID))
         var bySession: [String: Acc] = [:]
         for sample in all where active.contains(sample.sessionID) {
             var acc = bySession[sample.sessionID]
@@ -320,9 +363,11 @@ final class AnalyticsModel: ObservableObject {
     // MARK: Summaries
 
     nonisolated static func summarize(_ all: [TokenSample], period: UsagePeriod, now: Date) -> UsageOverview {
-        let since = period.since(now: now)
+        let range = period.range(now: now)
+        let since = range.lowerBound
         let start = all.firstIndex { $0.ts >= since } ?? all.endIndex
-        let samples = all[start...]
+        let end = all.lastIndex { $0.ts <= range.upperBound }.map { $0 + 1 } ?? start
+        let samples = all[start..<max(start, end)]
 
         var totals = UsageTotals()
         var sessions = Set<String>()
@@ -372,8 +417,8 @@ final class AnalyticsModel: ObservableObject {
         // Bars: hours today, days up to two months, else weeks.
         let calendar = Calendar.current
         let first = samples.first?.ts ?? now
-        let span = now.timeIntervalSince(max(since, first))
-        let unit: Calendar.Component = period == .today ? .hour : (span <= 62 * 86400 ? .day : .weekOfYear)
+        let span = min(now, range.upperBound).timeIntervalSince(max(since, first))
+        let unit: Calendar.Component = span <= 2 * 86400 ? .hour : (span <= 62 * 86400 ? .day : .weekOfYear)
         var buckets: [String: ActivityBar] = [:]
         var perBar: [Date: Int] = [:]
         for sample in samples where !sample.failed {
@@ -389,7 +434,7 @@ final class AnalyticsModel: ObservableObject {
         let peak = perBar.max { $0.value < $1.value }.map { (start: $0.key, tokens: $0.value) }
 
         return UsageOverview(
-            period: period, since: since, totals: totals,
+            period: period, since: since, until: range.upperBound, totals: totals,
             bars: buckets.values.sorted { $0.start < $1.start },
             barUnit: unit, peak: peak,
             apps: rows(apps), models: rows(models), projects: rows(projects)

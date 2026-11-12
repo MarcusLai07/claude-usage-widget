@@ -1,13 +1,14 @@
 import SwiftUI
 
 /// Every limit the account reports, in one card (Magpie's Allowances card):
-/// account header with plan badge, then one meter per window answering how
-/// much, until when, and whether you're on pace.
+/// the account, then one meter per window answering how much, until when,
+/// and whether you're on pace, then what was left over time. The controls
+/// (Trends, Hide account, Used/Left) sit in the section head above it.
 struct AllowancesCard: View {
     let snapshot: UsageSnapshot
     let profile: AccountProfile?
+    var hideAccount = false
     @Binding var showLeft: Bool
-    @Binding var hideAccount: Bool
     var isStale = false
     @ObservedObject var trends: TrendModel
 
@@ -19,13 +20,13 @@ struct AllowancesCard: View {
         let pairs = stride(from: 0, to: metrics.count, by: 2).map {
             Array(metrics[$0..<min($0 + 2, metrics.count)])
         }
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 16) {
             header
             // Two columns when there's room, one in a narrow window. Not a
             // LazyVGrid: inside the page's ScrollView it could leave its
             // items undrawn, and six meters gain nothing from laziness.
             ViewThatFits(in: .horizontal) {
-                Grid(alignment: .topLeading, horizontalSpacing: 28, verticalSpacing: 20) {
+                Grid(alignment: .topLeading, horizontalSpacing: 28, verticalSpacing: 18) {
                     ForEach(pairs.indices, id: \.self) { row in
                         GridRow {
                             ForEach(pairs[row]) { metric in
@@ -38,18 +39,44 @@ struct AllowancesCard: View {
                         }
                     }
                 }
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 18) {
                     ForEach(metrics) { meter($0, now: now) }
                 }
             }
             .opacity(isStale ? 0.75 : 1)
             if trends.loadedAt != nil {
-                Divider()
                 LeftOverTimeView(snapshot: snapshot, trends: trends)
+                    .padding(.top, 4)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .designCard()
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                SunburstMark(size: 17)
+                Text("Claude")
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            HStack {
+                Text(accountLine)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if let plan = profile?.plan {
+                    Text(plan)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private var accountLine: String {
+        guard let email = profile?.email else { return "Plan limits" }
+        return hideAccount ? AccountProfile.masked(email) : email
     }
 
     private func meter(_ metric: MetricDisplay, now: Date) -> some View {
@@ -65,56 +92,11 @@ struct AllowancesCard: View {
         if case .runsOut = forecast { return forecast }
         return nil
     }
-
-    private var header: some View {
-        HStack(alignment: .center, spacing: 11) {
-            SunburstMark(size: 26)
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 7) {
-                    Text("Claude")
-                        .font(.system(size: 15, weight: .semibold))
-                    if let plan = profile?.plan {
-                        PlanBadge(text: plan)
-                    }
-                }
-                Text(accountLine)
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(.secondary)
-            }
-            Spacer(minLength: 12)
-            Picker("Show", selection: $showLeft) {
-                Text("Used").tag(false)
-                Text("Left").tag(true)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .controlSize(.small)
-            .fixedSize()
-            .help("Show what's used or what's left of each limit")
-            if profile?.email != nil {
-                Button {
-                    hideAccount.toggle()
-                } label: {
-                    Image(systemName: hideAccount ? "eye.slash" : "eye")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 26, height: 22)
-                        .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
-                }
-                .buttonStyle(.plain)
-                .help(hideAccount ? "Show account email" : "Hide account email (for screenshots)")
-            }
-        }
-    }
-
-    private var accountLine: String {
-        guard let email = profile?.email else { return "Plan limits" }
-        return hideAccount ? AccountProfile.masked(email) : email
-    }
 }
 
-/// One window: name and figure, bar, then "Resets Tue 6:00 PM · in 5d ·
-/// Pace −8%". Clicking the figure flips Used/Left everywhere.
+/// One window: name and figure, a thin bar in the window's series color
+/// (orange, then red, near the limit), then "Resets Tue 18:00 · in 5d ·
+/// Pace −7%". Clicking the figure flips Used/Left everywhere.
 struct AllowanceMeter: View {
     let metric: MetricDisplay
     /// "Runs out Sat 14:00 at this pace", when it will.
@@ -122,18 +104,25 @@ struct AllowanceMeter: View {
     var onToggleMode: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 7) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline) {
                 Text(metric.name)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(.secondary)
                 Spacer(minLength: 8)
                 Button(action: onToggleMode) {
-                    MetricValue(metric: metric, size: 15)
+                    (Text(metric.valueText)
+                        .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                        .foregroundStyle(metric.percent >= 70 ? metric.color : Color.primary)
+                     + Text(metric.unitText.map { " \($0)" } ?? "")
+                        .font(.system(size: 12.5, weight: .semibold))
+                        .foregroundStyle(Color.primary))
                 }
                 .buttonStyle(.plain)
                 .help(metric.showLeft ? "Show what's used" : "Show what's left")
             }
-            UsageBar(percent: metric.shownPercent, height: 7, tint: metric.color)
+            UsageBar(percent: metric.shownPercent, height: 5,
+                     tint: metric.kind.meterColor(percentUsed: metric.percent))
             VStack(alignment: .leading, spacing: 2) {
                 MetricCaption(metric: metric, font: .system(size: 11.5), countdown: true)
                     .fixedSize(horizontal: false, vertical: true)

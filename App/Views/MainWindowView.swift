@@ -43,7 +43,7 @@ struct MainWindowView: View {
                 }
             }
         }
-        .frame(minWidth: 760, minHeight: 520)
+        .frame(minWidth: 940, minHeight: 600)
         // Widget taps arrive as claudeusage://open; as an accessory (menu bar)
         // app we must activate explicitly or the window opens behind others.
         .onOpenURL { _ in

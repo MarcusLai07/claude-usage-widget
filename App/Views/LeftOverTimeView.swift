@@ -18,13 +18,19 @@ extension MetricKind {
     /// Each window's line color, shared by the chart and its legend.
     var chartColor: Color {
         switch self {
-        case .session: return .clay
-        case .weekly: return .chartIndigo
+        case .session: return .dataAccent
+        case .weekly: return .chartSky
         case .weeklyFable: return .chartTeal
-        case .weeklyOpus: return .purple
-        case .weeklySonnet: return .green
-        case .extraUsage: return .gray
+        case .weeklyOpus: return .chartViolet
+        case .weeklySonnet: return .chartGreen
+        case .extraUsage: return .chartAmber
         }
+    }
+
+    /// A limit's bar: its series color until it nears the limit, then the
+    /// escalation colors (orange from 70%, red from 90%).
+    func meterColor(percentUsed: Double) -> Color {
+        percentUsed >= 70 ? usageColor(percentUsed) : chartColor
     }
 }
 
@@ -51,10 +57,11 @@ struct LeftOverTimeView: View {
             guard snapshot.window(for: kind) != nil else { return nil }
             return trends.line(kind)
         }
-        if !lines.isEmpty {
+        // Trends: Off (in the Allowances head) hides the curves entirely.
+        if !lines.isEmpty && range != .off {
             VStack(alignment: .leading, spacing: 8) {
                 head(forecast: picked == nil ? headForecast(lines, now: now) : nil)
-                if range != .off, let plot = plot(lines, now: now) {
+                if let plot = plot(lines, now: now) {
                     chart(plot, now: now)
                     axisLabels(plot, now: now)
                     legend(plot)
@@ -79,35 +86,41 @@ struct LeftOverTimeView: View {
     private func head(forecast: Forecast?) -> some View {
         HStack(spacing: 10) {
             Text("Left over time")
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 12))
                 .foregroundStyle(.secondary)
             if let forecast {
                 ForecastLine(forecast: forecast, font: .system(size: 11.5))
                     .lineLimit(1)
             }
             Spacer()
-            Menu {
-                Picker("Range", selection: selection) {
-                    ForEach(TrendRange.allCases, id: \.self) { range in
-                        Text(range.title).tag(range.rawValue)
-                    }
-                }
-                .pickerStyle(.inline)
-                if !trends.pastCycles.isEmpty {
-                    Picker("Past cycles", selection: selection) {
-                        ForEach(trends.pastCycles) { cycle in
-                            Text(cycleLabel(cycle)).tag(pastTag(cycle))
-                        }
+            // The range is the section head's Trends menu; here, in Cycle
+            // range, a recorded past cycle can be picked instead.
+            if range == .cycle {
+                Menu {
+                    Picker("Cycle", selection: selection) {
+                        Text("Current cycle").tag(TrendRange.cycle.rawValue)
                     }
                     .pickerStyle(.inline)
+                    if !trends.pastCycles.isEmpty {
+                        Picker("Past cycles", selection: selection) {
+                            ForEach(trends.pastCycles) { cycle in
+                                Text(cycleLabel(cycle)).tag(pastTag(cycle))
+                            }
+                        }
+                        .pickerStyle(.inline)
+                    }
+                } label: {
+                    Text(picked.map(cycleLabel) ?? "Cycle")
+                        .font(.system(size: 11.5))
                 }
-            } label: {
-                Text(picked.map(cycleLabel) ?? range.title)
-                    .font(.system(size: 11.5, weight: .medium))
+                .menuStyle(.borderlessButton)
+                .fixedSize()
+                .help("Choose a recorded cycle")
+            } else {
+                Text(range.title)
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(.secondary)
             }
-            .menuStyle(.borderlessButton)
-            .fixedSize()
-            .help("Show the current cycle, the last two days, or a recorded past cycle")
         }
     }
 

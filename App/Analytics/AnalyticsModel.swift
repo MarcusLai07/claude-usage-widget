@@ -210,6 +210,8 @@ final class AnalyticsModel: ObservableObject {
     @Published private(set) var modelColors: [String: Color] = [:]
     /// Session id → title, from the transcripts' title lines.
     @Published private(set) var sessionTitles: [String: String] = [:]
+    /// Claude Code's auto-compact window setting, when set.
+    @Published private(set) var compactSetting: Int?
 
     private var overviews: [String: (at: Date, overview: UsageOverview)] = [:]
     private var sessionLists: [String: (at: Date, projects: [ProjectSessions])] = [:]
@@ -257,10 +259,11 @@ final class AnalyticsModel: ObservableObject {
             }
             var scan = TranscriptStats.scan(claudeFolder: folder, desktopFolder: desktop, since: .distantPast)
             scan.samples.sort { $0.ts < $1.ts }
-            return scan
+            return (scan, ContextTuning.compactSetting(claudeFolder: folder))
         }.value
         PerfLog.record(source: "scan", started: scanStarted, error: nil)
-        apply(scan)
+        compactSetting = scan.1
+        apply(scan.0)
     }
 
     /// Takes in a scan's requests (sorted oldest first) and session titles.

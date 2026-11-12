@@ -504,3 +504,24 @@ own calls, as Magpie's Context tab does.
   28% vs 29%). Top sessions match Magpie's (1.3M, 1.29M, 1.18M) and so does
   the busiest hour (Wed 16:00).
 - `SessionsDerived` computes it all off the main thread per filter change.
+
+### Phase 10 notes (as built)
+
+- Usage › Context ("Tuned for you"): `ContextTuning` ports Magpie's
+  `internal/tune` — conversations (a subagent's transcript is its own),
+  compactions (a prompt dropping below 60% of one ≥ 20K), growth, the summary
+  a compaction leaves, the rework after it; every auto-compact window from a
+  floor to the model's window replayed on the period's calls; of windows
+  within 1% of the cheapest the largest; advice only for 3%+ savings. Cache
+  lifetime: 5 minutes against an hour on the real gaps between calls, for the
+  main conversation and for subagents.
+- Tokens are weighed by each model's own prices (Opus 5.5 reads at 0.05×
+  input), so savings also show as ≈$.
+- The current window is Claude Code's `autoCompactWindow` (settings.json) or
+  `CLAUDE_CODE_AUTO_COMPACT_WINDOW`, else the model's whole window — as
+  Claude Code runs Claude models. "Copy setting" puts
+  `"autoCompactWindow": N` on the clipboard; the app never edits Claude
+  Code's configuration.
+- On this Mac, 7 days: Opus 5.5 now 1M → 410K, 18% fewer weighted tokens
+  (≈$78); main-conversation cache already leanest at 1 hour (5 min +21%);
+  subagents leanest at 5 min (1 hour +18%). Transcript cache v5.

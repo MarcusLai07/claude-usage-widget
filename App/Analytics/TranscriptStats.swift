@@ -31,6 +31,9 @@ struct TokenSample: Identifiable {
     let effort: String?
     /// Sent by a subagent rather than the main conversation.
     let isSidechain: Bool
+    /// A subagent's own transcript (its file name), nil for the main one:
+    /// each subagent is a conversation of its own.
+    let agent: String?
     /// An API error reply (no tokens), with its error code.
     let error: String?
     /// From the prompt (or the previous reply) to this reply's last line.
@@ -45,13 +48,16 @@ struct TokenSample: Identifiable {
         TokenSample(id: id, ts: ts, model: model, input: input, output: output,
                     cacheRead: cacheRead, cacheWrite: cacheWrite, cacheWrite1h: cacheWrite1h,
                     thinking: thinking, sessionID: sessionID, project: project, app: app,
-                    effort: effort, isSidechain: isSidechain, error: error,
+                    effort: effort, isSidechain: isSidechain, agent: agent, error: error,
                     durationMs: durationMs, cost: cost)
     }
     /// Every token the call moved, as Magpie counts them.
     var tokens: Int { input + output + cacheRead + cacheWrite }
     /// The prompt as the model saw it: everything read, cached or not.
     var context: Int { input + cacheWrite + cacheRead }
+    /// The conversation it belongs to: the session's main one, or one of
+    /// its subagents'.
+    var stream: String { agent.map { "\(sessionID)/\($0)" } ?? sessionID }
 }
 
 /// What a scan of the transcripts found.
@@ -137,6 +143,7 @@ enum TranscriptStats {
         let app: String?
         let effort: String?
         let side: Bool
+        let agent: String?
         let error: String?
         let durationMs: Int?
 
@@ -144,7 +151,7 @@ enum TranscriptStats {
             case key = "k", ts = "t", model = "m", input = "i", output = "o"
             case cacheRead = "r", cacheCreate = "w", cacheCreate1h = "w1", thinking = "th"
             case session = "s", cwd = "c", app = "a", effort = "e", side = "sc"
-            case error = "er", durationMs = "d"
+            case agent = "ag", error = "er", durationMs = "d"
         }
     }
 
@@ -158,15 +165,16 @@ enum TranscriptStats {
     private static var cacheURL: URL? {
         FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: AppGroupStore.suiteName)?
-            .appendingPathComponent("transcript-cache-v4.json")
+            .appendingPathComponent("transcript-cache-v5.json")
     }
 
     /// Earlier cache formats: without sessions, folders and apps (v1), without
-    /// session titles (v2), or keeping a message's first line, not its last,
-    /// and no failed calls or timings (v3).
+    /// session titles (v2), keeping a message's first line, not its last,
+    /// and no failed calls or timings (v3), or without subagent files (v4).
     private static var legacyCacheURLs: [URL] {
         guard let folder = cacheURL?.deletingLastPathComponent() else { return [] }
-        return ["transcript-cache.json", "transcript-cache-v2.json", "transcript-cache-v3.json"].map {
+        return ["transcript-cache.json", "transcript-cache-v2.json", "transcript-cache-v3.json",
+                "transcript-cache-v4.json"].map {
             folder.appendingPathComponent($0)
         }
     }
@@ -242,7 +250,7 @@ enum TranscriptStats {
                     cacheRead: sample.cacheRead, cacheWrite: sample.cacheCreate,
                     cacheWrite1h: sample.cacheCreate1h, thinking: sample.thinking,
                     sessionID: sample.session, project: sample.cwd, app: sample.app,
-                    effort: sample.effort, isSidechain: sample.side,
+                    effort: sample.effort, isSidechain: sample.side, agent: sample.agent,
                     error: sample.error, durationMs: sample.durationMs,
                     cost: sample.error != nil ? 0 : ModelPricing.cost(
                         model: sample.model, input: sample.input, output: sample.output,
@@ -323,8 +331,10 @@ enum TranscriptStats {
         var lastReply: Date?
         var customTitles: [String: String] = [:]
         var aiTitles: [String: String] = [:]
-        // Claude Code names each transcript after its session.
+        // Claude Code names each transcript after its session; a subagent's
+        // sits in the session's `subagents` folder under its own name.
         let fileSession = fileURL.deletingPathExtension().lastPathComponent
+        let agent = fileURL.deletingLastPathComponent().lastPathComponent == "subagents" ? fileSession : nil
         autoreleasepool {
             guard let data = try? Data(contentsOf: fileURL, options: .mappedIfSafe) else { return }
             data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) in
@@ -394,6 +404,7 @@ enum TranscriptStats {
                         cwd: entry.cwd, app: entry.entrypoint,
                         effort: entry.perTurnEffort?.value ?? entry.effort?.value,
                         side: entry.isSidechain ?? false,
+                        agent: agent,
                         error: failed ? (entry.error?.value ?? "unknown") : nil,
                         durationMs: failed ? nil : duration
                     )

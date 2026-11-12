@@ -2,7 +2,7 @@ import SwiftUI
 import WidgetKit
 
 enum UsageTab: String, CaseIterable, Identifiable {
-    case overview, requests, sessions
+    case overview, requests, sessions, context
 
     var id: String { rawValue }
     var title: String {
@@ -10,6 +10,7 @@ enum UsageTab: String, CaseIterable, Identifiable {
         case .overview: return "Overview"
         case .requests: return "Requests"
         case .sessions: return "Sessions"
+        case .context: return "Context"
         }
     }
 }
@@ -170,6 +171,11 @@ struct UsageView: View {
                     tab = .requests
                 }
                 .padding(20)
+            }
+        case .context:
+            ScrollView {
+                ContextView(analytics: analytics, period: period)
+                    .padding(20)
             }
         }
     }

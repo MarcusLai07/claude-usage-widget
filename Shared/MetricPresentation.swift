@@ -27,9 +27,13 @@ enum MetricPresentation {
                                      valueText: "\(money(used)) / \(limitText)",
                                      resetsAt: nil, caption: "Prepaid credits")
             }
+            // Nothing used and no reset yet: the window starts with your next
+            // message (Anthropic reports the 5-hour window this way).
+            let notStarted = window.resetsAt == nil && percent == 0
             return MetricDisplay(kind: kind, name: kind.title, percent: percent,
                                  valueText: "\(Int(percent))%",
-                                 resetsAt: window.resetsAt, caption: nil)
+                                 resetsAt: window.resetsAt,
+                                 caption: notStarted ? "Not started" : nil)
         }
     }
 
@@ -56,14 +60,27 @@ struct MetricBarRow: View {
             }
             UsageBar(percent: metric.percent)
             if showCaption {
-                if let resetsAt = metric.resetsAt {
-                    ResetCaption(date: resetsAt, percent: metric.percent, font: .system(size: 10.5))
-                } else if let caption = metric.caption {
-                    Text(caption)
-                        .font(.system(size: 10.5))
-                        .foregroundStyle(.tertiary)
-                }
+                MetricCaption(metric: metric, font: .system(size: 10.5))
             }
+        }
+    }
+}
+
+/// A metric's reset line, or its caption ("Not started", "Prepaid credits")
+/// when it has no reset. Draws nothing when it has neither.
+struct MetricCaption: View {
+    let metric: MetricDisplay
+    var font: Font = .caption2
+
+    var hasContent: Bool { metric.resetsAt != nil || metric.caption != nil }
+
+    var body: some View {
+        if let resetsAt = metric.resetsAt {
+            ResetCaption(date: resetsAt, percent: metric.percent, font: font)
+        } else if let caption = metric.caption {
+            Text(caption)
+                .font(font)
+                .foregroundStyle(.tertiary)
         }
     }
 }

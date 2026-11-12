@@ -60,7 +60,8 @@ pkill -x ClaudeUsage 2>/dev/null || true
 sleep 1
 
 rm -rf "$APP"
-ditto dist/ClaudeUsage.app "$APP"
+ditto build.noindex/Build/Products/Release/ClaudeUsage.app "$APP"
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$APP" >/dev/null 2>&1 || true
 
 NEW_LEFT=$(days_left)
 VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist" 2>/dev/null || echo '?')

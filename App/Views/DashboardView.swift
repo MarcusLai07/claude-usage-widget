@@ -67,10 +67,7 @@ struct DashboardView: View {
                     .font(.system(size: 11.5))
                     .foregroundStyle(.tertiary)
                     .padding(.init(top: 1, leading: 0, bottom: 8, trailing: 0))
-                if let resetsAt = metric.resetsAt {
-                    ResetCaption(date: resetsAt, percent: metric.percent,
-                                 font: .system(size: 12.5, weight: .medium))
-                }
+                MetricCaption(metric: metric, font: .system(size: 12.5, weight: .medium))
             }
             Spacer(minLength: 0)
         }

@@ -33,12 +33,37 @@ enum UsageAPI {
         let currency: String?
     }
 
+    /// Decodes a value the endpoint may send in a shape this version doesn't
+    /// expect: a mismatch yields nil instead of failing the whole response.
+    private struct Lenient<T: Decodable>: Decodable {
+        let value: T?
+        init(from decoder: Decoder) throws { value = try? T(from: decoder) }
+    }
+
+    /// One row of the endpoint's `limits[]`, the meters Claude Code's /usage
+    /// renders as sent. `kind` is "session", "weekly_all" or "weekly_scoped";
+    /// a scoped row names its model ("Fable") or surface.
+    private struct APILimit: Decodable {
+        struct Named: Decodable { let display_name: String? }
+        struct Scope: Decodable {
+            let model: Named?
+            let surface: Named?
+        }
+        let kind: String?
+        let percent: Double?
+        let utilization: Double?
+        let resets_at: String?
+        let scope: Scope?
+    }
+
     private struct APIResponse: Decodable {
         let five_hour: APIWindow?
         let seven_day: APIWindow?
         let seven_day_opus: APIWindow?
         let seven_day_sonnet: APIWindow?
+        let seven_day_overage_included: Lenient<APIWindow>?
         let extra_usage: APIExtra?
+        let limits: Lenient<[Lenient<APILimit>]>?
     }
 
     static func fetchUsage() async throws -> UsageSnapshot {
@@ -71,10 +96,13 @@ enum UsageAPI {
     }
 
     private static func snapshot(from api: APIResponse) -> UsageSnapshot {
-        UsageSnapshot(
+        let rows = (api.limits?.value ?? []).compactMap(\.value)
+        var snapshot = UsageSnapshot(
             fetchedAt: Date(),
-            session: window(api.five_hour),
-            weekly: window(api.seven_day),
+            // The named keys first; the limits[] rows stand in if the
+            // endpoint ever stops sending them.
+            session: window(api.five_hour) ?? window(rows.first { $0.kind == "session" }),
+            weekly: window(api.seven_day) ?? window(rows.first { $0.kind == "weekly_all" }),
             weeklyOpus: window(api.seven_day_opus),
             weeklySonnet: window(api.seven_day_sonnet),
             extra: api.extra_usage.map {
@@ -82,13 +110,39 @@ enum UsageAPI {
                            monthlyLimit: $0.monthly_limit,
                            usedCredits: $0.used_credits,
                            currency: $0.currency)
-            }
+            },
+            weeklyFable: window(scopedRow(model: "fable", in: rows))
+                ?? window(api.seven_day_overage_included?.value)
         )
+        // Anthropic leaves the 5-hour window out (null) until it starts. A
+        // reading that reports any other window means it simply hasn't begun.
+        let reportsOthers = [snapshot.weekly, snapshot.weeklyFable,
+                             snapshot.weeklyOpus, snapshot.weeklySonnet].contains { $0 != nil }
+        if snapshot.session == nil, reportsOthers {
+            snapshot.session = UsageWindow(utilization: 0, resetsAt: nil)
+        }
+        return snapshot
+    }
+
+    /// The weekly row scoped to a model family ("Fable", "Fable 5.1"); the
+    /// most used one when several match.
+    private static func scopedRow(model family: String, in rows: [APILimit]) -> APILimit? {
+        rows.filter {
+            $0.kind == "weekly_scoped"
+                && ($0.scope?.model?.display_name ?? "").lowercased().hasPrefix(family)
+        }
+        .max { ($0.percent ?? $0.utilization ?? 0) < ($1.percent ?? $1.utilization ?? 0) }
     }
 
     private static func window(_ api: APIWindow?) -> UsageWindow? {
         guard let api else { return nil }
         return UsageWindow(utilization: api.utilization, resetsAt: parseDate(api.resets_at))
+    }
+
+    private static func window(_ row: APILimit?) -> UsageWindow? {
+        guard let row else { return nil }
+        return UsageWindow(utilization: row.percent ?? row.utilization,
+                           resetsAt: parseDate(row.resets_at))
     }
 
     private static func parseDate(_ string: String?) -> Date? {

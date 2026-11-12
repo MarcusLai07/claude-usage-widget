@@ -6,6 +6,7 @@ private extension MetricKind {
         switch self {
         case .session: return "5-hour rolling window"
         case .weekly: return "7-day rolling window"
+        case .weeklyFable: return "7-day Fable allotment"
         case .weeklyOpus: return "7-day Opus allotment"
         case .weeklySonnet: return "7-day Sonnet allotment"
         case .extraUsage: return "Prepaid credit balance"
@@ -15,7 +16,7 @@ private extension MetricKind {
     var settingsBadge: String {
         switch self {
         case .session: return "5-hr"
-        case .weekly, .weeklyOpus, .weeklySonnet: return "7-day"
+        case .weekly, .weeklyFable, .weeklyOpus, .weeklySonnet: return "7-day"
         case .extraUsage: return "$"
         }
     }

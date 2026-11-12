@@ -9,6 +9,16 @@ struct UsageSample: Codable, Identifiable {
     let weekly: Double?
     let opus: Double?
     let sonnet: Double?
+    // Added later: absent from older lines, which still decode as nil.
+    let fable: Double?
+    /// Each window's reset as read with this sample, so charts can split
+    /// history into cycles (a cycle runs from reset − span to reset). Nil
+    /// for a window that wasn't reported or hadn't started.
+    let sessionReset: Date?
+    let weeklyReset: Date?
+    let fableReset: Date?
+    let opusReset: Date?
+    let sonnetReset: Date?
 
     var id: Date { ts }
 }
@@ -36,7 +46,13 @@ enum UsageHistory {
             session: snapshot.session?.utilization,
             weekly: snapshot.weekly?.utilization,
             opus: snapshot.weeklyOpus?.utilization,
-            sonnet: snapshot.weeklySonnet?.utilization
+            sonnet: snapshot.weeklySonnet?.utilization,
+            fable: snapshot.weeklyFable?.utilization,
+            sessionReset: snapshot.session?.resetsAt,
+            weeklyReset: snapshot.weekly?.resetsAt,
+            fableReset: snapshot.weeklyFable?.resetsAt,
+            opusReset: snapshot.weeklyOpus?.resetsAt,
+            sonnetReset: snapshot.weeklySonnet?.resetsAt
         )
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601

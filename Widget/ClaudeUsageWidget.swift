@@ -179,9 +179,9 @@ struct BarsWidgetView: View {
                 .padding(.vertical, 4)
             UsageBar(percent: hero.percent)
                 .opacity(entry.isStale ? 0.62 : 1)
-            if let resetsAt = hero.resetsAt {
-                ResetCaption(date: resetsAt, percent: hero.percent, font: .system(size: 11))
-                    .padding(.top, 6)
+            let heroCaption = MetricCaption(metric: hero, font: .system(size: 11))
+            if heroCaption.hasContent {
+                heroCaption.padding(.top, 6)
             }
             Spacer(minLength: 4)
             if metrics.count > 1 {
@@ -273,9 +273,7 @@ struct RingsWidgetView: View {
             VStack(spacing: 1) {
                 Text(hero.name)
                     .font(.system(size: 12.5, weight: .semibold))
-                if let resetsAt = hero.resetsAt {
-                    ResetCaption(date: resetsAt, percent: hero.percent, font: .system(size: 10.5))
-                }
+                MetricCaption(metric: hero, font: .system(size: 10.5))
             }
             .padding(.top, 7)
             Spacer(minLength: 2)
@@ -304,13 +302,7 @@ struct RingsWidgetView: View {
                             .opacity(entry.isStale ? 0.75 : 1)
                         Text(metric.name)
                             .font(.system(size: 11.5, weight: .semibold))
-                        if let resetsAt = metric.resetsAt {
-                            ResetCaption(date: resetsAt, percent: metric.percent, font: .system(size: 9.5))
-                        } else if let caption = metric.caption {
-                            Text(caption)
-                                .font(.system(size: 9.5))
-                                .foregroundStyle(.tertiary)
-                        }
+                        MetricCaption(metric: metric, font: .system(size: 9.5))
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -330,9 +322,7 @@ struct RingsWidgetView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(hero.name)
                         .font(.system(size: 14, weight: .semibold))
-                    if let resetsAt = hero.resetsAt {
-                        ResetCaption(date: resetsAt, percent: hero.percent, font: .system(size: 11.5))
-                    }
+                    MetricCaption(metric: hero, font: .system(size: 11.5))
                     if hero.kind == .session {
                         Text("5-hour window")
                             .font(.system(size: 10.5))

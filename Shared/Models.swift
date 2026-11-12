@@ -3,6 +3,7 @@ import Foundation
 enum MetricKind: String, CaseIterable, Codable, Identifiable {
     case session
     case weekly
+    case weeklyFable
     case weeklyOpus
     case weeklySonnet
     case extraUsage
@@ -13,6 +14,7 @@ enum MetricKind: String, CaseIterable, Codable, Identifiable {
         switch self {
         case .session: return "Session"
         case .weekly: return "Weekly"
+        case .weeklyFable: return "Fable · 7-day"
         case .weeklyOpus: return "Opus · 7-day"
         case .weeklySonnet: return "Sonnet · 7-day"
         case .extraUsage: return "Extra usage"
@@ -44,11 +46,16 @@ struct UsageSnapshot: Codable, Equatable {
     var weeklyOpus: UsageWindow?
     var weeklySonnet: UsageWindow?
     var extra: ExtraUsage?
+    /// The weekly allowance of the Fable models (the endpoint's
+    /// `weekly_scoped` Fable row). Last, with a default, so older cached
+    /// snapshots and existing initializers stay valid.
+    var weeklyFable: UsageWindow? = nil
 
     func window(for kind: MetricKind) -> UsageWindow? {
         switch kind {
         case .session: return session
         case .weekly: return weekly
+        case .weeklyFable: return weeklyFable
         case .weeklyOpus: return weeklyOpus
         case .weeklySonnet: return weeklySonnet
         case .extraUsage:

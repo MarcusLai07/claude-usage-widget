@@ -1,0 +1,269 @@
+# Usage redesign: what to borrow from Magpie
+
+A review of how Claude Usage works today, how Magpie (`yetone/magpie`, v0.1.1566)
+designs its Usage flow, and a phased plan for adapting the parts that fit a
+native, single-provider macOS app.
+
+Sources: every file in this repo; Magpie's source (`internal/gui/assets/app.js`,
+`plugins/usage/page.js`, `internal/gui/trayusage.go`, `internal/provider/claude_limits.go`)
+and its local API (`127.0.0.1:3425/v1/magpie/quotas`, `/quotas/history`, `/usage`).
+
+---
+
+## 1. Claude Usage today
+
+### Data flow
+
+```
+OAuthClient / ClaudeCodeImport ──► TokenStore (data-protection keychain)
+                                        │
+UsageAPI.fetchUsage()  ◄── UsageFetcher (actor: freshness window + single flight)
+        │                                ▲              ▲
+        ▼                                │              │
+UsageRefresher (5-min timer, @MainActor) │      Widget UsageProvider (15-min timeline)
+  ├─ AppGroupStore.cachedSnapshot ───────┴──────────────┘
+  ├─ UsageHistory.append  → usage-history.jsonl   (one sample / ≥4 min)
+  ├─ NotificationManager.evaluate                  (threshold + limit alerts)
+  └─ WidgetCenter.reloadAllTimelines
+
+TranscriptStats (~/.claude/projects/**/*.jsonl, per-file mtime/size cache)
+  └─ AnalyticsModel → AnalyticsView (tokens by model)
+```
+
+### Surfaces
+
+| Surface | File | What it shows |
+|---|---|---|
+| Menu bar label | `ClaudeUsageApp.swift` | Sunburst template icon only |
+| Popover | `MenuBarView.swift` | Visible metrics as `MetricBarRow`s, stale banner, updated line, menu rows |
+| Window › Dashboard | `DashboardView.swift` | Session + Weekly rings, "More limits" bars |
+| Window › Analytics | `AnalyticsView.swift` | Utilization line chart (24h/7d/30d), tokens-by-model bars, two window summaries, model table |
+| Window › Settings / Account | `SettingsView.swift`, `AccountView.swift` | Metric checklist, notification thresholds; sign-out, `~/.claude` grant |
+| Widgets | `ClaudeUsageWidget.swift` | Bars and Rings, small/medium/large |
+
+### Gaps found while reading (independent of Magpie)
+
+1. **The weekly Fable window is invisible.** The usage endpoint now also returns
+   `limits[]`, rows Claude Code's `/usage` renders as sent:
+   `{kind: "session" | "weekly_all" | "weekly_scoped", group, percent (0–100),
+   resets_at, scope: {model | surface: {display_name}}, severity}`. Fable is a
+   `weekly_scoped` row with `scope.model.display_name = "Fable"` (Magpie shows it
+   as "7 days · Fable"; your account reports it today). Rate-limit headers call
+   the same window `seven_day_overage_included`. `UsageAPI.APIResponse` decoded
+   only `five_hour`, `seven_day`, `seven_day_opus`, `seven_day_sonnet` and
+   `extra_usage`. *(Fixed in phase 0.)*
+2. **An unstarted session window disappears.** Anthropic returns `five_hour: null`
+   until you've used Claude in the last 5 hours. `MetricPresentation` drops nil
+   windows, so the Dashboard loses its Session hero card. Magpie shows it as
+   "not started" at 0 %.
+3. **History can't be split into cycles.** `UsageSample` stores percentages but
+   not `resetsAt`, so a chart can't tell where one 5-hour or 7-day cycle ends and
+   the next begins. History is forward-only, so every day without this field is
+   lost for good.
+4. **The transcript parser ignores useful fields.** Each assistant line also has
+   `sessionId`, `cwd`, `gitBranch`, `entrypoint` (`claude-desktop`,
+   `claude-vscode`, `sdk-cli`), `effort`, `isSidechain` and
+   `usage.output_tokens_details.thinking_tokens`. The file path itself is
+   `projects/<encoded-cwd>/<sessionId>.jsonl`.
+5. **Limits and tokens live on different pages.** Dashboard has the limits,
+   Analytics has the tokens. To answer "what burned my week?" you flip between
+   them.
+
+---
+
+## 2. How Magpie's Usage page works
+
+One page, **Usage**, with tabs Overview · Requests · Sessions · Context. A single
+toolbar row holds the tabs, the period (Today · 7 days · 30 days · All · Custom),
+the auto-refresh interval and a total cost.
+
+### Overview, top to bottom
+
+| Block | What it does | Why it works |
+|---|---|---|
+| **Allowances card** (one per account) | Logo + name, email, plan badge. Windows in a 2-column grid: name ↔ "17% used", thin bar, muted line "Resets Nov 17 17:59 · in 5d · Pace −8%", second line "Whole ≈ 4.2M tokens" or "Whole: not enough data" | Every window answers *how much*, *until when*, and *am I on track* in three short lines |
+| **Used / Left toggle** | Global switch (also: click any figure). Bars fill with whichever is shown; pace sign flips to match | People think in "left" when rationing, "used" when auditing |
+| **Pace** | `used% − elapsed%` of the window. Orange when positive (burning faster than an even pace) | One number replaces reading a chart |
+| **Trends: Off · 2 days · Cycle** | "Left over time" curve under each card: a solid line per window, a **dashed even-pace line** from 100 % at cycle start to 0 % at reset, a "now" marker, legend with current % left. Head says "Runs out Sat 14:00 at this pace" or "Lasts past the reset at this pace". A picker reopens past cycles. Click to enlarge | The curve's only question ("will it last?") is answered in words; the even-pace line makes the shape readable at 60 px tall |
+| **Hide accounts** | Masks emails | Safe screenshots |
+| **Stat strip** | Joined tiles: Tokens (in · out), Cache read (hit rate), Reasoning, Calls (failed) | Totals for the picked period at a glance |
+| **Activity chart** | Bars per day, stacked in/out, max label in the corner | Shape of the period |
+| **Breakdown lists** | Collapsible Agents · Models · Accounts. Row: icon, name, "3 calls · 3 failed", an inline share bar, totals right-aligned, ≈ cost | Dense, scannable, comparable without a table |
+
+### Elsewhere
+
+- **Requests**: a ledger, one row per request, newest first, paged, CSV export.
+- **Sessions**: per-session rows with a context line.
+- **Menu bar**: the percentages are drawn *in* the menu bar, "42%" stacked over
+  "18%" beside the logo, optionally with pace. The tray panel has its own
+  Allowances tab.
+- **Alerts**: threshold alerts plus a **reset reminder**, "a long window renewing
+  soon with much of it left", so unused allowance isn't wasted.
+- **Look**: monochrome dark UI, one accent, small muted metadata joined with
+  "·", uppercase section labels, minimal chrome.
+
+---
+
+## 3. Proposed design for Claude Usage
+
+Borrow Magpie's **information design and interactions**; keep our **native
+SwiftUI look and brand** (clay accent, escalation colors, sunburst, SF Rounded
+numerals, system materials). Magpie is a web page in a webview; copying its skin
+would make a native app look like one.
+
+### 3.1 Information architecture
+
+```
+Sidebar                         Toolbar (Usage page)
+───────                         ─────────────────────────────────────────────
+◉ Usage                         [Overview | Requests | Sessions]
+   Overview                     [Today | 7 days | 30 days | All]   Used ⇄ Left
+   Requests                     👁 Hide account    ⟳  Updated 2 min ago
+   Sessions
+⚙ Settings
+👤 Account
+```
+
+Dashboard and Analytics merge into **Usage › Overview**. The period picker only
+affects the token sections. Allowances are always "now", as in Magpie.
+
+### 3.2 Usage › Overview
+
+**1. Allowances card** (replaces the two ring heroes and "More limits")
+
+- Header: sunburst · "Claude" · plan badge (`Max`, from `subscriptionType` when
+  the token came from Claude Code) · account email (masked when *Hide account*
+  is on).
+- Grid of window meters, 2 columns (1 below ~760 pt): Session · Weekly ·
+  Fable 7-day · Opus 7-day · Sonnet 7-day · Extra usage, showing only what the
+  API reports, with Session always present ("Not started" at 0 %).
+- Each meter, three lines:
+  - `Weekly` ………………… `17% used` (tap → `83% left`, global)
+  - capsule bar (existing `UsageBar`, escalation colors)
+  - `Resets Tue 17:59 · in 5d · Pace −8%`, then `Runs out Sat 14:00 at this pace`
+    or `Lasts past reset`, only when the forecast has enough samples
+- Pace is orange when over even pace; stays secondary when under.
+
+**2. Left over time** (inside the same card, under the meters)
+
+- Swift Charts: one `LineMark` per window (% left), a dashed `LineMark` for even
+  pace (100 → 0 across the cycle), `RuleMark` at now, x-domain = cycle start →
+  reset.
+- Range menu: *Cycle* (default) · *2 days* · *Off*. A cycle picker lists recorded
+  past cycles ("Nov 3 – Nov 10").
+- Legend: colored dot · window name · current %.
+- Replaces today's utilization chart, whose fixed 24h/7d/30d ranges cut across
+  cycles and put a 5-hour sawtooth on top of a weekly line.
+
+**3. Stat strip** (period-bound, from transcripts)
+
+| Tokens | Cache read | Thinking | Requests |
+|---|---|---|---|
+| 23M · 21M in · 2.2M out | 158M · hit rate 88 % | 1.4M · inside output | 705 · 12 sessions |
+
+**4. Activity chart**: daily bars stacked by model (keep today's palette),
+max label top-right, period-bound.
+
+**5. Breakdown lists** (collapsible, Magpie row style)
+
+- **Apps**, from `entrypoint`: Claude Desktop, VS Code, CLI / SDK. This is
+  Magpie's "Agents" list, and the data already sits in your transcripts.
+- **Models**: today's model table, re-cut as rows with inline share bars.
+- **Projects**, from `cwd`: top projects by tokens, with session count.
+
+Row anatomy: icon · name / caption (`41 requests · 3 sessions`) · inline share
+bar · right-aligned `1.2M` / `in 0.9M · out 0.3M`.
+
+**6. Footnote**: keep the existing disclaimer (tokens = Claude Code on this
+Mac; Anthropic's percentages are the source of truth).
+
+### 3.3 Usage › Requests
+
+SwiftUI `Table`, newest first, sortable: Time · App · Project · Model · Effort ·
+In · Out · Cache read · Cache write · Thinking. Search field, CSV export. A
+"Context" column (`input + cache_read + cache_write`) stands in for Magpie's
+Context tab without needing request bodies.
+
+### 3.4 Usage › Sessions
+
+One row per `sessionId`, grouped by project: first → last time, duration,
+model mix chips, requests, tokens, peak context. Clicking a row filters
+Requests to that session.
+
+### 3.5 Menu bar, popover, widgets
+
+- **Menu bar label**: Settings option *Icon* / *Icon + percentages*. The latter
+  draws a small template image with Session over Weekly ("5%" / "17%") beside
+  the sunburst, as Magpie does. Respects Used/Left.
+- **Popover**: each `MetricBarRow` caption gains `· Pace −8%`. Used/Left applies.
+- **Widgets**: medium/large reset captions gain pace. Used/Left is read from
+  `AppGroupStore`. Bump `CURRENT_PROJECT_VERSION`.
+
+### 3.6 Notifications
+
+Keep the threshold and limit alerts and add two, each once per cycle:
+
+- **Reset reminder**: "Your weekly limit resets tonight with 60 % unused."
+  (weekly window, reset < 12 h away, ≥ 40 % left; both configurable)
+- **Pace alert**: "At this pace your weekly limit runs out Sat 14:00, a day
+  before it resets." (forecast run-out more than 6 h before reset)
+
+---
+
+## 4. Formulas
+
+```swift
+// Window spans: five_hour = 5 h; every seven_day* = 7 d.
+start    = resetsAt - span
+elapsed% = clamp((now - start) / span) * 100
+pace     = used% - elapsed%          // + = burning faster than even
+// In "Left" mode show -pace, so the sign is relative to the figure shown.
+
+// Run-out forecast (Magpie's quotaEta): least-squares slope of %left over the
+// current cycle's latest falling run of samples (≥ 3 samples spanning ≥ 1 h).
+// slope ≥ 0                → "Lasts past reset"
+// zero-crossing ≥ resetsAt → "Lasts past reset"
+// else                     → "Runs out <time> at this pace"
+```
+
+**Cycle detection needs slack.** The same window's `resets_at` moves by a
+minute between reads (seen live: weekly 17:59 one fetch, 18:00 the next), so
+treat a new cycle as a reset that moves by more than ~5 minutes, or used %
+dropping sharply, as Magpie's `quotaCycleBreak` does.
+
+**Leave out:** Magpie's "Whole ≈ N tokens" (tokens seen ÷ used %). It
+contradicts this app's stated stance (README: token counts can't be converted
+to percentages, because Anthropic weights models differently and other
+devices count too). Cost at API list prices is possible but needs a price
+table to maintain. Keep it as a later, optional extra.
+
+---
+
+## 5. Changes by file
+
+| File | Change |
+|---|---|
+| `Shared/UsageAPI.swift` | Decode `limits[]` (Fable from its `weekly_scoped` row); keep a nil `five_hour` as "not started". Phase 1 can render every `limits[]` row as sent, so new meters need no release |
+| `Shared/Models.swift` | `MetricKind.weeklyFable`; `span` per kind; `UsageWindow.startsAt` (derived) |
+| `Shared/MetricPresentation.swift` | Pace, used/left text, forecast line in `MetricBarRow` / `ResetCaption` |
+| `Shared/AppGroupStore.swift` | `showLeft`, `menuBarStyle`, `hideAccount`, reminder settings |
+| `App/Analytics/UsageHistory.swift` | Add optional `sessionReset`, `weeklyReset`, `fableReset`, `fable` to `UsageSample` (old lines still decode) |
+| `App/Analytics/TranscriptStats.swift` | Parse `sessionId`, `cwd`, `entrypoint`, `effort`, `thinking_tokens`; bump the cache format |
+| `App/Analytics/AnalyticsModel.swift` | Period filter, stat totals, breakdowns by app, model and project, sessions, cycles, forecast |
+| `App/Views/*` | New `UsageView` (tabs), `AllowancesCard`, `CycleTrendChart`, `StatStrip`, `BreakdownList`, `RequestsTable`, `SessionsList`; retire `DashboardView` and `AnalyticsView` |
+| `App/ClaudeUsageApp.swift` | Menu bar label with percentages |
+| `App/NotificationManager.swift` | Reset reminder and pace alert |
+| `Widget/ClaudeUsageWidget.swift` | Pace in captions; Used/Left |
+
+---
+
+## 6. Phases
+
+| Phase | Scope | Size |
+|---|---|---|
+| **0, done** | Fable window, unstarted session, `resetsAt` in history samples | Small; starts the history clock |
+| **1** | Allowances card: pace, Used/Left, plan badge, hide account; pace in popover and widgets | Medium |
+| **2** | Left over time: cycle chart, even-pace line, forecast, past-cycle picker | Medium |
+| **3** | Usage › Overview: period picker, stat strip, activity chart, Apps/Models/Projects lists; merges Dashboard and Analytics | Large |
+| **4** | Requests table and Sessions list | Medium |
+| **5** | Menu bar percentages, reset reminder, pace alert | Small–medium |

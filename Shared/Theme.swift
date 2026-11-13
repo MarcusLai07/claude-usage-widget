@@ -3,6 +3,78 @@ import SwiftUI
 extension Color {
     /// Anthropic clay — the brand accent from the wireframes (#D97757).
     static let clay = Color(red: 217 / 255, green: 119 / 255, blue: 87 / 255)
+
+    init(lightHex: UInt32, darkHex: UInt32) {
+        self.init(nsColor: NSColor(name: nil) { appearance in
+            let hex = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? darkHex : lightHex
+            return NSColor(srgbRed: CGFloat((hex >> 16) & 0xFF) / 255,
+                           green: CGFloat((hex >> 8) & 0xFF) / 255,
+                           blue: CGFloat(hex & 0xFF) / 255,
+                           alpha: 1)
+        })
+    }
+
+    /// Track behind bars and pills.
+    static let track = Color.primary.opacity(0.08)
+    /// The data accent (Magpie's periwinkle): first series, bars, heatmaps.
+    static let dataAccent = Color(lightHex: 0x5B67E8, darkHex: 0x9AA5FF)
+    static let chartSky = Color(lightHex: 0x1E8FD6, darkHex: 0x6CC6FF)
+    static let chartTeal = Color(lightHex: 0x12A38F, darkHex: 0x4FD6BF)
+    static let chartAmber = Color(lightHex: 0xD18A00, darkHex: 0xF5C04A)
+    static let chartPink = Color(lightHex: 0xD6488E, darkHex: 0xF27FB8)
+    static let chartViolet = Color(lightHex: 0x8A4FD8, darkHex: 0xC09BFF)
+    static let chartGreen = Color(lightHex: 0x2E9E4F, darkHex: 0x6FD98C)
+    /// Kept for older call sites: the first series.
+    static let chartIndigo = dataAccent
+    /// Cost figures, as Magpie shows them.
+    static let costGreen = Color(lightHex: 0x1E9E5A, darkHex: 0x4CC38A)
+}
+
+extension MetricKind {
+    /// Each window's series color, in the app, the popover and the widgets.
+    var chartColor: Color {
+        switch self {
+        case .session: return .dataAccent
+        case .weekly: return .chartSky
+        case .weeklyFable: return .chartTeal
+        case .weeklyOpus: return .chartViolet
+        case .weeklySonnet: return .chartGreen
+        case .extraUsage: return .chartAmber
+        }
+    }
+
+    /// A limit's bar: its series color until it nears the limit, then the
+    /// escalation colors (orange from 70%, red from 90%).
+    func meterColor(percentUsed: Double) -> Color {
+        percentUsed >= 70 ? usageColor(percentUsed) : chartColor
+    }
+}
+
+/// "Runs out Sat 14:00 at this pace" (orange) or "Lasts past the reset at
+/// this pace", from the window's readings this cycle.
+struct ForecastLine: View {
+    let forecast: Forecast
+    var font: Font = .system(size: 11.5)
+
+    var body: some View {
+        switch forecast {
+        case .runsOut(let date):
+            Text("Runs out \(timeText(date)) at this pace")
+                .font(font)
+                .foregroundStyle(.orange)
+        case .lastsPastReset:
+            Text("Lasts past the reset at this pace")
+                .font(font)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func timeText(_ date: Date) -> String {
+        if Calendar.current.isDateInToday(date) {
+            return date.formatted(.dateTime.hour().minute())
+        }
+        return date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
+    }
 }
 
 /// Semantic escalation from the wireframe legend: clay < 70%, orange ≥ 70%,
@@ -48,7 +120,7 @@ struct UsageBar: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(.quaternary)
+                Capsule().fill(Color.track)
                 if percent > 0 {
                     Capsule()
                         .fill(tint ?? usageColor(percent))
@@ -79,26 +151,27 @@ struct UsageRing: View {
         self.label = label
     }
 
-    /// The metric's shown figure, colored by what's used, labelled "left" in
-    /// Left mode.
+    /// The metric's shown figure in its window's series color (orange, then
+    /// red, near the limit), labelled "left" in Left mode.
     init(metric: MetricDisplay, size: CGFloat, stroke: CGFloat) {
         self.init(percent: metric.shownPercent, size: size, stroke: stroke,
-                  tint: metric.color, label: metric.showLeft ? "left" : nil)
+                  tint: metric.kind.meterColor(percentUsed: metric.percent),
+                  label: metric.showLeft ? "left" : nil)
     }
 
     var body: some View {
         ZStack {
             Circle()
-                .stroke(.quaternary, lineWidth: stroke)
+                .stroke(Color.track, lineWidth: stroke)
             Circle()
                 .trim(from: 0, to: min(percent, 100) / 100)
                 .stroke(tint ?? usageColor(percent), style: StrokeStyle(lineWidth: stroke, lineCap: .round))
                 .rotationEffect(.degrees(-90))
             VStack(spacing: 0) {
                 (Text("\(Int(percent.rounded(.down)))")
-                    .font(.system(size: size * 0.28, weight: .bold, design: .rounded))
+                    .font(.system(size: size * 0.27, weight: .semibold).monospacedDigit())
                  + Text("%")
-                    .font(.system(size: size * 0.15, weight: .semibold, design: .rounded)))
+                    .font(.system(size: size * 0.15, weight: .medium)))
                 if let label {
                     Text(label)
                         .font(.system(size: max(8, size * 0.11), weight: .medium))

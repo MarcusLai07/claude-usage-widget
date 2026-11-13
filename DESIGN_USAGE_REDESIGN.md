@@ -536,3 +536,16 @@ own calls, as Magpie's Context tab does.
   needs no profile entry. On first launch, 0.6.1 copies the old group's
   settings, folder grants, history and logs over once (the app keeps the old
   group in its entitlements only for that); the transcript cache is rebuilt.
+
+### Widgets refresh (0.6.2)
+
+- Widgets and the popover take the app's look: each limit in its series color
+  (Session periwinkle, Weekly sky, Fable teal; orange and red near the limit),
+  medium-weight figures, thin bars and rings on a shared track, small-caps
+  labels, and a header with the plan.
+- The large Bars widget adds the week's "Left over time" curve — each weekly
+  window's line, the dashed even pace, now — with the forecast and current %
+  left; it shows three rows instead of five to make room.
+- The palette, series colors, `ForecastLine`, `UsageHistory` and
+  `UsageTrends` moved to Shared so the widget can use them; it reads the
+  history from the team-prefixed group, so no permission prompt.

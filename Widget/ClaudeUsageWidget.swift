@@ -1,5 +1,6 @@
 import WidgetKit
 import SwiftUI
+import Charts
 
 // MARK: - Timeline
 
@@ -10,6 +11,10 @@ struct UsageEntry: TimelineEntry {
     let signedIn: Bool
     let isStale: Bool
     var showLeft = AppGroupStore.showLeft
+    /// "Max 5x", from the app's profile read.
+    var plan: String? = AppGroupStore.accountProfile?.plan
+    /// The week's left-over-time curve, for the large widget only.
+    var trend: WidgetTrend? = nil
 
     /// Pace is measured at the entry's date, so later entries of one
     /// timeline move it along without a new fetch.
@@ -20,18 +25,57 @@ struct UsageEntry: TimelineEntry {
     }
 }
 
+/// What was left of each weekly window this cycle (the app's "Left over
+/// time"), read from the shared usage history, and the run-out forecast.
+struct WidgetTrend {
+    struct Line: Identifiable {
+        let kind: MetricKind
+        let points: [TrendPoint]
+        var id: MetricKind { kind }
+    }
+
+    let start: Date
+    let reset: Date
+    let lines: [Line]
+    let forecast: Forecast?
+
+    static func make(snapshot: UsageSnapshot, now: Date) -> WidgetTrend? {
+        guard let reset = snapshot.weekly?.resetsAt, reset > now,
+              let span = MetricKind.weekly.span else { return nil }
+        let start = reset.addingTimeInterval(-span)
+        let history = UsageTrends.lines(from: UsageHistory.load(since: start.addingTimeInterval(-3600)))
+        var lines: [Line] = []
+        for kind in [MetricKind.weekly, .weeklyFable, .weeklyOpus, .weeklySonnet]
+        where snapshot.window(for: kind) != nil {
+            guard let line = history.first(where: { $0.kind == kind }) else { continue }
+            let points = UsageTrends.visiblePoints(line.points.filter { $0.at >= start },
+                                                   in: start...reset, step: span / 120)
+            if !points.isEmpty { lines.append(Line(kind: kind, points: points)) }
+        }
+        guard !lines.isEmpty else { return nil }
+        let weekly = history.first { $0.kind == .weekly }
+        let forecast = weekly.flatMap {
+            UsageTrends.forecast(points: $0.points.filter { $0.at >= start },
+                                 cycle: CurrentCycle(start: start, reset: reset), now: now)
+        }
+        return WidgetTrend(start: start, reset: reset, lines: lines, forecast: forecast)
+    }
+}
+
 struct UsageProvider: TimelineProvider {
     func placeholder(in context: Context) -> UsageEntry {
         UsageEntry(date: Date(), snapshot: .placeholder,
                    visibleMetrics: [.session, .weekly], signedIn: true, isStale: false,
-                   showLeft: false)
+                   showLeft: false, plan: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (UsageEntry) -> Void) {
-        completion(UsageEntry(date: Date(),
-                              snapshot: AppGroupStore.cachedSnapshot ?? .placeholder,
+        let snapshot = AppGroupStore.cachedSnapshot ?? .placeholder
+        completion(UsageEntry(date: Date(), snapshot: snapshot,
                               visibleMetrics: AppGroupStore.visibleMetrics,
-                              signedIn: true, isStale: false))
+                              signedIn: true, isStale: false,
+                              trend: context.family == .systemLarge
+                                ? WidgetTrend.make(snapshot: snapshot, now: Date()) : nil))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<UsageEntry>) -> Void) {
@@ -58,10 +102,12 @@ struct UsageProvider: TimelineProvider {
             // pace moves about 1.7 points in that time.
             let now = Date()
             let visible = AppGroupStore.visibleMetrics
+            let trend = context.family == .systemLarge
+                ? snapshot.flatMap { WidgetTrend.make(snapshot: $0, now: now) } : nil
             let entries = stride(from: 0, to: 15, by: 5).map { minutes in
                 UsageEntry(date: now.addingTimeInterval(TimeInterval(minutes * 60)),
                            snapshot: snapshot, visibleMetrics: visible,
-                           signedIn: signedIn, isStale: stale)
+                           signedIn: signedIn, isStale: stale, trend: trend)
             }
             let refresh = now.addingTimeInterval(15 * 60)
             completion(Timeline(entries: entries, policy: .after(refresh)))
@@ -87,14 +133,12 @@ extension UsageSnapshot {
 struct SignedOutWidgetView: View {
     var body: some View {
         VStack(spacing: 9) {
-            Image(systemName: "lock.fill")
-                .font(.title3)
-                .foregroundStyle(.secondary)
+            SunburstMark(size: 22)
             Text("Sign in to see your limits")
-                .font(.caption.weight(.semibold))
+                .font(.system(size: 12, weight: .semibold))
                 .multilineTextAlignment(.center)
             Text("Open Claude Usage")
-                .font(.caption2)
+                .font(.system(size: 10.5))
                 .foregroundStyle(.tertiary)
         }
         .padding(12)
@@ -105,25 +149,44 @@ struct SignedOutWidgetView: View {
 /// explicit tap target for the same deep link.
 let openWindowURL = URL(string: "claudeusage://open")!
 
+/// The mark, "Claude" and the plan; the data's age on the right.
 struct WidgetHeader: View {
     let entry: UsageEntry
-    var markSize: CGFloat = 15
     var showAge = true
 
     var body: some View {
-        HStack {
+        HStack(spacing: 6) {
             Link(destination: openWindowURL) {
                 HStack(spacing: 6) {
-                    SunburstMark(size: markSize)
-                    Text("Claude Usage")
+                    SunburstMark(size: 14)
+                    Text("Claude")
                         .font(.system(size: 12.5, weight: .semibold))
+                        .foregroundStyle(Color.primary)
                 }
+            }
+            if let plan = entry.plan {
+                Text(plan)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
             }
             Spacer()
             if showAge, let fetchedAt = entry.snapshot?.fetchedAt {
                 AgeBadge(since: fetchedAt, stale: entry.isStale)
             }
         }
+    }
+}
+
+/// A small-caps label, as the app heads its sections.
+struct WidgetLabel: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text.uppercased())
+            .font(.system(size: 10, weight: .semibold))
+            .kerning(0.7)
+            .foregroundStyle(.secondary)
     }
 }
 
@@ -140,8 +203,73 @@ struct WidgetFooter: View {
                     : Text("Updated ") + Text(fetchedAt, style: .relative) + Text(" ago")
             }
         }
-        .font(.system(size: 10.5, weight: .medium))
+        .font(.system(size: 10, weight: .medium))
         .foregroundStyle(.tertiary)
+    }
+}
+
+/// "Left over time" for the week: each weekly window's line, the dashed even
+/// pace from full to empty, now, and the forecast (the app's chart, small).
+struct WidgetTrendView: View {
+    let trend: WidgetTrend
+    let snapshot: UsageSnapshot
+    let now: Date
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                WidgetLabel("Left over time")
+                Spacer(minLength: 4)
+                if let forecast = trend.forecast {
+                    ForecastLine(forecast: forecast, font: .system(size: 10))
+                        .lineLimit(1)
+                }
+            }
+            Chart {
+                LineMark(x: .value("Time", trend.start), y: .value("Left", 100), series: .value("Line", "even"))
+                    .foregroundStyle(MetricKind.weekly.chartColor.opacity(0.5))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                LineMark(x: .value("Time", trend.reset), y: .value("Left", 0), series: .value("Line", "even"))
+                    .foregroundStyle(MetricKind.weekly.chartColor.opacity(0.5))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                ForEach(trend.lines) { line in
+                    ForEach(Array(line.points.enumerated()), id: \.offset) { _, point in
+                        LineMark(x: .value("Time", point.at), y: .value("Left", point.left),
+                                 series: .value("Line", line.kind.rawValue))
+                            .foregroundStyle(line.kind.chartColor)
+                            .lineStyle(StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round))
+                    }
+                }
+                RuleMark(x: .value("Now", now))
+                    .foregroundStyle(Color.secondary.opacity(0.6))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 3]))
+            }
+            .chartXScale(domain: trend.start...trend.reset)
+            .chartYScale(domain: -4...104)
+            .chartXAxis(.hidden)
+            .chartYAxis {
+                AxisMarks(position: .trailing, values: [0, 50, 100]) { _ in
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
+                }
+            }
+            .chartPlotStyle { $0.clipped() }
+            .frame(height: 54)
+            HStack(spacing: 10) {
+                ForEach(trend.lines) { line in
+                    HStack(spacing: 4) {
+                        Circle().fill(line.kind.chartColor).frame(width: 6, height: 6)
+                        Text(line.kind == .weekly ? "Weekly" : line.kind.title)
+                            .foregroundStyle(.secondary)
+                        Text("\(Int(max(0, 100 - (snapshot.window(for: line.kind)?.utilization ?? 0))))%")
+                            .fontWeight(.semibold)
+                    }
+                }
+                Spacer(minLength: 0)
+                Text(trend.reset.formatted(.dateTime.weekday(.abbreviated)))
+                    .foregroundStyle(.tertiary)
+            }
+            .font(.system(size: 10))
+        }
     }
 }
 
@@ -174,29 +302,29 @@ struct BarsWidgetView: View {
         let hero = metrics[0]
         return VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text(hero.name.uppercased())
-                    .font(.system(size: 10.5, weight: .semibold))
-                    .kerning(1)
-                    .foregroundStyle(.secondary)
+                WidgetLabel(hero.name)
                 Spacer()
                 if let fetchedAt = entry.snapshot?.fetchedAt {
                     AgeBadge(since: fetchedAt, stale: entry.isStale)
                 }
             }
             (Text("\(Int(hero.shownPercent))")
-                .font(.system(size: 44, weight: .bold, design: .rounded))
+                .font(.system(size: 40, weight: .medium).monospacedDigit())
+                .foregroundStyle(hero.percent >= 70 ? hero.color : Color.primary)
              + Text("%")
-                .font(.system(size: 22, weight: .semibold, design: .rounded))
+                .font(.system(size: 20, weight: .medium))
              + Text(hero.unitText.map { " \($0)" } ?? "")
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .padding(.vertical, 4)
-            UsageBar(percent: hero.shownPercent, tint: hero.color)
+                .padding(.top, 4)
+                .padding(.bottom, 6)
+            UsageBar(percent: hero.shownPercent, height: 5,
+                     tint: hero.kind.meterColor(percentUsed: hero.percent))
                 .opacity(entry.isStale ? 0.62 : 1)
             // No room for pace in the small widget; medium and large show it.
-            let heroCaption = MetricCaption(metric: hero, font: .system(size: 11), pace: .hidden)
+            let heroCaption = MetricCaption(metric: hero, font: .system(size: 10.5), pace: .hidden)
             if heroCaption.hasContent {
                 heroCaption.padding(.top, 6)
             }
@@ -205,13 +333,16 @@ struct BarsWidgetView: View {
                 let second = metrics[1]
                 HStack {
                     Text(second.name)
+                        .foregroundStyle(.secondary)
                     Spacer()
                     Text(second.valueWithUnit)
+                        .fontWeight(.semibold)
+                        .monospacedDigit()
                 }
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.secondary)
+                .font(.system(size: 11))
                 .padding(.bottom, 5)
-                UsageBar(percent: second.shownPercent, height: 4, tint: second.color)
+                UsageBar(percent: second.shownPercent, height: 4,
+                         tint: second.kind.meterColor(percentUsed: second.percent))
                     .opacity(entry.isStale ? 0.62 : 1)
             }
         }
@@ -221,7 +352,7 @@ struct BarsWidgetView: View {
         VStack(alignment: .leading, spacing: 0) {
             WidgetHeader(entry: entry)
             Spacer(minLength: 6)
-            VStack(alignment: .leading, spacing: 11) {
+            VStack(alignment: .leading, spacing: 10) {
                 ForEach(entry.displays.prefix(3)) { metric in
                     MetricBarRow(metric: metric)
                 }
@@ -233,15 +364,21 @@ struct BarsWidgetView: View {
 
     private var large: some View {
         VStack(alignment: .leading, spacing: 0) {
-            WidgetHeader(entry: entry, markSize: 16, showAge: false)
-            VStack(alignment: .leading, spacing: 14) {
-                ForEach(entry.displays.prefix(5)) { metric in
+            WidgetHeader(entry: entry, showAge: false)
+            VStack(alignment: .leading, spacing: 12) {
+                // With the curve below, three rows; without it, up to five.
+                ForEach(entry.displays.prefix(entry.trend == nil ? 5 : 3)) { metric in
                     MetricBarRow(metric: metric)
                 }
             }
             .opacity(entry.isStale ? 0.8 : 1)
-            .padding(.top, 14)
-            Spacer(minLength: 6)
+            .padding(.top, 12)
+            Spacer(minLength: 8)
+            if let trend = entry.trend, let snapshot = entry.snapshot {
+                WidgetTrendView(trend: trend, snapshot: snapshot, now: entry.date)
+                    .opacity(entry.isStale ? 0.8 : 1)
+                Spacer(minLength: 6)
+            }
             WidgetFooter(entry: entry)
         }
     }
@@ -285,11 +422,11 @@ struct RingsWidgetView: View {
                 }
             }
             Spacer(minLength: 2)
-            UsageRing(metric: hero, size: 78, stroke: 9)
+            UsageRing(metric: hero, size: 78, stroke: 8)
                 .opacity(entry.isStale ? 0.75 : 1)
             VStack(spacing: 1) {
                 Text(hero.name)
-                    .font(.system(size: 12.5, weight: .semibold))
+                    .font(.system(size: 12, weight: .semibold))
                 MetricCaption(metric: hero, font: .system(size: 10.5), pace: .hidden)
             }
             .padding(.top, 7)
@@ -298,10 +435,10 @@ struct RingsWidgetView: View {
                 let second = metrics[1]
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(second.color)
+                        .fill(second.kind.meterColor(percentUsed: second.percent))
                         .frame(width: 7, height: 7)
                     Text("\(second.name) \(second.valueWithUnit)")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -315,7 +452,7 @@ struct RingsWidgetView: View {
             HStack(alignment: .top, spacing: 0) {
                 ForEach(entry.displays.prefix(3)) { metric in
                     VStack(spacing: 5) {
-                        UsageRing(metric: metric, size: 62, stroke: 7)
+                        UsageRing(metric: metric, size: 62, stroke: 6)
                             .opacity(entry.isStale ? 0.75 : 1)
                         Text(metric.name)
                             .font(.system(size: 11.5, weight: .semibold))
@@ -333,9 +470,9 @@ struct RingsWidgetView: View {
         let metrics = entry.displays
         let hero = metrics[0]
         return VStack(alignment: .leading, spacing: 0) {
-            WidgetHeader(entry: entry, markSize: 16, showAge: false)
+            WidgetHeader(entry: entry, showAge: false)
             HStack(spacing: 14) {
-                UsageRing(metric: hero, size: 96, stroke: 10)
+                UsageRing(metric: hero, size: 96, stroke: 9)
                     .opacity(entry.isStale ? 0.75 : 1)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(hero.name)
@@ -379,7 +516,7 @@ struct ClaudeUsageBarsWidget: Widget {
             BarsWidgetView(entry: entry)
         }
         .configurationDisplayName("Claude Usage — Bars")
-        .description("Plan usage as labelled progress bars with reset countdowns.")
+        .description("Your limits as bars with reset times and pace; the large size adds the week's left-over-time curve.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
@@ -390,7 +527,7 @@ struct ClaudeUsageRingsWidget: Widget {
             RingsWidgetView(entry: entry)
         }
         .configurationDisplayName("Claude Usage — Rings")
-        .description("Plan usage as radial gauges with reset countdowns.")
+        .description("Your limits as rings in each window's color, with reset times.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }

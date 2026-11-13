@@ -14,26 +14,6 @@ enum TrendRange: String, CaseIterable {
     }
 }
 
-extension MetricKind {
-    /// Each window's line color, shared by the chart and its legend.
-    var chartColor: Color {
-        switch self {
-        case .session: return .dataAccent
-        case .weekly: return .chartSky
-        case .weeklyFable: return .chartTeal
-        case .weeklyOpus: return .chartViolet
-        case .weeklySonnet: return .chartGreen
-        case .extraUsage: return .chartAmber
-        }
-    }
-
-    /// A limit's bar: its series color until it nears the limit, then the
-    /// escalation colors (orange from 70%, red from 90%).
-    func meterColor(percentUsed: Double) -> Color {
-        percentUsed >= 70 ? usageColor(percentUsed) : chartColor
-    }
-}
-
 /// "Left over time" under the meters (Magpie's quota curve): what was left
 /// of each window, a dashed even pace from full at the cycle's start to
 /// empty at its reset, and now. A line above its dashes lasts the cycle.
@@ -340,32 +320,5 @@ struct LeftOverTimeView: View {
             Spacer(minLength: 0)
         }
         .font(.system(size: 11))
-    }
-}
-
-/// "Runs out Sat 14:00 at this pace" (orange) or "Lasts past the reset at
-/// this pace", from the window's readings this cycle.
-struct ForecastLine: View {
-    let forecast: Forecast
-    var font: Font = .system(size: 11.5)
-
-    var body: some View {
-        switch forecast {
-        case .runsOut(let date):
-            Text("Runs out \(timeText(date)) at this pace")
-                .font(font)
-                .foregroundStyle(.orange)
-        case .lastsPastReset:
-            Text("Lasts past the reset at this pace")
-                .font(font)
-                .foregroundStyle(.tertiary)
-        }
-    }
-
-    private func timeText(_ date: Date) -> String {
-        if Calendar.current.isDateInToday(date) {
-            return date.formatted(.dateTime.hour().minute())
-        }
-        return date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
     }
 }

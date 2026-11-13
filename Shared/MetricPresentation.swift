@@ -106,8 +106,10 @@ enum MetricPresentation {
     }
 }
 
-/// One labelled metric row — name, colored rounded-numeral value, capsule bar,
-/// and reset/caption line. Used by the popover and both widget directions.
+/// One labelled metric row, as the app's Allowances card draws a limit: the
+/// name, "17% used", a thin bar in the window's series color (orange, then
+/// red, near the limit), and the reset/pace line. Used by the popover and
+/// both widget directions.
 struct MetricBarRow: View {
     let metric: MetricDisplay
     var showCaption = true
@@ -116,11 +118,13 @@ struct MetricBarRow: View {
         VStack(alignment: .leading, spacing: 5) {
             HStack(alignment: .firstTextBaseline) {
                 Text(metric.name)
-                    .font(.system(size: 12.5, weight: .semibold))
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
                 Spacer()
                 MetricValue(metric: metric)
             }
-            UsageBar(percent: metric.shownPercent, tint: metric.color)
+            UsageBar(percent: metric.shownPercent, height: 5,
+                     tint: metric.kind.meterColor(percentUsed: metric.percent))
             if showCaption {
                 MetricCaption(metric: metric, font: .system(size: 10.5))
             }
@@ -128,19 +132,19 @@ struct MetricBarRow: View {
     }
 }
 
-/// "17% used" / "83% left": the figure in rounded numerals and the escalation
-/// color, the unit muted after it.
+/// "17% used" / "83% left": the figure in medium-weight digits — orange or
+/// red only near the limit — the unit after it.
 struct MetricValue: View {
     let metric: MetricDisplay
-    var size: CGFloat = 13
+    var size: CGFloat = 12.5
 
     var body: some View {
         let figure = Text(metric.valueText)
-            .font(.system(size: size, weight: .bold, design: .rounded))
-            .foregroundStyle(metric.color)
+            .font(.system(size: size, weight: .semibold).monospacedDigit())
+            .foregroundStyle(metric.percent >= 70 ? metric.color : Color.primary)
         if let unit = metric.unitText {
             figure + Text(" \(unit)")
-                .font(.system(size: size * 0.85, weight: .medium))
+                .font(.system(size: size * 0.92, weight: .medium))
                 .foregroundStyle(.secondary)
         } else {
             figure

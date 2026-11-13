@@ -2,35 +2,14 @@ import SwiftUI
 
 // MARK: - Window design tokens (from the Claude Usage Window design handoff)
 
+// The data palette (dataAccent, chartSky…, costGreen, track) and
+// `Color(lightHex:darkHex:)` live in Shared/Theme.swift, for the widget too.
 extension Color {
-    init(lightHex: UInt32, darkHex: UInt32) {
-        self.init(nsColor: NSColor(name: nil) { appearance in
-            let hex = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? darkHex : lightHex
-            return NSColor(srgbRed: CGFloat((hex >> 16) & 0xFF) / 255,
-                           green: CGFloat((hex >> 8) & 0xFF) / 255,
-                           blue: CGFloat(hex & 0xFF) / 255,
-                           alpha: 1)
-        })
-    }
-
     // Flat and dense, as Magpie's data pages: a dark page, panels a step
     // lighter with a hairline edge.
     static let windowContent = Color(lightHex: 0xF4F4F6, darkHex: 0x18181A)
     static let cardBackground = Color(lightHex: 0xFFFFFF, darkHex: 0x212124)
     static let cardStroke = Color.primary.opacity(0.08)
-    /// Track behind bars and pills.
-    static let track = Color.primary.opacity(0.07)
-
-    /// The data accent (Magpie's periwinkle): first series, bars, heatmaps.
-    static let dataAccent = Color(lightHex: 0x5B67E8, darkHex: 0x9AA5FF)
-    static let chartSky = Color(lightHex: 0x1E8FD6, darkHex: 0x6CC6FF)
-    static let chartTeal = Color(lightHex: 0x12A38F, darkHex: 0x4FD6BF)
-    static let chartAmber = Color(lightHex: 0xD18A00, darkHex: 0xF5C04A)
-    static let chartPink = Color(lightHex: 0xD6488E, darkHex: 0xF27FB8)
-    static let chartViolet = Color(lightHex: 0x8A4FD8, darkHex: 0xC09BFF)
-    static let chartGreen = Color(lightHex: 0x2E9E4F, darkHex: 0x6FD98C)
-    /// Kept for older call sites: the weekly series.
-    static let chartIndigo = dataAccent
 }
 
 /// Stable model → color assignment for charts, in share order: the data
@@ -49,11 +28,6 @@ func costText(_ usd: Double, approximate: Bool = true) -> String {
     if usd >= 100 { return prefix + Int(usd.rounded()).formatted() }
     if usd >= 1 { return prefix + String(format: "%.2f", usd) }
     return prefix + String(format: "%.3f", usd)
-}
-
-extension Color {
-    /// Cost figures, as Magpie shows them.
-    static let costGreen = Color(lightHex: 0x1E9E5A, darkHex: 0x4CC38A)
 }
 
 /// "Nov 12 15:20" (the system's month-day-hour format adds "at").

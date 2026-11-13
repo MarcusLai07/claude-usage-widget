@@ -241,6 +241,12 @@ final class AnalyticsModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
+        #if SHOTS
+        // The screenshot tool (Shots/) shows sample requests; ~/.claude is never read.
+        hasClaudeAccess = true
+        hasDesktopAccess = true
+        apply(Self.shotsScan)
+        #else
         guard let folder = ClaudeFolderAccess.resolve() else {
             hasClaudeAccess = false
             lastLoaded = Date()
@@ -264,6 +270,7 @@ final class AnalyticsModel: ObservableObject {
         PerfLog.record(source: "scan", started: scanStarted, error: nil)
         compactSetting = scan.1
         apply(scan.0)
+        #endif
     }
 
     /// Takes in a scan's requests (sorted oldest first) and session titles.

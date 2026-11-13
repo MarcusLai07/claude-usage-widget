@@ -502,6 +502,7 @@ struct RingsWidgetView: View {
 
 // MARK: - Widget declarations
 
+#if !SHOTS  // The screenshot tool (Shots/) has an entry point of its own.
 @main
 struct ClaudeUsageWidgetBundle: WidgetBundle {
     var body: some Widget {
@@ -509,6 +510,7 @@ struct ClaudeUsageWidgetBundle: WidgetBundle {
         ClaudeUsageRingsWidget()
     }
 }
+#endif
 
 struct ClaudeUsageBarsWidget: Widget {
     var body: some WidgetConfiguration {

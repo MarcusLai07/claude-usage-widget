@@ -13,7 +13,12 @@ enum AppGroupStore {
     static let legacySuiteName = "group.com.marcuslai.ClaudeUsage"
 
     static var defaults: UserDefaults {
+        #if SHOTS
+        // The screenshot tool (Shots/) keeps to its own defaults.
+        return .standard
+        #else
         UserDefaults(suiteName: suiteName) ?? .standard
+        #endif
     }
 
     /// Moves settings, folder grants, usage history and logs from the old

@@ -30,7 +30,12 @@ struct UsageView: View {
     private var hideAccount = false
     @AppStorage("usagePeriod") private var period: UsagePeriod = .week
     @AppStorage("trendRange") private var trendRange: TrendRange = .cycle
+    #if SHOTS
+    // The screenshot tool (Shots/) picks the tab; it has no scene to restore.
+    @SceneStorage("usageTab") private var tab: UsageTab = UsageView.shotsTab
+    #else
     @SceneStorage("usageTab") private var tab: UsageTab = .overview
+    #endif
     @State private var sessionFilter: String?
     @State private var editingRange = false
     /// Bumped when the custom range changes, to redraw what depends on it.

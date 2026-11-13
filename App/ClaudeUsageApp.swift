@@ -7,6 +7,7 @@ final class WindowRouter: ObservableObject {
     @Published var section: MainSection = .usage
 }
 
+#if !SHOTS  // The screenshot tool (Shots/) has an entry point of its own.
 @main
 struct ClaudeUsageApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
@@ -40,6 +41,7 @@ struct ClaudeUsageApp: App {
         .handlesExternalEvents(matching: ["*"])
     }
 }
+#endif
 
 extension Notification.Name {
     static let openMainWindow = Notification.Name("openMainWindow")

@@ -73,6 +73,10 @@ enum UsageHistory {
     /// order, so it reads back from the newest and stops at the first one
     /// older than `since`: a week costs a week of lines, not the whole file.
     static func load(since: Date) -> [UsageSample] {
+        #if SHOTS
+        // The screenshot tool (Shots/) reads its sample history, never the app's.
+        return shotsHistory.filter { $0.ts >= since }
+        #else
         guard let url = fileURL,
               let content = try? String(contentsOf: url, encoding: .utf8) else { return [] }
         let decoder = JSONDecoder()
@@ -84,6 +88,7 @@ enum UsageHistory {
             samples.append(sample)
         }
         return samples.reversed()
+        #endif
     }
 
     /// ~5 MB ≈ two years of 5-minute samples; keep one rotated generation.

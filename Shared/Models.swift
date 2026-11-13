@@ -21,6 +21,17 @@ enum MetricKind: String, CaseIterable, Codable, Identifiable {
         }
     }
 
+    /// The name where a row or legend has no room for "· 7-day": the
+    /// per-model weekly windows by model alone, the rest as `title`.
+    var shortTitle: String {
+        switch self {
+        case .weeklyFable: return "Fable"
+        case .weeklyOpus: return "Opus"
+        case .weeklySonnet: return "Sonnet"
+        case .session, .weekly, .extraUsage: return title
+        }
+    }
+
     /// How long one cycle of the window lasts; nil for extra usage, which
     /// has no rolling window. Pace is measured against this.
     var span: TimeInterval? {

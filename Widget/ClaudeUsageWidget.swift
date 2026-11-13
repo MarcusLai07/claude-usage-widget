@@ -254,22 +254,36 @@ struct WidgetTrendView: View {
             }
             .chartPlotStyle { $0.clipped() }
             .frame(height: 54)
-            HStack(spacing: 10) {
+            // Always one line: short names ("Opus", not "Opus · 7-day"), and
+            // the reset day gives way first if all four windows still don't fit.
+            ViewThatFits(in: .horizontal) {
+                legend(showResetDay: true)
+                legend(showResetDay: false)
+            }
+            .font(.system(size: 10))
+        }
+    }
+
+    private func legend(showResetDay: Bool) -> some View {
+        HStack(spacing: 0) {
+            HStack(spacing: 8) {
                 ForEach(trend.lines) { line in
                     HStack(spacing: 4) {
                         Circle().fill(line.kind.chartColor).frame(width: 6, height: 6)
-                        Text(line.kind == .weekly ? "Weekly" : line.kind.title)
+                        Text(line.kind.shortTitle)
                             .foregroundStyle(.secondary)
                         Text("\(Int(max(0, 100 - (snapshot.window(for: line.kind)?.utilization ?? 0))))%")
                             .fontWeight(.semibold)
                     }
                 }
-                Spacer(minLength: 0)
+            }
+            Spacer(minLength: 8)
+            if showResetDay {
                 Text(trend.reset.formatted(.dateTime.weekday(.abbreviated)))
                     .foregroundStyle(.tertiary)
             }
-            .font(.system(size: 10))
         }
+        .lineLimit(1)
     }
 }
 
@@ -349,12 +363,17 @@ struct BarsWidgetView: View {
     }
 
     private var medium: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        let metrics = Array(entry.displays.prefix(3))
+        // Inside the margins there are about 138 pt. With the header, two full
+        // rows take about 119; three would take 172, so three are drawn
+        // compact, the reset line beside the name (about 122).
+        let compact = metrics.count > 2
+        return VStack(alignment: .leading, spacing: 0) {
             WidgetHeader(entry: entry)
             Spacer(minLength: 6)
-            VStack(alignment: .leading, spacing: 10) {
-                ForEach(entry.displays.prefix(3)) { metric in
-                    MetricBarRow(metric: metric)
+            VStack(alignment: .leading, spacing: compact ? 12 : 10) {
+                ForEach(metrics) { metric in
+                    MetricBarRow(metric: metric, compact: compact)
                 }
             }
             .opacity(entry.isStale ? 0.8 : 1)

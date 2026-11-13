@@ -110,11 +110,47 @@ enum MetricPresentation {
 /// name, "17% used", a thin bar in the window's series color (orange, then
 /// red, near the limit), and the reset/pace line. Used by the popover and
 /// both widget directions.
+///
+/// `compact` puts the reset line on the name's line, between the short name
+/// and the figure, so the row is the name line and the bar: about 25 pt
+/// against 43. The medium widget needs it to fit three rows.
 struct MetricBarRow: View {
     let metric: MetricDisplay
     var showCaption = true
+    var compact = false
 
     var body: some View {
+        if compact {
+            compactRow
+        } else {
+            fullRow
+        }
+    }
+
+    private var compactRow: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(metric.kind.shortTitle)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .layoutPriority(2)
+                if showCaption {
+                    // The line that gives way when the row is short of room.
+                    MetricCaption(metric: metric, font: .system(size: 10.5))
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 0)
+                MetricValue(metric: metric)
+                    .lineLimit(1)
+                    .layoutPriority(2)
+            }
+            UsageBar(percent: metric.shownPercent, height: 5,
+                     tint: metric.kind.meterColor(percentUsed: metric.percent))
+        }
+    }
+
+    private var fullRow: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack(alignment: .firstTextBaseline) {
                 Text(metric.name)
